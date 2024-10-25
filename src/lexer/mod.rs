@@ -1,3 +1,3 @@
 mod lexer;
 
-pub use lexer::{Lexer};
+pub use lexer::Lexer;
