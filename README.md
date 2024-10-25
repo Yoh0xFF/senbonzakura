@@ -1,0 +1,3 @@
+# Senbonzakura
+
+Learning Rust, trying some random ideas...
