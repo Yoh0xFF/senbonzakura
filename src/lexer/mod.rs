@@ -1,3 +1,6 @@
 mod lexer;
+mod regex_rules;
+mod token;
 
-pub use lexer::Lexer;
+pub(crate) use self::lexer::Lexer;
+pub(crate) use self::token::*;
