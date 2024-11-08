@@ -1,6 +1,5 @@
 mod lexer;
 mod regex_rules;
-#[cfg(test)]
 mod tests;
 mod token;
 
