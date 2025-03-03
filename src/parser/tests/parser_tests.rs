@@ -4,7 +4,7 @@ use crate::{Expression, Parser};
 
 #[test]
 fn test_string_literal() {
-    let parser = Parser::new(r#""Hello""#);
+    let mut parser = Parser::new(r#""Hello""#);
 
     let ast = parser.parse();
 
@@ -18,7 +18,7 @@ fn test_string_literal() {
 
 #[test]
 fn test_number_literal() {
-    let parser = Parser::new("12");
+    let mut parser = Parser::new("12");
 
     let ast = parser.parse();
 

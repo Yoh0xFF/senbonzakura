@@ -1,5 +1,3 @@
-use std::cell::Cell;
-
 use regex::Regex;
 
 use super::{
@@ -15,7 +13,7 @@ use super::{
 #[derive(Debug, Clone)]
 pub struct Lexer<'a> {
     source: &'a str,
-    index: Cell<usize>,
+    index: usize,
     rules: Vec<(Regex, TokenType)>,
 }
 
@@ -25,7 +23,7 @@ impl<'a> Lexer<'a> {
 
         Lexer {
             source,
-            index: Cell::new(0),
+            index: 0,
             rules,
         }
     }
@@ -33,8 +31,8 @@ impl<'a> Lexer<'a> {
     /**
      * Obtain next token
      */
-    pub fn next_token(&self) -> Token {
-        let crnt_index = self.index.get();
+    pub fn next_token(&mut self) -> Token {
+        let crnt_index = self.index;
 
         // Check if we're at the end of the source
         if crnt_index >= self.source.len() {
@@ -58,11 +56,11 @@ impl<'a> Lexer<'a> {
 
             // Skip whitespace
             if *token_type == TokenType::Whitespace {
-                self.index.set(crnt_index + token_len);
+                self.index = crnt_index + token_len;
                 return self.next_token();
             }
 
-            self.index.set(crnt_index + token_len);
+            self.index = crnt_index + token_len;
             return Token {
                 token_type: *token_type,
                 i: crnt_index,

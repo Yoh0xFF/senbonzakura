@@ -5,7 +5,7 @@ mod lexer;
 mod parser;
 
 fn main() {
-    let lexer = Lexer::new(r#"12 17 "Hello"   'world' "#);
+    let mut lexer = Lexer::new(r#"12 17 "Hello"   'world' "#);
     let next_token = lexer.next_token();
     println!("Token: {}", next_token);
     let next_token = lexer.next_token();
@@ -17,7 +17,7 @@ fn main() {
     let next_token = lexer.next_token();
     println!("Token: {}", next_token);
 
-    let parser = Parser::new("12");
+    let mut parser = Parser::new("12");
     let expression = parser.parse();
 
     match expression {

@@ -2,7 +2,7 @@ use crate::lexer::{Lexer, Token, TokenType};
 
 #[test]
 fn test_number_token() {
-    let lexer = Lexer::new("12");
+    let mut lexer = Lexer::new("12");
 
     let next_token = lexer.next_token();
 
@@ -18,7 +18,7 @@ fn test_number_token() {
 
 #[test]
 fn test_skip_whitespace() {
-    let lexer = Lexer::new("    12");
+    let mut lexer = Lexer::new("    12");
 
     let next_token = lexer.next_token();
 
@@ -34,7 +34,7 @@ fn test_skip_whitespace() {
 
 #[test]
 fn test_string_tokens() {
-    let lexer = Lexer::new(r#""Hello" 'world'"#);
+    let mut lexer = Lexer::new(r#""Hello" 'world'"#);
 
     let next_token_a = lexer.next_token();
     let next_token_b = lexer.next_token();
