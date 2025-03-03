@@ -1,4 +1,4 @@
-use std::{mem, rc::Rc};
+use std::{cell::Cell, rc::Rc};
 
 use crate::{lexer::TokenType, Lexer, Token};
 
@@ -8,29 +8,28 @@ use super::Expression;
  * Senbonzakura recursive descent parser
  */
 #[derive(Debug, Clone)]
-pub struct Parser {
-    lexer: Lexer,
-    lookahead: Token,
+pub struct Parser<'a> {
+    source: &'a str,
+    lexer: Lexer<'a>,
+    lookahead: Cell<Token>,
 }
 
-impl Parser {
+impl<'a> Parser<'a> {
     /**
      * Parses a string into an AST
      */
-    pub fn new() -> Self {
+    pub fn new(source: &'a str) -> Self {
+        let lexer = Lexer::new(&source);
+        let lookahead = lexer.next_token();
+
         Parser {
-            lexer: Lexer::new(),
-            lookahead: Token {
-                index: 0,
-                token_type: TokenType::End,
-                value: ".".to_string(),
-            },
+            source,
+            lexer,
+            lookahead: Cell::new(lookahead),
         }
     }
 
-    pub fn parse(&mut self, source: &str) -> Expression {
-        self.lexer.init(source);
-        self.lookahead = self.lexer.next_token();
+    pub fn parse(&self) -> Expression {
         self.program()
     }
 
@@ -41,7 +40,7 @@ impl Parser {
      *  : NumericLiteral
      *  ;
      */
-    fn program(&mut self) -> Expression {
+    fn program(&self) -> Expression {
         let literal = self.literal();
         Expression::Program { body: literal }
     }
@@ -52,8 +51,10 @@ impl Parser {
      *  | StringLiteral
      *  ;
      */
-    fn literal(&mut self) -> Rc<Expression> {
-        match self.lookahead.token_type {
+    fn literal(&self) -> Rc<Expression> {
+        let lookahead = self.lookahead.get();
+
+        match lookahead.token_type {
             TokenType::String => self.string_literal(),
             TokenType::Number => self.numeric_literal(),
             _ => panic!("Literal: unexpected literal production"),
@@ -65,9 +66,11 @@ impl Parser {
      *  : STRING
      *  ;
      */
-    fn string_literal(&mut self) -> Rc<Expression> {
+    fn string_literal(&self) -> Rc<Expression> {
         let token = self.eat(TokenType::String);
-        Rc::new(Expression::StringLiteral(token.value))
+        let token_value = &self.source[token.i + 1..token.j - 1];
+
+        Rc::new(Expression::StringLiteral(String::from(token_value)))
     }
 
     /**
@@ -75,26 +78,29 @@ impl Parser {
      *  : NUMBER
      *  ;
      */
-    fn numeric_literal(&mut self) -> Rc<Expression> {
+    fn numeric_literal(&self) -> Rc<Expression> {
         let token = self.eat(TokenType::Number);
-        Rc::new(Expression::NumericLiteral(
-            token.value.trim().parse().unwrap(),
-        ))
+        let token_value = &self.source[token.i..token.j];
+        let token_value = token_value.trim().parse().unwrap();
+
+        Rc::new(Expression::NumericLiteral(token_value))
     }
 
     /**
      * Expects a token of a given type
      */
-    fn eat(&mut self, token_type: TokenType) -> Token {
-        if self.lookahead.token_type != token_type {
+    fn eat(&self, token_type: TokenType) -> Token {
+        let lookahead = self.lookahead.get();
+
+        if lookahead.token_type != token_type {
             panic!(
                 "Unexpected token: {}, expected token: '{}'",
-                self.lookahead.token_type, token_type
+                lookahead.token_type, token_type
             );
         }
 
-        let token = mem::replace(&mut self.lookahead, self.lexer.next_token());
+        self.lookahead.set(self.lexer.next_token());
 
-        token
+        lookahead
     }
 }

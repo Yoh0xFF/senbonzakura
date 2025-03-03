@@ -4,11 +4,9 @@ use crate::{Expression, Parser};
 
 #[test]
 fn test_string_literal() {
-    let mut parser = Parser::new();
+    let parser = Parser::new(r#""Hello""#);
 
-    let source = "\"Hello\"";
-
-    let ast = parser.parse(source);
+    let ast = parser.parse();
 
     assert_eq!(
         ast,
@@ -20,11 +18,9 @@ fn test_string_literal() {
 
 #[test]
 fn test_number_literal() {
-    let mut parser = Parser::new();
+    let parser = Parser::new("12");
 
-    let source = "12";
-
-    let ast = parser.parse(source);
+    let ast = parser.parse();
 
     assert_eq!(
         ast,

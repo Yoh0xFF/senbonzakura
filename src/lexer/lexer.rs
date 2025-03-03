@@ -1,3 +1,5 @@
+use std::cell::Cell;
+
 use regex::Regex;
 
 use super::{
@@ -11,43 +13,35 @@ use super::{
  * Lazily pulls a token from a stream
  */
 #[derive(Debug, Clone)]
-pub struct Lexer {
-    source: String,
-    index: usize,
+pub struct Lexer<'a> {
+    source: &'a str,
+    index: Cell<usize>,
     rules: Vec<(Regex, TokenType)>,
 }
 
-impl Lexer {
-    pub fn new() -> Self {
+impl<'a> Lexer<'a> {
+    pub fn new(source: &'a str) -> Self {
         let rules = REGEX_RULES.get_or_init(|| init_regex_rules()).to_vec();
 
         Lexer {
-            source: "".to_string(),
-            index: 0,
+            source,
+            index: Cell::new(0),
             rules,
         }
     }
 
     /**
-     * Initialize the string
-     */
-    pub fn init(&mut self, source: &str) {
-        self.source = source.to_string();
-        self.index = 0;
-    }
-
-    /**
      * Obtain next token
      */
-    pub fn next_token(&mut self) -> Token {
-        let crnt_index = self.index;
+    pub fn next_token(&self) -> Token {
+        let crnt_index = self.index.get();
 
         // Check if we're at the end of the source
         if crnt_index >= self.source.len() {
             return Token {
-                index: crnt_index,
                 token_type: TokenType::End,
-                value: ".".to_string(),
+                i: crnt_index,
+                j: crnt_index,
             };
         }
 
@@ -60,28 +54,20 @@ impl Lexer {
                 None => continue, // Try to match other token
                 Some(x) => token = x.as_str(),
             }
-
             let token_len = token.chars().count();
 
             // Skip whitespace
             if *token_type == TokenType::Whitespace {
-                self.index = self.index + token_len;
+                self.index.set(crnt_index + token_len);
                 return self.next_token();
             }
 
-            self.index = self.index + token_len;
-
-            let value = match token_type {
-                TokenType::String => String::from(&token[1..token_len - 1]),
-                _ => String::from(token),
-            };
-
-            let token = Token {
-                index: crnt_index,
+            self.index.set(crnt_index + token_len);
+            return Token {
                 token_type: *token_type,
-                value,
+                i: crnt_index,
+                j: crnt_index + token_len,
             };
-            return token;
         }
 
         // If we get here, no token matched

@@ -14,11 +14,11 @@ impl fmt::Display for TokenType {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Token {
-    pub index: usize,
     pub token_type: TokenType,
-    pub value: String,
+    pub i: usize,
+    pub j: usize,
 }
 
 impl fmt::Display for Token {
@@ -26,9 +26,9 @@ impl fmt::Display for Token {
         write!(
             f,
             "Token ({}, {}, {})",
-            self.index,
             self.token_type.to_string(),
-            self.value
+            self.i,
+            self.j,
         )
     }
 }
