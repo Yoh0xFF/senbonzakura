@@ -1,4 +1,6 @@
-use std::cell::RefCell;
+use std::{mem, rc::Rc};
+
+use crate::{lexer::TokenType, Lexer, Token};
 
 use super::Expression;
 
@@ -7,7 +9,8 @@ use super::Expression;
  */
 #[derive(Debug, Clone)]
 pub struct Parser {
-    source: RefCell<String>,
+    lexer: Lexer,
+    lookahead: Token,
 }
 
 impl Parser {
@@ -16,12 +19,18 @@ impl Parser {
      */
     pub fn new() -> Self {
         Parser {
-            source: RefCell::new(String::from("")),
+            lexer: Lexer::new(),
+            lookahead: Token {
+                index: 0,
+                token_type: TokenType::End,
+                value: ".".to_string(),
+            },
         }
     }
 
-    pub fn parse(&self, source: &str) -> Expression {
-        self.source.replace(source.to_string());
+    pub fn parse(&mut self, source: &str) -> Expression {
+        self.lexer.init(source);
+        self.lookahead = self.lexer.next_token();
         self.program()
     }
 
@@ -32,8 +41,33 @@ impl Parser {
      *  : NumericLiteral
      *  ;
      */
-    fn program(&self) -> Expression {
-        self.numeric_literal()
+    fn program(&mut self) -> Expression {
+        let literal = self.literal();
+        Expression::Program { body: literal }
+    }
+
+    /**
+     * Literal
+     *  : NumericLiteral
+     *  | StringLiteral
+     *  ;
+     */
+    fn literal(&mut self) -> Rc<Expression> {
+        match self.lookahead.token_type {
+            TokenType::String => self.string_literal(),
+            TokenType::Number => self.numeric_literal(),
+            _ => panic!("Literal: unexpected literal production"),
+        }
+    }
+
+    /**
+     * StringLiteral
+     *  : STRING
+     *  ;
+     */
+    fn string_literal(&mut self) -> Rc<Expression> {
+        let token = self.eat(TokenType::String);
+        Rc::new(Expression::StringLiteral(token.value))
     }
 
     /**
@@ -41,9 +75,26 @@ impl Parser {
      *  : NUMBER
      *  ;
      */
-    fn numeric_literal(&self) -> Expression {
-        let source = self.source.borrow();
-        let number: i32 = source.parse().unwrap();
-        Expression::NumericLiteral(number)
+    fn numeric_literal(&mut self) -> Rc<Expression> {
+        let token = self.eat(TokenType::Number);
+        Rc::new(Expression::NumericLiteral(
+            token.value.trim().parse().unwrap(),
+        ))
+    }
+
+    /**
+     * Expects a token of a given type
+     */
+    fn eat(&mut self, token_type: TokenType) -> Token {
+        if self.lookahead.token_type != token_type {
+            panic!(
+                "Unexpected token: {}, expected token: '{}'",
+                self.lookahead.token_type, token_type
+            );
+        }
+
+        let token = mem::replace(&mut self.lookahead, self.lexer.next_token());
+
+        token
     }
 }

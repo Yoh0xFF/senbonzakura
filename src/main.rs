@@ -5,26 +5,31 @@ mod lexer;
 mod parser;
 
 fn main() {
-    let source = r#"12 17 "Hello"   'world' "#;
+    let mut lexer = Lexer::new();
+    lexer.init(r#"12 17 "Hello"   'world' "#);
+    let next_token = lexer.next_token();
+    println!("Token: {}", next_token);
+    let next_token = lexer.next_token();
+    println!("Token: {}", next_token);
+    let next_token = lexer.next_token();
+    println!("Token: {}", next_token);
+    let next_token = lexer.next_token();
+    println!("Token: {}", next_token);
+    let next_token = lexer.next_token();
+    println!("Token: {}", next_token);
 
-    let lexer = Lexer::new(String::from(source));
-    let next_token: Token = lexer.next_token();
-    println!("Token: {}", next_token);
-    let next_token = lexer.next_token();
-    println!("Token: {}", next_token);
-    let next_token = lexer.next_token();
-    println!("Token: {}", next_token);
-    let next_token = lexer.next_token();
-    println!("Token: {}", next_token);
-    let next_token = lexer.next_token();
-    println!("Token: {}", next_token);
-
-    let parser = Parser::new();
+    let mut parser = Parser::new();
     let expression = parser.parse("12");
 
     match expression {
-        Expression::NumericLiteral(x) => {
-            println!("NumericLiteral {}", x);
+        Expression::Program { body } => {
+            println!("Program {:?}", body);
+        }
+        Expression::NumericLiteral(val) => {
+            println!("NumericLiteral {:?}", val);
+        }
+        Expression::StringLiteral(val) => {
+            println!("StringLiteral {:?}", val);
         }
     }
 }

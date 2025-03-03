@@ -1,5 +1,3 @@
-use std::cell::Cell;
-
 use regex::Regex;
 
 use super::{
@@ -7,26 +5,53 @@ use super::{
     token::{Token, TokenType},
 };
 
+/**
+ * Lexer class
+ *
+ * Lazily pulls a token from a stream
+ */
 #[derive(Debug, Clone)]
 pub struct Lexer {
     source: String,
-    index: Cell<usize>,
+    index: usize,
     rules: Vec<(Regex, TokenType)>,
 }
 
 impl Lexer {
-    pub fn new(source: String) -> Self {
+    pub fn new() -> Self {
         let rules = REGEX_RULES.get_or_init(|| init_regex_rules()).to_vec();
 
         Lexer {
-            source,
-            index: Cell::new(0),
+            source: "".to_string(),
+            index: 0,
             rules,
         }
     }
 
-    pub fn next_token(&self) -> Token {
-        let crnt_index = self.index();
+    /**
+     * Initialize the string
+     */
+    pub fn init(&mut self, source: &str) {
+        self.source = source.to_string();
+        self.index = 0;
+    }
+
+    /**
+     * Obtain next token
+     */
+    pub fn next_token(&mut self) -> Token {
+        let crnt_index = self.index;
+
+        // Check if we're at the end of the source
+        if crnt_index >= self.source.len() {
+            return Token {
+                index: crnt_index,
+                token_type: TokenType::End,
+                value: ".".to_string(),
+            };
+        }
+
+        // Slice the string starting from the current position
         let expression = &self.source[crnt_index..];
 
         for (regex, token_type) in &self.rules {
@@ -36,39 +61,34 @@ impl Lexer {
                 Some(x) => token = x.as_str(),
             }
 
+            let token_len = token.chars().count();
+
             // Skip whitespace
             if *token_type == TokenType::Whitespace {
-                self.increment_by_n(token.chars().count());
+                self.index = self.index + token_len;
                 return self.next_token();
             }
 
-            self.increment_by_n(token.chars().count());
+            self.index = self.index + token_len;
+
+            let value = match token_type {
+                TokenType::String => String::from(&token[1..token_len - 1]),
+                _ => String::from(token),
+            };
+
             let token = Token {
                 index: crnt_index,
                 token_type: *token_type,
-                value: String::from(token),
+                value,
             };
             return token;
         }
 
-        let updated_index = self.index();
-        if updated_index == self.source.chars().count() {
-            let token = Token {
-                index: crnt_index,
-                token_type: TokenType::End,
-                value: String::from("."),
-            };
-            return token;
-        } else {
-            panic!("Invalid expression at index {}", updated_index);
-        }
-    }
-
-    fn increment_by_n(&self, n: usize) {
-        self.index.set(self.index.get() + n);
-    }
-
-    fn index(&self) -> usize {
-        return self.index.get();
+        // If we get here, no token matched
+        panic!(
+            "Invalid token at index {}, remaining text: '{}'",
+            crnt_index,
+            &self.source[crnt_index..]
+        );
     }
 }
