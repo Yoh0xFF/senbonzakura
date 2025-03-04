@@ -55,17 +55,22 @@ impl<'a> Lexer<'a> {
             let token_len = token.chars().count();
 
             // Skip whitespace
-            if *token_type == TokenType::Whitespace {
-                self.index = crnt_index + token_len;
-                return self.next_token();
+            match *token_type {
+                TokenType::Whitespace
+                | TokenType::SingleLineComment
+                | TokenType::MultiLineComment => {
+                    self.index = crnt_index + token_len;
+                    return self.next_token();
+                }
+                _ => {
+                    self.index = crnt_index + token_len;
+                    return Token {
+                        token_type: *token_type,
+                        i: crnt_index,
+                        j: crnt_index + token_len,
+                    };
+                }
             }
-
-            self.index = crnt_index + token_len;
-            return Token {
-                token_type: *token_type,
-                i: crnt_index,
-                j: crnt_index + token_len,
-            };
         }
 
         // If we get here, no token matched

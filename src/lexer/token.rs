@@ -3,6 +3,8 @@ use core::fmt;
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub enum TokenType {
     Whitespace,
+    SingleLineComment,
+    MultiLineComment,
     Number,
     String,
     End,
