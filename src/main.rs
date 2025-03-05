@@ -24,6 +24,12 @@ fn main() {
         Expression::Program { body } => {
             println!("Program {:?}", body);
         }
+        Expression::BlockStatement { body } => {
+            println!("BlockStatement {:?}", body);
+        }
+        Expression::EmptyStatement => {
+            println!("EmptyStatement");
+        }
         Expression::ExpressionStatement { expression } => {
             println!("ExpressionStatement {:?}", expression);
         }

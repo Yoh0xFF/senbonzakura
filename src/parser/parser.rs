@@ -44,7 +44,7 @@ impl<'a> Parser<'a> {
     where
         Self: ParseLiterals,
     {
-        let statement_list = self.statement_list();
+        let statement_list = self.statement_list(None);
         Rc::new(Expression::Program {
             body: statement_list,
         })

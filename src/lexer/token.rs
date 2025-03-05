@@ -8,6 +8,8 @@ pub enum TokenType {
     Number,
     String,
     StatementEnd,
+    OpeningBrace,
+    ClosingBrace,
     End,
 }
 

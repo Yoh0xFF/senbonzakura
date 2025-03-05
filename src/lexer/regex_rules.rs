@@ -16,6 +16,8 @@ pub(super) fn init_regex_rules() -> Vec<(Regex, TokenType)> {
 
     // Symbols, delimiters
     let statement_end = Regex::new(r"^;").unwrap();
+    let opening_brace = Regex::new(r"^\{").unwrap();
+    let closing_brace = Regex::new(r"^\}").unwrap();
 
     // Numbers
     let number = Regex::new(r"^\d+").unwrap();
@@ -29,6 +31,8 @@ pub(super) fn init_regex_rules() -> Vec<(Regex, TokenType)> {
         (single_line_comments, TokenType::SingleLineComment),
         (multi_line_comments, TokenType::MultiLineComment),
         (statement_end, TokenType::StatementEnd),
+        (opening_brace, TokenType::OpeningBrace),
+        (closing_brace, TokenType::ClosingBrace),
         (number, TokenType::Number),
         (string_double_quotes, TokenType::String),
         (string_single_quotes, TokenType::String),
