@@ -17,12 +17,15 @@ fn main() {
     let next_token = lexer.next_token();
     println!("Token: {}", next_token);
 
-    let mut parser = Parser::new("12");
+    let mut parser = Parser::new("12;");
     let expression = parser.parse();
 
-    match expression {
+    match expression.as_ref() {
         Expression::Program { body } => {
             println!("Program {:?}", body);
+        }
+        Expression::ExpressionStatement { expression } => {
+            println!("ExpressionStatement {:?}", expression);
         }
         Expression::NumericLiteral(val) => {
             println!("NumericLiteral {:?}", val);

@@ -7,6 +7,7 @@ pub enum TokenType {
     MultiLineComment,
     Number,
     String,
+    StatementEnd,
     End,
 }
 

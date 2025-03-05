@@ -1,3 +1,5 @@
+use std::rc::Rc;
+
 use crate::{lexer::TokenType, Lexer, Token};
 
 use super::{parse_literals::ParseLiterals, Expression};
@@ -27,7 +29,7 @@ impl<'a> Parser<'a> {
         }
     }
 
-    pub fn parse(&mut self) -> Expression {
+    pub fn parse(&mut self) -> Rc<Expression> {
         self.program()
     }
 
@@ -35,15 +37,68 @@ impl<'a> Parser<'a> {
      * Main entry point
      *
      * Program
-     *  : NumericLiteral
+     *  : StatementList
      *  ;
      */
-    fn program(&mut self) -> Expression
+    fn program(&mut self) -> Rc<Expression>
     where
         Self: ParseLiterals,
     {
-        let literal = self.literal();
-        Expression::Program { body: literal }
+        let statement_list = self.statement_list();
+        Rc::new(Expression::Program {
+            body: statement_list,
+        })
+    }
+
+    /**
+     * StatementList
+     *  : Statement
+     *  | StatementList Statement
+     *  ;
+     */
+    fn statement_list(&mut self) -> Rc<Vec<Rc<Expression>>> {
+        let mut statement_list: Vec<Rc<Expression>> = vec![];
+
+        while self.lookahead.token_type != TokenType::End {
+            let statement = self.statement();
+            statement_list.push(statement);
+        }
+
+        Rc::new(statement_list)
+    }
+
+    /**
+     * Satement
+     *  : ExpressionStatement
+     *  ;
+     */
+    fn statement(&mut self) -> Rc<Expression> {
+        self.expression_statement()
+    }
+
+    /**
+     * ExpressionStatement
+     *  : Expression ';'
+     *  ;
+     */
+    fn expression_statement(&mut self) -> Rc<Expression> {
+        let expression = self.expression();
+
+        self.eat(TokenType::StatementEnd);
+
+        Rc::new(Expression::ExpressionStatement { expression })
+    }
+
+    /**
+     * ExpressionStatement
+     *  : Literal
+     *  ;
+     */
+    fn expression(&mut self) -> Rc<Expression>
+    where
+        Self: ParseLiterals,
+    {
+        self.literal()
     }
 
     /**

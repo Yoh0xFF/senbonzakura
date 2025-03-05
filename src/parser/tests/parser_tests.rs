@@ -7,5 +7,5 @@ pub(super) fn execute(source: &str, expected: Rc<Expression>) {
 
     let ast = parser.parse();
 
-    assert_eq!(ast, *expected);
+    assert_eq!(ast, expected);
 }
