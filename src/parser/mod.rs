@@ -1,5 +1,6 @@
 mod ast;
 mod parse_literals;
+mod parse_root;
 mod parser;
 mod tests;
 

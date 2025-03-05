@@ -2,7 +2,7 @@ use std::rc::Rc;
 
 use crate::{lexer::TokenType, Lexer, Token};
 
-use super::{parse_literals::ParseLiterals, Expression};
+use super::{parse_literals::ParseLiterals, parse_root::ParseRootExpression, Expression};
 
 /**
  * Senbonzakura recursive descent parser
@@ -48,57 +48,6 @@ impl<'a> Parser<'a> {
         Rc::new(Expression::Program {
             body: statement_list,
         })
-    }
-
-    /**
-     * StatementList
-     *  : Statement
-     *  | StatementList Statement
-     *  ;
-     */
-    fn statement_list(&mut self) -> Rc<Vec<Rc<Expression>>> {
-        let mut statement_list: Vec<Rc<Expression>> = vec![];
-
-        while self.lookahead.token_type != TokenType::End {
-            let statement = self.statement();
-            statement_list.push(statement);
-        }
-
-        Rc::new(statement_list)
-    }
-
-    /**
-     * Satement
-     *  : ExpressionStatement
-     *  ;
-     */
-    fn statement(&mut self) -> Rc<Expression> {
-        self.expression_statement()
-    }
-
-    /**
-     * ExpressionStatement
-     *  : Expression ';'
-     *  ;
-     */
-    fn expression_statement(&mut self) -> Rc<Expression> {
-        let expression = self.expression();
-
-        self.eat(TokenType::StatementEnd);
-
-        Rc::new(Expression::ExpressionStatement { expression })
-    }
-
-    /**
-     * ExpressionStatement
-     *  : Literal
-     *  ;
-     */
-    fn expression(&mut self) -> Rc<Expression>
-    where
-        Self: ParseLiterals,
-    {
-        self.literal()
     }
 
     /**
