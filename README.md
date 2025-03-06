@@ -7,3 +7,9 @@
 ## Description
 
 Learning Compiler Theory and Rust, trying some random ideas...
+
+Project goals:
+- Create a statically typed domain-specific compiled language that compiles to the web assembly
+- Fast compilation time and easy syntax
+- Lightweight runtime
+- Should be easy to use as an embedded helper language for scripting or plugin development
