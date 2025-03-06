@@ -3,7 +3,7 @@ use crate::{lexer::TokenType, Lexer, Token};
 use super::{parse_entry_points::ParseEntryPoints, StatementRef};
 
 /**
- * Senbonzakura recursive descent parser
+ * Recursive descent parser
  */
 #[derive(Debug, Clone)]
 pub struct Parser<'a> {

@@ -49,20 +49,21 @@ impl<'a> Lexer<'a> {
         for (regex, token_type) in &self.rules {
             let token: &str;
             match regex.find(expression) {
-                None => continue, // Try to match other token
-                Some(x) => token = x.as_str(),
+                None => continue,              // Try to match other token
+                Some(x) => token = x.as_str(), // Return reference to the matched token
             }
             let token_len = token.chars().count();
 
-            // Skip whitespace
             match *token_type {
                 TokenType::Whitespace
                 | TokenType::SingleLineComment
                 | TokenType::MultiLineComment => {
+                    // Skip whitespace and comments
                     self.index = crnt_index + token_len;
                     return self.next_token();
                 }
                 _ => {
+                    // Return the matched token
                     self.index = crnt_index + token_len;
                     return Token {
                         token_type: *token_type,
