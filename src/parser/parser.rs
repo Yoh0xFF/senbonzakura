@@ -1,8 +1,6 @@
-use std::rc::Rc;
-
 use crate::{lexer::TokenType, Lexer, Token};
 
-use super::{parse_entry_points::ParseEntryPoints, Statement};
+use super::{parse_entry_points::ParseEntryPoints, StatementRef};
 
 /**
  * Senbonzakura recursive descent parser
@@ -29,7 +27,7 @@ impl<'a> Parser<'a> {
     /**
      * Parses a string into an AST
      */
-    pub fn parse(&mut self) -> Rc<Statement> {
+    pub fn parse(&mut self) -> StatementRef {
         self.program_root()
     }
 

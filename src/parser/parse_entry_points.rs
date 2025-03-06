@@ -1,7 +1,8 @@
 use std::rc::Rc;
 
 use super::{
-    parse_literals::ParseLiterals, parse_statements::ParseStatements, Expression, Parser, Statement,
+    parse_literals::ParseLiterals, parse_statements::ParseStatements, ExpressionRef, Parser,
+    Statement, StatementRef,
 };
 
 pub(super) trait ParseEntryPoints {
@@ -12,18 +13,18 @@ pub(super) trait ParseEntryPoints {
      *  : StatementList
      *  ;
      */
-    fn program_root(&mut self) -> Rc<Statement>;
+    fn program_root(&mut self) -> StatementRef;
 
     /**
      * ExpressionStatement
      *  : Literal
      *  ;
      */
-    fn expression_root(&mut self) -> Rc<Expression>;
+    fn expression_root(&mut self) -> ExpressionRef;
 }
 
 impl<'a> ParseEntryPoints for Parser<'a> {
-    fn program_root(&mut self) -> Rc<Statement>
+    fn program_root(&mut self) -> StatementRef
     where
         Self: ParseLiterals,
     {
@@ -33,7 +34,7 @@ impl<'a> ParseEntryPoints for Parser<'a> {
         })
     }
 
-    fn expression_root(&mut self) -> Rc<Expression>
+    fn expression_root(&mut self) -> ExpressionRef
     where
         Self: ParseLiterals,
     {
