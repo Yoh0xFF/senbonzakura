@@ -2,14 +2,18 @@ use core::fmt;
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub enum TokenType {
+    // Whitespace and comments
     Whitespace,
     SingleLineComment,
     MultiLineComment,
-    Number,
-    String,
+    // Symbols
     StatementEnd,
     OpeningBrace,
     ClosingBrace,
+    // Literals
+    Number,
+    String,
+    // End
     End,
 }
 

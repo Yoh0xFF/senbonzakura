@@ -8,23 +8,30 @@ pub(super) static REGEX_RULES: OnceLock<Vec<(Regex, TokenType)>> = OnceLock::new
 
 pub(super) fn init_regex_rules() -> Vec<(Regex, TokenType)> {
     // Whitespace
-    let whitespace = Regex::new(r"^\s+").unwrap();
+    let whitespace = Regex::new(r"^\s+").expect("Failed to compile regex for whitespace");
 
     // Comments
-    let single_line_comments = Regex::new(r"^//.*").unwrap();
-    let multi_line_comments = Regex::new(r"^/\*[\s\S]*?\*/").unwrap();
+    let single_line_comments =
+        Regex::new(r"^//.*").expect("Failed to compile regex for single line comments");
+    let multi_line_comments =
+        Regex::new(r"^/\*[\s\S]*?\*/").expect("Failed to compile regex for multi line comments");
 
     // Symbols, delimiters
-    let statement_end = Regex::new(r"^;").unwrap();
-    let opening_brace = Regex::new(r"^\{").unwrap();
-    let closing_brace = Regex::new(r"^\}").unwrap();
+    let statement_end =
+        Regex::new(r"^;").expect("Failed to compile regex for statement end (;) symbol");
+    let opening_brace =
+        Regex::new(r"^\{").expect("Failed to compile regex for opening brace ({) symbol");
+    let closing_brace =
+        Regex::new(r"^\}").expect("Failed to compile regex for for closing brace (}) symbol");
 
     // Numbers
-    let number = Regex::new(r"^\d+").unwrap();
+    let number = Regex::new(r"^\d+").expect("Failed to compile regex for number literal");
 
     // Strings
-    let string_double_quotes = Regex::new(r#"^"[^"]*""#).unwrap();
-    let string_single_quotes = Regex::new(r"^'[^']*'").unwrap();
+    let string_double_quotes =
+        Regex::new(r#"^"[^"]*""#).expect("Failed to compile regex for double quote string literal");
+    let string_single_quotes =
+        Regex::new(r"^'[^']*'").expect("Failed to compile regex for single quote string literal");
 
     vec![
         (whitespace, TokenType::Whitespace),
