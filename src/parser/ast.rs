@@ -14,6 +14,11 @@ pub enum Statement {
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Expression {
+    BinaryExpression {
+        operator: String,
+        left: ExpressionRef,
+        right: ExpressionRef,
+    },
     StringLiteral(String),
     NumericLiteral(i32),
 }

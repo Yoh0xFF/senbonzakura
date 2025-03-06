@@ -10,6 +10,11 @@ pub enum TokenType {
     StatementEnd,
     OpeningBrace,
     ClosingBrace,
+    OpeningParenthesis,
+    ClosingParenthesis,
+    // Math operators,
+    AdditiveOperator,
+    FactorOperator,
     // Literals
     Number,
     String,
