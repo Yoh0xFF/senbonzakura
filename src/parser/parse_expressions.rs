@@ -4,7 +4,14 @@ use crate::lexer::TokenType;
 
 use super::{Expression, ExpressionRef, Parser};
 
-pub(super) trait ParseLiterals {
+pub(super) trait ParseExpressions {
+    /**
+     * Expression
+     *  : Literal
+     *  ;
+     */
+    fn expression(&mut self) -> ExpressionRef;
+
     /**
      * Literal
      *  : NumericLiteral
@@ -28,7 +35,11 @@ pub(super) trait ParseLiterals {
     fn numeric_literal(&mut self) -> ExpressionRef;
 }
 
-impl<'a> ParseLiterals for Parser<'a> {
+impl<'a> ParseExpressions for Parser<'a> {
+    fn expression(&mut self) -> ExpressionRef {
+        self.literal()
+    }
+
     fn literal(&mut self) -> ExpressionRef {
         match self.lookahead.token_type {
             TokenType::String => self.string_literal(),

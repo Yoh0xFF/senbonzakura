@@ -2,7 +2,10 @@ use std::rc::Rc;
 
 use crate::lexer::TokenType;
 
-use super::{parse_entry_points::ParseEntryPoints, Parser, Statement, StatementList, StatementRef};
+use super::{
+    parse_entry_points::ParseEntryPoints, parse_expressions::ParseExpressions, Parser, Statement,
+    StatementList, StatementRef,
+};
 
 pub(super) trait ParseStatements {
     /**
@@ -89,7 +92,7 @@ impl<'a> ParseStatements for Parser<'a> {
     where
         Self: ParseEntryPoints,
     {
-        let expression = self.expression_root();
+        let expression = self.expression();
 
         self.eat(TokenType::StatementEnd);
 
