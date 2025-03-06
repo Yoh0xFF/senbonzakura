@@ -1,5 +1,5 @@
 use lexer::{Lexer, Token};
-use parser::{Expression, Parser};
+use parser::{Parser, Statement};
 
 mod lexer;
 mod parser;
@@ -18,26 +18,20 @@ fn main() {
     println!("Token: {}", next_token);
 
     let mut parser = Parser::new("12;");
-    let expression = parser.parse();
+    let statement = parser.parse();
 
-    match expression.as_ref() {
-        Expression::Program { body } => {
+    match statement.as_ref() {
+        Statement::Program { body } => {
             println!("Program {:?}", body);
         }
-        Expression::BlockStatement { body } => {
+        Statement::BlockStatement { body } => {
             println!("BlockStatement {:?}", body);
         }
-        Expression::EmptyStatement => {
+        Statement::EmptyStatement => {
             println!("EmptyStatement");
         }
-        Expression::ExpressionStatement { expression } => {
+        Statement::ExpressionStatement { expression } => {
             println!("ExpressionStatement {:?}", expression);
-        }
-        Expression::NumericLiteral(val) => {
-            println!("NumericLiteral {:?}", val);
-        }
-        Expression::StringLiteral(val) => {
-            println!("StringLiteral {:?}", val);
         }
     }
 }

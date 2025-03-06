@@ -2,7 +2,7 @@ use std::rc::Rc;
 
 use crate::{lexer::TokenType, Lexer, Token};
 
-use super::{parse_literals::ParseLiterals, parse_root::ParseRootExpression, Expression};
+use super::{parse_entry_points::ParseEntryPoints, Statement};
 
 /**
  * Senbonzakura recursive descent parser
@@ -15,9 +15,6 @@ pub struct Parser<'a> {
 }
 
 impl<'a> Parser<'a> {
-    /**
-     * Parses a string into an AST
-     */
     pub fn new(source: &'a str) -> Self {
         let mut lexer = Lexer::new(&source);
         let lookahead = lexer.next_token();
@@ -29,25 +26,11 @@ impl<'a> Parser<'a> {
         }
     }
 
-    pub fn parse(&mut self) -> Rc<Expression> {
-        self.program()
-    }
-
     /**
-     * Main entry point
-     *
-     * Program
-     *  : StatementList
-     *  ;
+     * Parses a string into an AST
      */
-    fn program(&mut self) -> Rc<Expression>
-    where
-        Self: ParseLiterals,
-    {
-        let statement_list = self.statement_list(None);
-        Rc::new(Expression::Program {
-            body: statement_list,
-        })
+    pub fn parse(&mut self) -> Rc<Statement> {
+        self.program_root()
     }
 
     /**

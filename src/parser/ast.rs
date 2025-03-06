@@ -1,11 +1,15 @@
 use std::rc::Rc;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub enum Expression {
-    Program { body: Rc<Vec<Rc<Expression>>> },
-    BlockStatement { body: Rc<Vec<Rc<Expression>>> },
+pub enum Statement {
+    Program { body: Rc<Vec<Rc<Statement>>> },
+    BlockStatement { body: Rc<Vec<Rc<Statement>>> },
     EmptyStatement,
     ExpressionStatement { expression: Rc<Expression> },
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum Expression {
     StringLiteral(String),
     NumericLiteral(i32),
 }

@@ -1,8 +1,8 @@
 use std::rc::Rc;
 
-use crate::{Expression, Parser};
+use crate::{parser::Statement, Parser};
 
-pub(super) fn execute(source: &str, expected: Rc<Expression>) {
+pub(super) fn execute(source: &str, expected: Rc<Statement>) {
     let mut parser = Parser::new(source);
 
     let ast = parser.parse();
