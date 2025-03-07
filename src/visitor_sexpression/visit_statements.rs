@@ -1,5 +1,5 @@
 use crate::{
-    ast::{ExpressionDispatcher, Statement, StatementDispatcher},
+    ast::{Expression, ExpressionDispatcher, Statement, StatementDispatcher, StatementList},
     StatementNode,
 };
 
@@ -10,42 +10,61 @@ pub(super) fn visit_statement(
     visitor: &mut SExpressionVisitor,
     statement: &Statement,
 ) -> Result<()> {
-    match statement.as_ref() {
-        StatementNode::Program { body } => {
-            visitor.begin_expr("program")?;
+    let result = match statement.as_ref() {
+        StatementNode::Program { body } => visit_program_statement(visitor, body),
+        StatementNode::Block { body } => visit_block_statement(visitor, body),
+        StatementNode::Empty => visit_empty_statement(visitor),
+        StatementNode::Expression { expression } => visit_expression_statement(visitor, expression),
+    };
 
-            if !body.is_empty() {
-                for statement in body.iter() {
-                    visitor.write_space_or_newline()?;
-                    statement.accept(visitor)?;
-                }
-            }
+    result
+}
 
-            visitor.end_expr()?;
-        }
-        StatementNode::Block { body } => {
-            visitor.begin_expr("block")?;
+fn visit_program_statement(visitor: &mut SExpressionVisitor, body: &StatementList) -> Result<()> {
+    visitor.begin_expr("program")?;
 
-            if !body.is_empty() {
-                for statement in body.iter() {
-                    visitor.write_space_or_newline()?;
-                    statement.accept(visitor)?;
-                }
-            }
-
-            visitor.end_expr()?;
-        }
-        StatementNode::Empty => {
-            visitor.begin_expr("empty")?;
-            visitor.end_expr()?;
-        }
-        StatementNode::Expression { expression } => {
-            visitor.begin_expr("expr")?;
+    if !body.is_empty() {
+        for statement in body.iter() {
             visitor.write_space_or_newline()?;
-            expression.accept(visitor)?;
-            visitor.end_expr()?;
+            statement.accept(visitor)?;
         }
     }
+
+    visitor.end_expr()?;
+
+    Ok(())
+}
+
+fn visit_block_statement(visitor: &mut SExpressionVisitor, body: &StatementList) -> Result<()> {
+    visitor.begin_expr("block")?;
+
+    if !body.is_empty() {
+        for statement in body.iter() {
+            visitor.write_space_or_newline()?;
+            statement.accept(visitor)?;
+        }
+    }
+
+    visitor.end_expr()?;
+
+    Ok(())
+}
+
+fn visit_empty_statement(visitor: &mut SExpressionVisitor) -> Result<()> {
+    visitor.begin_expr("empty")?;
+    visitor.end_expr()?;
+
+    Ok(())
+}
+
+fn visit_expression_statement(
+    visitor: &mut SExpressionVisitor,
+    expression: &Expression,
+) -> Result<()> {
+    visitor.begin_expr("expr")?;
+    visitor.write_space_or_newline()?;
+    expression.accept(visitor)?;
+    visitor.end_expr()?;
 
     Ok(())
 }
