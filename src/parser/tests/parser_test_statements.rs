@@ -9,7 +9,11 @@ fn test_block_statement() {
             17;
         }
         "#,
-        "(program (block (expr (string \"Hello\")) (expr (number 17))))",
+        r#"
+        (program
+            (block
+                (expr (string "Hello"))
+                (expr (number 17))))"#,
     )
 }
 
@@ -20,7 +24,10 @@ fn test_empty_block_statement() {
         {
         }
         "#,
-        "(program (block ))",
+        r#"
+        (program
+            (block))
+        "#,
     )
 }
 
@@ -35,7 +42,13 @@ fn test_nested_block_statement() {
             }
         }
         "#,
-        "(program (block (expr (string \"Hello\")) (block (expr (number 17)))))",
+        r#"
+        (program
+            (block
+                (expr (string "Hello"))
+                (block
+                    (expr (number 17)))))
+        "#,
     )
 }
 
@@ -47,6 +60,8 @@ fn test_empty_statement() {
             ;
         }
         "#,
-        "(program (block (empty)))",
+        r#"
+        (program
+            (block (empty)))"#,
     )
 }

@@ -23,6 +23,6 @@ fn main() {
 
     let mut parser = Parser::new("12;");
     let ast = parser.parse();
-    let sexpression = ast.to_sexpression().unwrap();
-    println!("SExpression: {}", sexpression);
+    let sexpression = ast.to_pretty_sexpression().unwrap();
+    println!("SExpression:\n{}", sexpression);
 }

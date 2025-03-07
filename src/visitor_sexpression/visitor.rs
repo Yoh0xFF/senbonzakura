@@ -1,98 +1,98 @@
-use crate::{
-    ast::{
-        AstVisitor, Expression, ExpressionDispatcher, ExpressionNode, Statement,
-        StatementDispatcher,
-    },
-    StatementNode,
-};
+use crate::ast::{AstVisitor, Expression, Statement};
 use anyhow::Result;
+use std::fmt::Write;
+
+use super::{visit_expressions::visit_expression, visit_statements::visit_statement};
+
+/**
+ * S-Expression Visitor Configuration
+ */
+#[derive(Debug, Clone, Copy)]
+pub struct SExpressionConfig {
+    pub pretty: bool,
+    pub indent_size: usize,
+}
+
+impl Default for SExpressionConfig {
+    fn default() -> Self {
+        Self {
+            pretty: false,
+            indent_size: 2,
+        }
+    }
+}
 
 /**
  * S-Expression Visitor for AST nodes
  */
-pub struct SExpressionVisitor;
+pub struct SExpressionVisitor {
+    pub(super) config: SExpressionConfig,
+    pub(super) current_indent: usize,
+    pub(super) output: String,
+}
 
 impl SExpressionVisitor {
     pub fn new() -> Self {
-        SExpressionVisitor
+        Self::with_config(SExpressionConfig::default())
     }
 
-    pub fn statement_to_sexpression(&mut self, statement: &Statement) -> Result<String> {
-        statement.accept(self)
+    pub fn with_config(config: SExpressionConfig) -> Self {
+        SExpressionVisitor {
+            config,
+            output: String::with_capacity(1024),
+            current_indent: 0,
+        }
+    }
+
+    pub(super) fn write_indent(&mut self) -> Result<()> {
+        if self.config.pretty && self.current_indent > 0 {
+            write!(
+                self.output,
+                "{}",
+                " ".repeat(self.current_indent * self.config.indent_size)
+            )?;
+        }
+        Ok(())
+    }
+
+    pub(super) fn begin_expr(&mut self, name: &str) -> Result<()> {
+        self.write_indent()?;
+        write!(self.output, "({}", name)?;
+
+        if self.config.pretty {
+            self.current_indent += 1;
+        }
+
+        Ok(())
+    }
+
+    pub(super) fn end_expr(&mut self) -> Result<()> {
+        if self.config.pretty {
+            self.current_indent -= 1;
+        }
+
+        write!(self.output, ")")?;
+        Ok(())
+    }
+
+    pub(super) fn write_space_or_newline(&mut self) -> Result<()> {
+        if self.config.pretty {
+            writeln!(self.output)?;
+        } else {
+            write!(self.output, " ")?;
+        }
+        Ok(())
     }
 }
 
 impl AstVisitor for SExpressionVisitor {
-    type Output = String;
+    type Output = ();
 
     fn visit_statement(&mut self, statement: &Statement) -> Result<Self::Output> {
-        match statement.as_ref() {
-            StatementNode::Program { body } => {
-                let body_sexp: Result<Vec<_>> = body
-                    .iter()
-                    .map(|statement| self.statement_to_sexpression(statement))
-                    .collect();
-
-                Ok(format!("(program {})", body_sexp?.join(" ")))
-            }
-            StatementNode::Block { body } => {
-                let body_sexp: Result<Vec<_>> = body
-                    .iter()
-                    .map(|statement| self.statement_to_sexpression(statement))
-                    .collect();
-
-                Ok(format!("(block {})", body_sexp?.join(" ")))
-            }
-            StatementNode::Empty => Ok("(empty)".to_string()),
-            StatementNode::Expression { expression } => {
-                let expr_sexp = self.visit_expression(expression)?;
-                Ok(format!("(expr {})", expr_sexp))
-            }
-        }
+        visit_statement(self, statement)
     }
 
     fn visit_expression(&mut self, expression: &Expression) -> Result<Self::Output> {
-        match expression.as_ref() {
-            ExpressionNode::Binary {
-                operator,
-                left,
-                right,
-            } => {
-                let left_sexp = self.visit_expression(left)?;
-                let right_sexp = self.visit_expression(right)?;
-
-                Ok(format!(
-                    "(binary \"{}\" {} {})",
-                    operator, left_sexp, right_sexp
-                ))
-            }
-            ExpressionNode::StringLiteral(value) => {
-                // Escape double quotes
-                let escaped = value.replace("\"", "\\\"");
-                Ok(format!("(string \"{}\")", escaped))
-            }
-            ExpressionNode::NumericLiteral(value) => Ok(format!("(number {})", value)),
-        }
-    }
-}
-
-/**
- * Add extension trait for convenient s-expression conversion
- */
-pub trait ToSExpression {
-    fn to_sexpression(&self) -> Result<String>;
-}
-
-impl ToSExpression for Statement {
-    fn to_sexpression(&self) -> Result<String> {
-        let mut visitor = SExpressionVisitor::new();
-        self.accept(&mut visitor)
-    }
-}
-
-impl ToSExpression for Expression {
-    fn to_sexpression(&self) -> Result<String> {
-        let mut visitor = SExpressionVisitor::new();
-        self.accept(&mut visitor)
+        visit_expression(self, expression)
     }
 }
