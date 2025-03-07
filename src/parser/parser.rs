@@ -1,6 +1,6 @@
 use crate::{lexer::TokenType, Lexer, Token};
 
-use super::{parse_entry_points::ParseEntryPoints, StatementRef};
+use super::{parse_statements::ParseStatements, StatementRef};
 
 /**
  * Recursive descent parser
@@ -28,7 +28,7 @@ impl<'a> Parser<'a> {
      * Parses a string into an AST
      */
     pub fn parse(&mut self) -> StatementRef {
-        self.program_root()
+        self.program()
     }
 
     /**

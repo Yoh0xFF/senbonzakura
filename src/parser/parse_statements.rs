@@ -2,12 +2,18 @@ use std::rc::Rc;
 
 use crate::lexer::TokenType;
 
-use super::{
-    parse_entry_points::ParseEntryPoints, parse_expressions::ParseExpressions, Parser, Statement,
-    StatementList, StatementRef,
-};
+use super::{parse_expressions::ParseExpressions, Parser, Statement, StatementList, StatementRef};
 
 pub(super) trait ParseStatements {
+    /**
+     * Main entry point
+     *
+     * Program
+     *  : StatementList
+     *  ;
+     */
+    fn program(&mut self) -> StatementRef;
+
     /**
      * BlockStatement
      *  : '{' OptStatementList '}'
@@ -47,6 +53,13 @@ pub(super) trait ParseStatements {
 }
 
 impl<'a> ParseStatements for Parser<'a> {
+    fn program(&mut self) -> StatementRef {
+        let statement_list = self.statement_list(None);
+        Rc::new(Statement::Program {
+            body: statement_list,
+        })
+    }
+
     fn block_statement(&mut self) -> StatementRef {
         self.eat(TokenType::OpeningBrace);
 
@@ -88,10 +101,7 @@ impl<'a> ParseStatements for Parser<'a> {
         Rc::new(Statement::EmptyStatement)
     }
 
-    fn expression_statement(&mut self) -> StatementRef
-    where
-        Self: ParseEntryPoints,
-    {
+    fn expression_statement(&mut self) -> StatementRef {
         let expression = self.expression();
 
         self.eat(TokenType::StatementEnd);

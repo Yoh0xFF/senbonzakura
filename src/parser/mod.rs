@@ -1,5 +1,4 @@
 mod ast;
-mod parse_entry_points;
 mod parse_expressions;
 mod parse_statements;
 mod parser;
