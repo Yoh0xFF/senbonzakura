@@ -1,6 +1,8 @@
+use ast::Statement;
 use lexer::{Lexer, Token};
-use parser::{Parser, Statement};
+use parser::Parser;
 
+mod ast;
 mod lexer;
 mod parser;
 

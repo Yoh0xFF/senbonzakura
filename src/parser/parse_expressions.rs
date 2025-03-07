@@ -1,8 +1,9 @@
 use std::rc::Rc;
 
+use crate::ast::{Expression, ExpressionRef};
 use crate::lexer::TokenType;
 
-use super::{Expression, ExpressionRef, Parser};
+use super::Parser;
 
 pub(super) trait ParseExpressions {
     /**

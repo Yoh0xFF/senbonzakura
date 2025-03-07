@@ -1,4 +1,4 @@
-use crate::{parser::StatementRef, Parser};
+use crate::{ast::StatementRef, Parser};
 
 pub(super) fn execute(source: &str, expected: StatementRef) {
     let mut parser = Parser::new(source);

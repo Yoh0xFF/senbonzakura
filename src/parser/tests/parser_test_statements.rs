@@ -1,6 +1,6 @@
 use std::rc::Rc;
 
-use crate::parser::{Expression, Statement};
+use crate::{ast::Expression, Statement};
 
 use super::parser_tests::execute;
 

@@ -1,6 +1,7 @@
+use crate::ast::StatementRef;
 use crate::{lexer::TokenType, Lexer, Token};
 
-use super::{parse_statements::ParseStatements, StatementRef};
+use super::parse_statements::ParseStatements;
 
 /**
  * Recursive descent parser

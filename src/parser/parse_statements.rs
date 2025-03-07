@@ -1,8 +1,9 @@
 use std::rc::Rc;
 
+use crate::ast::{Statement, StatementList, StatementRef};
 use crate::lexer::TokenType;
 
-use super::{parse_expressions::ParseExpressions, Parser, Statement, StatementList, StatementRef};
+use super::{parse_expressions::ParseExpressions, Parser};
 
 pub(super) trait ParseStatements {
     /**
