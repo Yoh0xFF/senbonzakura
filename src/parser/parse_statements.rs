@@ -1,6 +1,6 @@
 use std::rc::Rc;
 
-use crate::ast::{Statement, StatementList, StatementRef};
+use crate::ast::{Statement, StatementList, StatementNode};
 use crate::lexer::TokenType;
 
 use super::{parse_expressions::ParseExpressions, Parser};
@@ -13,14 +13,14 @@ pub(super) trait ParseStatements {
      *  : StatementList
      *  ;
      */
-    fn program(&mut self) -> StatementRef;
+    fn program(&mut self) -> Statement;
 
     /**
      * BlockStatement
      *  : '{' OptStatementList '}'
      *  ;
      */
-    fn block_statement(&mut self) -> StatementRef;
+    fn block_statement(&mut self) -> Statement;
 
     /**
      * StatementList
@@ -36,32 +36,32 @@ pub(super) trait ParseStatements {
      *  | BlockStatement
      *  ;
      */
-    fn statement(&mut self) -> StatementRef;
+    fn statement(&mut self) -> Statement;
 
     /**
      * EmptyStatement
      *  : ';'
      *  ;
      */
-    fn empty_statement(&mut self) -> StatementRef;
+    fn empty_statement(&mut self) -> Statement;
 
     /**
      * ExpressionStatement
      *  : Expression ';'
      *  ;
      */
-    fn expression_statement(&mut self) -> StatementRef;
+    fn expression_statement(&mut self) -> Statement;
 }
 
 impl<'a> ParseStatements for Parser<'a> {
-    fn program(&mut self) -> StatementRef {
+    fn program(&mut self) -> Statement {
         let statement_list = self.statement_list(None);
-        Rc::new(Statement::Program {
+        Rc::new(StatementNode::Program {
             body: statement_list,
         })
     }
 
-    fn block_statement(&mut self) -> StatementRef {
+    fn block_statement(&mut self) -> Statement {
         self.eat(TokenType::OpeningBrace);
 
         let block = if self.lookahead.token_type != TokenType::ClosingBrace {
@@ -72,11 +72,11 @@ impl<'a> ParseStatements for Parser<'a> {
 
         self.eat(TokenType::ClosingBrace);
 
-        Rc::new(Statement::Block { body: block })
+        Rc::new(StatementNode::Block { body: block })
     }
 
     fn statement_list(&mut self, stop_token_type: Option<TokenType>) -> StatementList {
-        let mut statement_list: Vec<StatementRef> = vec![];
+        let mut statement_list: Vec<Statement> = vec![];
 
         while self.lookahead.token_type != TokenType::End
             && self.lookahead.token_type != stop_token_type.unwrap_or(TokenType::End)
@@ -88,7 +88,7 @@ impl<'a> ParseStatements for Parser<'a> {
         Rc::new(statement_list)
     }
 
-    fn statement(&mut self) -> StatementRef {
+    fn statement(&mut self) -> Statement {
         match self.lookahead.token_type {
             TokenType::StatementEnd => return self.empty_statement(),
             TokenType::OpeningBrace => return self.block_statement(),
@@ -96,17 +96,17 @@ impl<'a> ParseStatements for Parser<'a> {
         }
     }
 
-    fn empty_statement(&mut self) -> StatementRef {
+    fn empty_statement(&mut self) -> Statement {
         self.eat(TokenType::StatementEnd);
 
-        Rc::new(Statement::Empty)
+        Rc::new(StatementNode::Empty)
     }
 
-    fn expression_statement(&mut self) -> StatementRef {
+    fn expression_statement(&mut self) -> Statement {
         let expression = self.expression();
 
         self.eat(TokenType::StatementEnd);
 
-        Rc::new(Statement::Expression { expression })
+        Rc::new(StatementNode::Expression { expression })
     }
 }

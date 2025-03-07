@@ -1,9 +1,9 @@
 use crate::{
     ast::{
-        AstVisitor, Expression, ExpressionDispatcher, ExpressionRef, StatementDispatcher,
-        StatementRef,
+        AstVisitor, Expression, ExpressionDispatcher, ExpressionNode, Statement,
+        StatementDispatcher,
     },
-    Statement,
+    StatementNode,
 };
 use anyhow::Result;
 
@@ -17,7 +17,7 @@ impl SExpressionVisitor {
         SExpressionVisitor
     }
 
-    pub fn statement_to_sexpression(&mut self, statement: StatementRef) -> Result<String> {
+    pub fn statement_to_sexpression(&mut self, statement: Statement) -> Result<String> {
         statement.accept(self)
     }
 }
@@ -25,9 +25,9 @@ impl SExpressionVisitor {
 impl AstVisitor for SExpressionVisitor {
     type Output = String;
 
-    fn visit_statement(&mut self, statement: StatementRef) -> Result<Self::Output> {
+    fn visit_statement(&mut self, statement: Statement) -> Result<Self::Output> {
         match statement.as_ref() {
-            Statement::Program { body } => {
+            StatementNode::Program { body } => {
                 let body_sexp: Result<Vec<_>> = body
                     .iter()
                     .map(|statement| self.statement_to_sexpression(statement.clone()))
@@ -35,7 +35,7 @@ impl AstVisitor for SExpressionVisitor {
 
                 Ok(format!("(program {})", body_sexp?.join(" ")))
             }
-            Statement::Block { body } => {
+            StatementNode::Block { body } => {
                 let body_sexp: Result<Vec<_>> = body
                     .iter()
                     .map(|statement| self.statement_to_sexpression(statement.clone()))
@@ -43,17 +43,17 @@ impl AstVisitor for SExpressionVisitor {
 
                 Ok(format!("(block {})", body_sexp?.join(" ")))
             }
-            Statement::Empty => Ok("(empty)".to_string()),
-            Statement::Expression { expression } => {
+            StatementNode::Empty => Ok("(empty)".to_string()),
+            StatementNode::Expression { expression } => {
                 let expr_sexp = self.visit_expression(expression.clone())?;
                 Ok(format!("(expr {})", expr_sexp))
             }
         }
     }
 
-    fn visit_expression(&mut self, expression: ExpressionRef) -> Result<Self::Output> {
+    fn visit_expression(&mut self, expression: Expression) -> Result<Self::Output> {
         match expression.as_ref() {
-            Expression::Binary {
+            ExpressionNode::Binary {
                 operator,
                 left,
                 right,
@@ -66,12 +66,12 @@ impl AstVisitor for SExpressionVisitor {
                     operator, left_sexp, right_sexp
                 ))
             }
-            Expression::StringLiteral(value) => {
+            ExpressionNode::StringLiteral(value) => {
                 // Escape double quotes
                 let escaped = value.replace("\"", "\\\"");
                 Ok(format!("(string \"{}\")", escaped))
             }
-            Expression::NumericLiteral(value) => Ok(format!("(number {})", value)),
+            ExpressionNode::NumericLiteral(value) => Ok(format!("(number {})", value)),
         }
     }
 }
@@ -83,14 +83,14 @@ pub trait ToSExpression {
     fn to_sexpression(&self) -> Result<String>;
 }
 
-impl ToSExpression for StatementRef {
+impl ToSExpression for Statement {
     fn to_sexpression(&self) -> Result<String> {
         let mut visitor = SExpressionVisitor::new();
         self.accept(&mut visitor)
     }
 }
 
-impl ToSExpression for ExpressionRef {
+impl ToSExpression for Expression {
     fn to_sexpression(&self) -> Result<String> {
         let mut visitor = SExpressionVisitor::new();
         self.accept(&mut visitor)

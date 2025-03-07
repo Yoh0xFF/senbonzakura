@@ -1,4 +1,4 @@
-use crate::ast::StatementRef;
+use crate::ast::Statement;
 use crate::{lexer::TokenType, Lexer, Token};
 
 use super::parse_statements::ParseStatements;
@@ -28,7 +28,7 @@ impl<'a> Parser<'a> {
     /**
      * Parses a string into an AST
      */
-    pub fn parse(&mut self) -> StatementRef {
+    pub fn parse(&mut self) -> Statement {
         self.program()
     }
 
