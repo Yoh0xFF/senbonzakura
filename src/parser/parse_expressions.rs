@@ -81,7 +81,7 @@ impl<'a> ParseExpressions for Parser<'a> {
 
             let right = self.factor_expression();
 
-            left = Rc::new(Expression::BinaryExpression {
+            left = Rc::new(Expression::Binary {
                 operator: String::from(operator),
                 left,
                 right,
@@ -100,7 +100,7 @@ impl<'a> ParseExpressions for Parser<'a> {
 
             let right = self.primary_expression();
 
-            left = Rc::new(Expression::BinaryExpression {
+            left = Rc::new(Expression::Binary {
                 operator: String::from(operator),
                 left,
                 right,

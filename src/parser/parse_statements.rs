@@ -72,7 +72,7 @@ impl<'a> ParseStatements for Parser<'a> {
 
         self.eat(TokenType::ClosingBrace);
 
-        Rc::new(Statement::BlockStatement { body: block })
+        Rc::new(Statement::Block { body: block })
     }
 
     fn statement_list(&mut self, stop_token_type: Option<TokenType>) -> StatementList {
@@ -99,7 +99,7 @@ impl<'a> ParseStatements for Parser<'a> {
     fn empty_statement(&mut self) -> StatementRef {
         self.eat(TokenType::StatementEnd);
 
-        Rc::new(Statement::EmptyStatement)
+        Rc::new(Statement::Empty)
     }
 
     fn expression_statement(&mut self) -> StatementRef {
@@ -107,6 +107,6 @@ impl<'a> ParseStatements for Parser<'a> {
 
         self.eat(TokenType::StatementEnd);
 
-        Rc::new(Statement::ExpressionStatement { expression })
+        Rc::new(Statement::Expression { expression })
     }
 }

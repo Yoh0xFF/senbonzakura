@@ -26,13 +26,13 @@ fn main() {
         Statement::Program { body } => {
             println!("Program {:?}", body);
         }
-        Statement::BlockStatement { body } => {
+        Statement::Block { body } => {
             println!("BlockStatement {:?}", body);
         }
-        Statement::EmptyStatement => {
+        Statement::Empty => {
             println!("EmptyStatement");
         }
-        Statement::ExpressionStatement { expression } => {
+        Statement::Expression { expression } => {
             println!("ExpressionStatement {:?}", expression);
         }
     }
