@@ -17,7 +17,7 @@ impl SExpressionVisitor {
         SExpressionVisitor
     }
 
-    pub fn statement_to_sexpression(&mut self, statement: Statement) -> Result<String> {
+    pub fn statement_to_sexpression(&mut self, statement: &Statement) -> Result<String> {
         statement.accept(self)
     }
 }
@@ -25,12 +25,12 @@ impl SExpressionVisitor {
 impl AstVisitor for SExpressionVisitor {
     type Output = String;
 
-    fn visit_statement(&mut self, statement: Statement) -> Result<Self::Output> {
+    fn visit_statement(&mut self, statement: &Statement) -> Result<Self::Output> {
         match statement.as_ref() {
             StatementNode::Program { body } => {
                 let body_sexp: Result<Vec<_>> = body
                     .iter()
-                    .map(|statement| self.statement_to_sexpression(statement.clone()))
+                    .map(|statement| self.statement_to_sexpression(statement))
                     .collect();
 
                 Ok(format!("(program {})", body_sexp?.join(" ")))
@@ -38,28 +38,28 @@ impl AstVisitor for SExpressionVisitor {
             StatementNode::Block { body } => {
                 let body_sexp: Result<Vec<_>> = body
                     .iter()
-                    .map(|statement| self.statement_to_sexpression(statement.clone()))
+                    .map(|statement| self.statement_to_sexpression(statement))
                     .collect();
 
                 Ok(format!("(block {})", body_sexp?.join(" ")))
             }
             StatementNode::Empty => Ok("(empty)".to_string()),
             StatementNode::Expression { expression } => {
-                let expr_sexp = self.visit_expression(expression.clone())?;
+                let expr_sexp = self.visit_expression(expression)?;
                 Ok(format!("(expr {})", expr_sexp))
             }
         }
     }
 
-    fn visit_expression(&mut self, expression: Expression) -> Result<Self::Output> {
+    fn visit_expression(&mut self, expression: &Expression) -> Result<Self::Output> {
         match expression.as_ref() {
             ExpressionNode::Binary {
                 operator,
                 left,
                 right,
             } => {
-                let left_sexp = self.visit_expression(left.clone())?;
-                let right_sexp = self.visit_expression(right.clone())?;
+                let left_sexp = self.visit_expression(left)?;
+                let right_sexp = self.visit_expression(right)?;
 
                 Ok(format!(
                     "(binary \"{}\" {} {})",

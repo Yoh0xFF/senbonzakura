@@ -1,4 +1,4 @@
-use std::rc::Rc;
+use std::{fmt, rc::Rc};
 
 pub type Statement = Rc<StatementNode>;
 pub type Expression = Rc<ExpressionNode>;
@@ -15,10 +15,29 @@ pub enum StatementNode {
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum ExpressionNode {
     Binary {
-        operator: String,
+        operator: BinaryOperator,
         left: Expression,
         right: Expression,
     },
     StringLiteral(String),
     NumericLiteral(i32),
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum BinaryOperator {
+    Add,
+    Subtract,
+    Multiply,
+    Divide,
+}
+
+impl fmt::Display for BinaryOperator {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            BinaryOperator::Add => write!(f, "+"),
+            BinaryOperator::Subtract => write!(f, "-"),
+            BinaryOperator::Multiply => write!(f, "*"),
+            BinaryOperator::Divide => write!(f, "/"),
+        }
+    }
 }

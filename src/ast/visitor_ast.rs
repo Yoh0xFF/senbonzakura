@@ -14,12 +14,12 @@ pub trait AstVisitor {
     /**
      * Process a Statement node
      */
-    fn visit_statement(&mut self, statement: Statement) -> Result<Self::Output>;
+    fn visit_statement(&mut self, statement: &Statement) -> Result<Self::Output>;
 
     /**
      * Process an Expression node
      */
-    fn visit_expression(&mut self, expression: Expression) -> Result<Self::Output>;
+    fn visit_expression(&mut self, expression: &Expression) -> Result<Self::Output>;
 }
 
 /**
@@ -47,7 +47,7 @@ pub trait ExpressionDispatcher {
  */
 impl StatementDispatcher for Statement {
     fn accept<V: AstVisitor>(&self, visitor: &mut V) -> Result<V::Output> {
-        visitor.visit_statement(self.clone())
+        visitor.visit_statement(self)
     }
 }
 
@@ -56,6 +56,6 @@ impl StatementDispatcher for Statement {
  */
 impl ExpressionDispatcher for Expression {
     fn accept<V: AstVisitor>(&self, visitor: &mut V) -> Result<V::Output> {
-        visitor.visit_expression(self.clone())
+        visitor.visit_expression(self)
     }
 }

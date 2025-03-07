@@ -1,6 +1,6 @@
 use std::rc::Rc;
 
-use crate::ast::{Expression, ExpressionNode};
+use crate::ast::{BinaryOperator, Expression, ExpressionNode};
 use crate::lexer::TokenType;
 
 use super::Parser;
@@ -77,12 +77,17 @@ impl<'a> ParseExpressions for Parser<'a> {
 
         while self.lookahead.token_type == TokenType::AdditiveOperator {
             let operator_token = self.eat(TokenType::AdditiveOperator);
-            let operator = &self.source[operator_token.i..operator_token.j];
+            let operator_value = &self.source[operator_token.i..operator_token.j];
+            let operator = match operator_value {
+                "+" => BinaryOperator::Add,
+                "-" => BinaryOperator::Subtract,
+                _ => panic!("Unknown additive operator {}", operator_value),
+            };
 
             let right = self.factor_expression();
 
             left = Rc::new(ExpressionNode::Binary {
-                operator: String::from(operator),
+                operator,
                 left,
                 right,
             });
@@ -96,12 +101,17 @@ impl<'a> ParseExpressions for Parser<'a> {
 
         while self.lookahead.token_type == TokenType::FactorOperator {
             let operator_token = self.eat(TokenType::FactorOperator);
-            let operator = &self.source[operator_token.i..operator_token.j];
+            let operator_value = &self.source[operator_token.i..operator_token.j];
+            let operator = match operator_value {
+                "*" => BinaryOperator::Multiply,
+                "/" => BinaryOperator::Divide,
+                _ => panic!("Unknown factor operator {}", operator_value),
+            };
 
             let right = self.primary_expression();
 
             left = Rc::new(ExpressionNode::Binary {
-                operator: String::from(operator),
+                operator,
                 left,
                 right,
             });
