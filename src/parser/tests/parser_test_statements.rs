@@ -1,7 +1,3 @@
-use std::rc::Rc;
-
-use crate::{ast::Expression, Statement};
-
 use super::parser_tests::execute;
 
 #[test]
@@ -13,20 +9,7 @@ fn test_block_statement() {
             17;
         }
         "#,
-        Rc::new(Statement::Program {
-            body: Rc::new(vec![Rc::new(Statement::Block {
-                body: Rc::new(vec![
-                    Rc::new(Statement::Expression {
-                        expression: Rc::new(Expression::StringLiteral(
-                            "Hello".to_string(),
-                        )),
-                    }),
-                    Rc::new(Statement::Expression {
-                        expression: Rc::new(Expression::NumericLiteral(17)),
-                    }),
-                ]),
-            })]),
-        }),
+        "(program (block (expr (string \"Hello\")) (expr (number 17))))",
     )
 }
 
@@ -37,11 +20,7 @@ fn test_empty_block_statement() {
         {
         }
         "#,
-        Rc::new(Statement::Program {
-            body: Rc::new(vec![Rc::new(Statement::Block {
-                body: Rc::new(vec![]),
-            })]),
-        }),
+        "(program (block ))",
     )
 }
 
@@ -56,22 +35,7 @@ fn test_nested_block_statement() {
             }
         }
         "#,
-        Rc::new(Statement::Program {
-            body: Rc::new(vec![Rc::new(Statement::Block {
-                body: Rc::new(vec![
-                    Rc::new(Statement::Expression {
-                        expression: Rc::new(Expression::StringLiteral(
-                            "Hello".to_string(),
-                        )),
-                    }),
-                    Rc::new(Statement::Block {
-                        body: Rc::new(vec![Rc::new(Statement::Expression {
-                            expression: Rc::new(Expression::NumericLiteral(17)),
-                        })]),
-                    }),
-                ]),
-            })]),
-        }),
+        "(program (block (expr (string \"Hello\")) (block (expr (number 17)))))",
     )
 }
 
@@ -83,10 +47,6 @@ fn test_empty_statement() {
             ;
         }
         "#,
-        Rc::new(Statement::Program {
-            body: Rc::new(vec![Rc::new(Statement::Block {
-                body: Rc::new(vec![Rc::new(Statement::Empty)]),
-            })]),
-        }),
+        "(program (block (empty)))",
     )
 }

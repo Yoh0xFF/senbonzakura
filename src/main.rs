@@ -1,10 +1,12 @@
 use ast::Statement;
 use lexer::{Lexer, Token};
 use parser::Parser;
+use visitor_sexpression::ToSExpression;
 
 mod ast;
 mod lexer;
 mod parser;
+mod visitor_sexpression;
 
 fn main() {
     let mut lexer = Lexer::new(r#"12 17 "Hello"   'world' "#);
@@ -20,20 +22,7 @@ fn main() {
     println!("Token: {}", next_token);
 
     let mut parser = Parser::new("12;");
-    let statement = parser.parse();
-
-    match statement.as_ref() {
-        Statement::Program { body } => {
-            println!("Program {:?}", body);
-        }
-        Statement::Block { body } => {
-            println!("BlockStatement {:?}", body);
-        }
-        Statement::Empty => {
-            println!("EmptyStatement");
-        }
-        Statement::Expression { expression } => {
-            println!("ExpressionStatement {:?}", expression);
-        }
-    }
+    let ast = parser.parse();
+    let sexpression = ast.to_sexpression().unwrap();
+    println!("SExpression: {}", sexpression);
 }
