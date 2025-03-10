@@ -12,6 +12,11 @@ pub enum TokenType {
     ClosingBrace,
     OpeningParenthesis,
     ClosingParenthesis,
+    // Identifier
+    Identifier,
+    // Assignment operators
+    SimpleAssignmentOperator,
+    ComplexAssignmentOperator,
     // Math operators,
     AdditiveOperator,
     FactorOperator,

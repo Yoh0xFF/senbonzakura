@@ -1,6 +1,6 @@
 use std::rc::Rc;
 
-use crate::ast::{BinaryOperator, Expression, ExpressionNode};
+use crate::ast::{AssignmentOperator, BinaryOperator, Expression, ExpressionNode};
 use crate::lexer::TokenType;
 
 use super::Parser;
@@ -12,6 +12,28 @@ pub(super) trait ParseExpressions {
      *  ;
      */
     fn expression(&mut self) -> Expression;
+
+    /**
+     * AssignmentExpression
+     *  : AdditiveExpression
+     *  | LeftHandSideExpression ASSIGNMENT_OPERATOR AssignmentExpression
+     *  ;
+     */
+    fn assignment_expression(&mut self) -> Expression;
+
+    /**
+     * LeftHandSideExpression
+     *  : IdentifierExpression
+     *  ;
+     */
+    fn left_hand_side_expression(&mut self) -> Expression;
+
+    /**
+     * IdentifierExpression
+     *  : IDENTIFIER
+     *  ;
+     */
+    fn identifier_expression(&mut self) -> Expression;
 
     /**
      * AdditiveExpression
@@ -31,8 +53,9 @@ pub(super) trait ParseExpressions {
 
     /**
      * PrimaryExpression
-     *  : Literal
+     *  : LiteralExpression
      *  | GroupExpression
+     *  | LeftHandSideExpression
      *  ;
      */
     fn primary_expression(&mut self) -> Expression;
@@ -50,26 +73,70 @@ pub(super) trait ParseExpressions {
      *  | StringLiteral
      *  ;
      */
-    fn literal(&mut self) -> Expression;
+    fn literal_expression(&mut self) -> Expression;
 
     /**
      * StringLiteral
      *  : STRING
      *  ;
      */
-    fn string_literal(&mut self) -> Expression;
+    fn string_literal_expression(&mut self) -> Expression;
 
     /**
      * NumericLiteral
      *  : NUMBER
      *  ;
      */
-    fn numeric_literal(&mut self) -> Expression;
+    fn numeric_literal_expression(&mut self) -> Expression;
 }
 
 impl<'a> ParseExpressions for Parser<'a> {
     fn expression(&mut self) -> Expression {
-        self.additive_expression()
+        self.assignment_expression()
+    }
+
+    fn assignment_expression(&mut self) -> Expression {
+        let left = self.additive_expression();
+
+        if !self.is_assignment_operator_token() {
+            return left;
+        }
+
+        let assignment_operator_token = self.eat_any_of(&[
+            TokenType::SimpleAssignmentOperator,
+            TokenType::ComplexAssignmentOperator,
+        ]);
+        let assignment_operator_value =
+            &self.source[assignment_operator_token.i..assignment_operator_token.j];
+        let assignment_operator = match assignment_operator_value {
+            "=" => AssignmentOperator::Assign,
+            "+=" => AssignmentOperator::AssignAdd,
+            "-=" => AssignmentOperator::AssignSubtract,
+            "*=" => AssignmentOperator::AssignMultiply,
+            "/=" => AssignmentOperator::AssignDivide,
+            _ => panic!("Unknown assignment operator {}", assignment_operator_value),
+        };
+
+        if !self.is_valid_assignment_target(&left) {
+            panic!("Invalid left-hand side in the assignment expression");
+        }
+
+        Rc::new(ExpressionNode::Assignment {
+            operator: assignment_operator,
+            left: left,
+            right: self.assignment_expression(),
+        })
+    }
+
+    fn left_hand_side_expression(&mut self) -> Expression {
+        self.identifier_expression()
+    }
+
+    fn identifier_expression(&mut self) -> Expression {
+        let identifier_token = self.eat(TokenType::Identifier);
+        let identifier_value = &self.source[identifier_token.i..identifier_token.j];
+
+        Rc::new(ExpressionNode::Identifier(String::from(identifier_value)))
     }
 
     fn additive_expression(&mut self) -> Expression {
@@ -121,9 +188,13 @@ impl<'a> ParseExpressions for Parser<'a> {
     }
 
     fn primary_expression(&mut self) -> Expression {
+        if self.is_literal_token() {
+            return self.literal_expression();
+        }
+
         match self.lookahead.token_type {
             TokenType::OpeningParenthesis => return self.group_expression(),
-            _ => return self.literal(),
+            _ => return self.left_hand_side_expression(),
         }
     }
 
@@ -135,22 +206,22 @@ impl<'a> ParseExpressions for Parser<'a> {
         expression_ref
     }
 
-    fn literal(&mut self) -> Expression {
+    fn literal_expression(&mut self) -> Expression {
         match self.lookahead.token_type {
-            TokenType::String => self.string_literal(),
-            TokenType::Number => self.numeric_literal(),
+            TokenType::String => self.string_literal_expression(),
+            TokenType::Number => self.numeric_literal_expression(),
             _ => panic!("Literal: unexpected literal production"),
         }
     }
 
-    fn string_literal(&mut self) -> Expression {
+    fn string_literal_expression(&mut self) -> Expression {
         let token = self.eat(TokenType::String);
         let token_value = &self.source[token.i + 1..token.j - 1];
 
         Rc::new(ExpressionNode::StringLiteral(String::from(token_value)))
     }
 
-    fn numeric_literal(&mut self) -> Expression {
+    fn numeric_literal_expression(&mut self) -> Expression {
         let token = self.eat(TokenType::Number);
         let token_value = &self.source[token.i..token.j];
         let token_value = token_value.trim().parse().unwrap();

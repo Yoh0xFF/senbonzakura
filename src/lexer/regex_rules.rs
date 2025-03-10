@@ -28,6 +28,12 @@ pub(super) fn init_regex_rules() -> Vec<(Regex, TokenType)> {
     let closing_parenthesis =
         Regex::new(r"^\)").expect("Failed to compile regex for closing parenthesis ()) symbol");
 
+    // Assignment operators
+    let simple_assignment_operator =
+        Regex::new(r"^=").expect("Failed to compile regex for simgle assignment operator");
+    let complex_assignment_operator = Regex::new(r"^[\*\/\+\-]=")
+        .expect("Failed to compile regex for complex assignment operator");
+
     // Math operators
     let additive_operator =
         Regex::new(r"^[+\-]").expect("Failed to compile regex for additive operators (+, -)");
@@ -43,6 +49,9 @@ pub(super) fn init_regex_rules() -> Vec<(Regex, TokenType)> {
     let string_single_quotes =
         Regex::new(r"^'[^']*'").expect("Failed to compile regex for single quote string literal");
 
+    // Identifiers
+    let identifier = Regex::new(r"^\w+").expect("Failed to compile regex for identifiers");
+
     vec![
         (whitespace, TokenType::Whitespace),
         (single_line_comments, TokenType::SingleLineComment),
@@ -52,10 +61,20 @@ pub(super) fn init_regex_rules() -> Vec<(Regex, TokenType)> {
         (closing_brace, TokenType::ClosingBrace),
         (opening_parenthesis, TokenType::OpeningParenthesis),
         (closing_parenthesis, TokenType::ClosingParenthesis),
+        (
+            simple_assignment_operator,
+            TokenType::SimpleAssignmentOperator,
+        ),
+        (
+            complex_assignment_operator,
+            TokenType::ComplexAssignmentOperator,
+        ),
         (additive_operator, TokenType::AdditiveOperator),
         (factor_operator, TokenType::FactorOperator),
         (number, TokenType::Number),
         (string_double_quotes, TokenType::String),
         (string_single_quotes, TokenType::String),
+        // Important! Order matters this rule must be after the number literal rule
+        (identifier, TokenType::Identifier),
     ]
 }

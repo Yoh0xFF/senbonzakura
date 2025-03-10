@@ -9,6 +9,11 @@ pub(super) fn visit_expression(
     expression: &Expression,
 ) -> Result<()> {
     let result = match expression.as_ref() {
+        ExpressionNode::Assignment {
+            operator,
+            left,
+            right,
+        } => todo!(),
         ExpressionNode::Binary {
             operator,
             left,
@@ -16,6 +21,7 @@ pub(super) fn visit_expression(
         } => visit_binary_expression(visitor, *operator, left, right),
         ExpressionNode::StringLiteral(value) => visit_string_literal_expression(visitor, value),
         ExpressionNode::NumericLiteral(value) => visit_numeric_literal_expression(visitor, *value),
+        ExpressionNode::Identifier(name) => todo!(),
     };
 
     result
