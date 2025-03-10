@@ -1,4 +1,6 @@
-use crate::ast::{BinaryOperator, Expression, ExpressionDispatcher, ExpressionNode};
+use crate::ast::{
+    AssignmentOperator, BinaryOperator, Expression, ExpressionDispatcher, ExpressionNode,
+};
 
 use super::SExpressionVisitor;
 use anyhow::Result;
@@ -13,23 +15,51 @@ pub(super) fn visit_expression(
             operator,
             left,
             right,
-        } => todo!(),
+        } => visit_assignment_expression(visitor, operator, left, right),
         ExpressionNode::Binary {
             operator,
             left,
             right,
-        } => visit_binary_expression(visitor, *operator, left, right),
+        } => visit_binary_expression(visitor, operator, left, right),
         ExpressionNode::StringLiteral(value) => visit_string_literal_expression(visitor, value),
         ExpressionNode::NumericLiteral(value) => visit_numeric_literal_expression(visitor, *value),
-        ExpressionNode::Identifier(name) => todo!(),
+        ExpressionNode::Identifier(name) => visit_identifier_expression(visitor, name),
     };
 
     result
 }
 
+fn visit_assignment_expression(
+    visitor: &mut SExpressionVisitor,
+    operator: &AssignmentOperator,
+    left: &Expression,
+    right: &Expression,
+) -> Result<()> {
+    visitor.begin_expr("assign")?;
+
+    // Write the operator
+    visitor.write_space_or_newline()?;
+    visitor.write_indent()?;
+
+    // Convert operator to appropriate string representation
+    write!(visitor.output, "\"{}\"", operator)?;
+
+    // Process left operand
+    visitor.write_space_or_newline()?;
+    left.accept(visitor)?;
+
+    // Process right operand
+    visitor.write_space_or_newline()?;
+    right.accept(visitor)?;
+
+    visitor.end_expr()?;
+
+    Ok(())
+}
+
 fn visit_binary_expression(
     visitor: &mut SExpressionVisitor,
-    operator: BinaryOperator,
+    operator: &BinaryOperator,
     left: &Expression,
     right: &Expression,
 ) -> Result<()> {
@@ -64,6 +94,17 @@ fn visit_string_literal_expression(visitor: &mut SExpressionVisitor, value: &str
 fn visit_numeric_literal_expression(visitor: &mut SExpressionVisitor, value: i32) -> Result<()> {
     visitor.begin_expr("number")?;
     write!(visitor.output, " {}", value)?;
+    visitor.end_expr()?;
+
+    Ok(())
+}
+
+fn visit_identifier_expression(visitor: &mut SExpressionVisitor, name: &str) -> Result<()> {
+    visitor.begin_expr("id")?;
+
+    // Write the identifier name
+    write!(visitor.output, " {}", name)?;
+
     visitor.end_expr()?;
 
     Ok(())

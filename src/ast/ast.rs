@@ -42,10 +42,10 @@ impl fmt::Display for AssignmentOperator {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             AssignmentOperator::Assign => write!(f, "="),
-            AssignmentOperator::AssignAdd => write!(f, "+"),
-            AssignmentOperator::AssignSubtract => write!(f, "-"),
-            AssignmentOperator::AssignMultiply => write!(f, "*"),
-            AssignmentOperator::AssignDivide => write!(f, "/"),
+            AssignmentOperator::AssignAdd => write!(f, "+="),
+            AssignmentOperator::AssignSubtract => write!(f, "-="),
+            AssignmentOperator::AssignMultiply => write!(f, "*="),
+            AssignmentOperator::AssignDivide => write!(f, "/="),
         }
     }
 }

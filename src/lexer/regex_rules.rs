@@ -31,8 +31,8 @@ pub(super) fn init_regex_rules() -> Vec<(Regex, TokenType)> {
     // Assignment operators
     let simple_assignment_operator =
         Regex::new(r"^=").expect("Failed to compile regex for simgle assignment operator");
-    let complex_assignment_operator = Regex::new(r"^[\*\/\+\-]=")
-        .expect("Failed to compile regex for complex assignment operator");
+    let complex_assignment_operator =
+        Regex::new(r"^[*/+-]=").expect("Failed to compile regex for complex assignment operator");
 
     // Math operators
     let additive_operator =
