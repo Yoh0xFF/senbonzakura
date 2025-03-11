@@ -79,5 +79,14 @@ fn visit_variable_declaration_statement(
     visitor: &mut SExpressionVisitor,
     variables: &ExpressionList,
 ) -> Result<()> {
-    todo!()
+    visitor.begin_expr("let")?;
+
+    for variable in variables.iter() {
+        visitor.write_space_or_newline()?;
+        variable.accept(visitor)?;
+    }
+
+    visitor.end_expr()?;
+
+    Ok(())
 }

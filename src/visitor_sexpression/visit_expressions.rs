@@ -38,7 +38,21 @@ fn visit_variable_initialization_expression(
     identifier: &Expression,
     initializer: &Option<Expression>,
 ) -> Result<()> {
-    todo!()
+    visitor.begin_expr("init")?;
+
+    // Process identifier
+    visitor.write_space_or_newline()?;
+    identifier.accept(visitor)?;
+
+    // Process initializer if present
+    if let Some(init) = initializer {
+        visitor.write_space_or_newline()?;
+        init.accept(visitor)?;
+    }
+
+    visitor.end_expr()?;
+
+    Ok(())
 }
 
 fn visit_assignment_expression(

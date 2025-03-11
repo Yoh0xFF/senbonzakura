@@ -21,7 +21,7 @@ fn main() {
     let next_token = lexer.next_token();
     println!("Token: {}", next_token);
 
-    let mut parser = Parser::new("12;");
+    let mut parser = Parser::new("12; { let x, y = 12; x = 7; let z = x + y; }");
     let ast = parser.parse();
     let sexpression = ast.to_pretty_sexpression().unwrap();
     println!("SExpression:\n{}", sexpression);

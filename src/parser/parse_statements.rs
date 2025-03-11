@@ -120,6 +120,8 @@ impl<'a> ParseStatements for Parser<'a> {
             if !self.is_token(TokenType::Comma) {
                 break;
             }
+
+            self.eat(TokenType::Comma);
         }
         self.eat(TokenType::StatementEnd);
 

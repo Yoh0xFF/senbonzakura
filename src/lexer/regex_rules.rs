@@ -27,7 +27,7 @@ pub(super) fn init_regex_rules() -> Vec<(Regex, TokenType)> {
         Regex::new(r"^\(").expect("Failed to compile regex for opening parenthesis (() symbol");
     let closing_parenthesis =
         Regex::new(r"^\)").expect("Failed to compile regex for closing parenthesis ()) symbol");
-    let comma = Regex::new(r"^,)").expect("Failed to compile regex for comma (,) symbol");
+    let comma = Regex::new(r"^\,").expect("Failed to compile regex for comma (,) symbol");
 
     // Keywords
     let let_keyword =
