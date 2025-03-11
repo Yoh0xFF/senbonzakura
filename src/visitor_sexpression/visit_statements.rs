@@ -1,5 +1,8 @@
 use crate::{
-    ast::{Expression, ExpressionDispatcher, Statement, StatementDispatcher, StatementList},
+    ast::{
+        Expression, ExpressionDispatcher, ExpressionList, Statement, StatementDispatcher,
+        StatementList,
+    },
     StatementNode,
 };
 
@@ -15,6 +18,9 @@ pub(super) fn visit_statement(
         StatementNode::Block { body } => visit_block_statement(visitor, body),
         StatementNode::Empty => visit_empty_statement(visitor),
         StatementNode::Expression { expression } => visit_expression_statement(visitor, expression),
+        StatementNode::VariableDeclaration { variables } => {
+            visit_variable_declaration_statement(visitor, variables)
+        }
     };
 
     result
@@ -67,4 +73,11 @@ fn visit_expression_statement(
     visitor.end_expr()?;
 
     Ok(())
+}
+
+fn visit_variable_declaration_statement(
+    visitor: &mut SExpressionVisitor,
+    variables: &ExpressionList,
+) -> Result<()> {
+    todo!()
 }

@@ -11,6 +11,10 @@ pub(super) fn visit_expression(
     expression: &Expression,
 ) -> Result<()> {
     let result = match expression.as_ref() {
+        ExpressionNode::VariableIntialization {
+            identifier,
+            initializer,
+        } => visit_variable_initialization_expression(visitor, identifier, initializer),
         ExpressionNode::Assignment {
             operator,
             left,
@@ -27,6 +31,14 @@ pub(super) fn visit_expression(
     };
 
     result
+}
+
+fn visit_variable_initialization_expression(
+    visitor: &mut SExpressionVisitor,
+    identifier: &Expression,
+    initializer: &Option<Expression>,
+) -> Result<()> {
+    todo!()
 }
 
 fn visit_assignment_expression(

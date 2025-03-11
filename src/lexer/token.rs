@@ -12,6 +12,9 @@ pub enum TokenType {
     ClosingBrace,
     OpeningParenthesis,
     ClosingParenthesis,
+    Comma,
+    // Keywords,
+    LetKeyword,
     // Identifier
     Identifier,
     // Assignment operators

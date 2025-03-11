@@ -27,6 +27,11 @@ pub(super) fn init_regex_rules() -> Vec<(Regex, TokenType)> {
         Regex::new(r"^\(").expect("Failed to compile regex for opening parenthesis (() symbol");
     let closing_parenthesis =
         Regex::new(r"^\)").expect("Failed to compile regex for closing parenthesis ()) symbol");
+    let comma = Regex::new(r"^,)").expect("Failed to compile regex for comma (,) symbol");
+
+    // Keywords
+    let let_keyword =
+        Regex::new(r"^\blet\b").expect("Failed to compile regex for the 'let' keyword");
 
     // Assignment operators
     let simple_assignment_operator =
@@ -61,6 +66,8 @@ pub(super) fn init_regex_rules() -> Vec<(Regex, TokenType)> {
         (closing_brace, TokenType::ClosingBrace),
         (opening_parenthesis, TokenType::OpeningParenthesis),
         (closing_parenthesis, TokenType::ClosingParenthesis),
+        (comma, TokenType::Comma),
+        (let_keyword, TokenType::LetKeyword),
         (
             simple_assignment_operator,
             TokenType::SimpleAssignmentOperator,

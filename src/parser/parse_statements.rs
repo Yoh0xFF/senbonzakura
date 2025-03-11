@@ -1,6 +1,6 @@
 use std::rc::Rc;
 
-use crate::ast::{Statement, StatementList, StatementNode};
+use crate::ast::{Expression, Statement, StatementList, StatementNode};
 use crate::lexer::TokenType;
 
 use super::{parse_expressions::ParseExpressions, Parser};
@@ -31,12 +31,25 @@ pub(super) trait ParseStatements {
     fn statement_list(&mut self, stop_token_type: Option<TokenType>) -> StatementList;
 
     /**
-     * Satement
+     * Statement
      *  : ExpressionStatement
      *  | BlockStatement
+     *  | EmptyStatement
+     *  | VariableStatement
      *  ;
      */
     fn statement(&mut self) -> Statement;
+
+    /**
+     * VariableDeclarationStatement
+     *  : 'let' VariableInitializationList ';'
+     *
+     * VariableInitializationList
+     *  : VariableInitialization
+     *  | VariableInitializationList ',' VariableInitialization
+     *  ;
+     */
+    fn variable_declaration_statement(&mut self) -> Statement;
 
     /**
      * EmptyStatement
@@ -92,8 +105,27 @@ impl<'a> ParseStatements for Parser<'a> {
         match self.lookahead.token_type {
             TokenType::StatementEnd => return self.empty_statement(),
             TokenType::OpeningBrace => return self.block_statement(),
+            TokenType::LetKeyword => return self.variable_declaration_statement(),
             _ => return self.expression_statement(),
         }
+    }
+
+    fn variable_declaration_statement(&mut self) -> Statement {
+        let mut variables: Vec<Expression> = vec![];
+
+        self.eat(TokenType::LetKeyword);
+        loop {
+            variables.push(self.variable_initialization_expression());
+
+            if !self.is_token(TokenType::Comma) {
+                break;
+            }
+        }
+        self.eat(TokenType::StatementEnd);
+
+        Rc::new(StatementNode::VariableDeclaration {
+            variables: Rc::new(variables),
+        })
     }
 
     fn empty_statement(&mut self) -> Statement {

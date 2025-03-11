@@ -14,6 +14,13 @@ pub(super) trait ParseExpressions {
     fn expression(&mut self) -> Expression;
 
     /**
+     * VariableInitializationExpression
+     *  : Identifier ['=' Initializer]
+     *  ;
+     */
+    fn variable_initialization_expression(&mut self) -> Expression;
+
+    /**
      * AssignmentExpression
      *  : AdditiveExpression
      *  | LeftHandSideExpression ASSIGNMENT_OPERATOR AssignmentExpression
@@ -93,6 +100,24 @@ pub(super) trait ParseExpressions {
 impl<'a> ParseExpressions for Parser<'a> {
     fn expression(&mut self) -> Expression {
         self.assignment_expression()
+    }
+
+    fn variable_initialization_expression(&mut self) -> Expression {
+        let identifier = self.identifier_expression();
+
+        let initializer: Option<Expression> =
+            if self.is_any_of_token(&[TokenType::StatementEnd, TokenType::Comma]) {
+                None
+            } else {
+                self.eat(TokenType::SimpleAssignmentOperator);
+                let initializer = self.assignment_expression();
+                Some(initializer)
+            };
+
+        Rc::new(ExpressionNode::VariableIntialization {
+            identifier,
+            initializer,
+        })
     }
 
     fn assignment_expression(&mut self) -> Expression {

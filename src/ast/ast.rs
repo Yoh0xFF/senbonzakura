@@ -3,17 +3,23 @@ use std::{fmt, rc::Rc};
 pub type Statement = Rc<StatementNode>;
 pub type Expression = Rc<ExpressionNode>;
 pub type StatementList = Rc<Vec<Rc<StatementNode>>>;
+pub type ExpressionList = Rc<Vec<Rc<ExpressionNode>>>;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum StatementNode {
     Program { body: StatementList },
     Block { body: StatementList },
+    VariableDeclaration { variables: ExpressionList },
     Empty,
     Expression { expression: Expression },
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum ExpressionNode {
+    VariableIntialization {
+        identifier: Expression,
+        initializer: Option<Expression>,
+    },
     Assignment {
         operator: AssignmentOperator,
         left: Expression,
