@@ -2,8 +2,8 @@ use std::{fmt, rc::Rc};
 
 pub type Statement = Rc<StatementNode>;
 pub type Expression = Rc<ExpressionNode>;
-pub type StatementList = Rc<Vec<Rc<StatementNode>>>;
-pub type ExpressionList = Rc<Vec<Rc<ExpressionNode>>>;
+pub type StatementList = Vec<Statement>;
+pub type ExpressionList = Vec<Expression>;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum StatementNode {

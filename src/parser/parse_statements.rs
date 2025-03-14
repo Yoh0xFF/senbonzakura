@@ -80,7 +80,7 @@ impl<'a> ParseStatements for Parser<'a> {
         let block = if self.lookahead.token_type != TokenType::ClosingBrace {
             self.statement_list(Some(TokenType::ClosingBrace))
         } else {
-            Rc::new(vec![])
+            vec![]
         };
 
         self.eat(TokenType::ClosingBrace);
@@ -98,7 +98,7 @@ impl<'a> ParseStatements for Parser<'a> {
             statement_list.push(statement);
         }
 
-        Rc::new(statement_list)
+        statement_list
     }
 
     fn statement(&mut self) -> Statement {
@@ -126,7 +126,7 @@ impl<'a> ParseStatements for Parser<'a> {
         self.eat(TokenType::StatementEnd);
 
         Rc::new(StatementNode::VariableDeclaration {
-            variables: Rc::new(variables),
+            variables: variables,
         })
     }
 
