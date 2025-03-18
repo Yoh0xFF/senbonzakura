@@ -173,77 +173,41 @@ impl<'a> ParseExpressions for Parser<'a> {
     }
 
     fn relational_expression(&mut self) -> Expression {
-        let mut left = self.additive_expression();
-
-        while self.lookahead.token_type == TokenType::RelationalOperator {
-            let operator_token = self.eat(TokenType::RelationalOperator);
-            let operator_value = &self.source[operator_token.i..operator_token.j];
-            let operator = match operator_value {
+        self.parse_binary_expression(
+            TokenType::RelationalOperator,
+            |parser| parser.additive_expression(),
+            |op| match op {
                 ">" => BinaryOperator::GreaterThan,
                 ">=" => BinaryOperator::GreaterThanOrEqualTo,
                 "<" => BinaryOperator::LessThan,
                 "<=" => BinaryOperator::LessThanOrEqualTo,
-                _ => panic!("Unknown relational operator {}", operator_value),
-            };
-
-            let right = self.additive_expression();
-
-            left = Rc::new(ExpressionNode::Binary {
-                operator,
-                left,
-                right,
-            });
-        }
-
-        left
+                _ => panic!("Unknown relational operator {}", op),
+            },
+        )
     }
 
     fn additive_expression(&mut self) -> Expression {
-        let mut left = self.factor_expression();
-
-        while self.lookahead.token_type == TokenType::AdditiveOperator {
-            let operator_token = self.eat(TokenType::AdditiveOperator);
-            let operator_value = &self.source[operator_token.i..operator_token.j];
-            let operator = match operator_value {
+        self.parse_binary_expression(
+            TokenType::AdditiveOperator,
+            |parser| parser.factor_expression(),
+            |op| match op {
                 "+" => BinaryOperator::Add,
                 "-" => BinaryOperator::Subtract,
-                _ => panic!("Unknown additive operator {}", operator_value),
-            };
-
-            let right = self.factor_expression();
-
-            left = Rc::new(ExpressionNode::Binary {
-                operator,
-                left,
-                right,
-            });
-        }
-
-        left
+                _ => panic!("Unknown additive operator {}", op),
+            },
+        )
     }
 
     fn factor_expression(&mut self) -> Expression {
-        let mut left = self.primary_expression();
-
-        while self.lookahead.token_type == TokenType::FactorOperator {
-            let operator_token = self.eat(TokenType::FactorOperator);
-            let operator_value = &self.source[operator_token.i..operator_token.j];
-            let operator = match operator_value {
+        self.parse_binary_expression(
+            TokenType::FactorOperator,
+            |parser| parser.primary_expression(),
+            |op| match op {
                 "*" => BinaryOperator::Multiply,
                 "/" => BinaryOperator::Divide,
-                _ => panic!("Unknown factor operator {}", operator_value),
-            };
-
-            let right = self.primary_expression();
-
-            left = Rc::new(ExpressionNode::Binary {
-                operator,
-                left,
-                right,
-            });
-        }
-
-        left
+                _ => panic!("Unknown factor operator {}", op),
+            },
+        )
     }
 
     fn primary_expression(&mut self) -> Expression {

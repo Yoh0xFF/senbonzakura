@@ -1,4 +1,6 @@
-use crate::ast::{Expression, ExpressionNode, Statement};
+use std::rc::Rc;
+
+use crate::ast::{BinaryOperator, Expression, ExpressionNode, Statement};
 use crate::{lexer::TokenType, Lexer, Token};
 
 use super::parse_statements::ParseStatements;
@@ -118,5 +120,37 @@ impl<'a> Parser<'a> {
             TokenType::SimpleAssignmentOperator,
             TokenType::ComplexAssignmentOperator,
         ])
+    }
+
+    /**
+     * Parse generic binary expression
+     */
+    pub(super) fn parse_binary_expression<F, G>(
+        &mut self,
+        token_type: TokenType,
+        operand_parser: F,
+        operator_mapper: G,
+    ) -> Expression
+    where
+        F: Fn(&mut Self) -> Expression,
+        G: Fn(&str) -> BinaryOperator,
+    {
+        let mut left = operand_parser(self);
+
+        while self.lookahead.token_type == token_type {
+            let operator_token = self.eat(token_type);
+            let operator_value = &self.source[operator_token.i..operator_token.j];
+            let operator = operator_mapper(operator_value);
+
+            let right = operand_parser(self);
+
+            left = Rc::new(ExpressionNode::Binary {
+                operator,
+                left,
+                right,
+            });
+        }
+
+        left
     }
 }
