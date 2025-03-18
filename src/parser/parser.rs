@@ -125,15 +125,15 @@ impl<'a> Parser<'a> {
     /**
      * Parse generic binary expression
      */
-    pub(super) fn parse_binary_expression<F, G>(
+    pub(super) fn parse_binary_expression<OperandParserFnType, OperatorMapperFnType>(
         &mut self,
         token_type: TokenType,
-        operand_parser: F,
-        operator_mapper: G,
+        operand_parser: OperandParserFnType,
+        operator_mapper: OperatorMapperFnType,
     ) -> Expression
     where
-        F: Fn(&mut Self) -> Expression,
-        G: Fn(&str) -> BinaryOperator,
+        OperandParserFnType: Fn(&mut Self) -> Expression,
+        OperatorMapperFnType: Fn(&str) -> BinaryOperator,
     {
         let mut left = operand_parser(self);
 
