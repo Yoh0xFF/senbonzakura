@@ -102,5 +102,23 @@ fn visit_conditional_statement(
     consequent: &Statement,
     alternative: &Option<Statement>,
 ) -> Result<()> {
-    todo!()
+    visitor.begin_expr("if")?;
+
+    // Process condition
+    visitor.write_space_or_newline()?;
+    condition.accept(visitor)?;
+
+    // Process consequent
+    visitor.write_space_or_newline()?;
+    consequent.accept(visitor)?;
+
+    // Process alternative if present
+    if let Some(alt) = alternative {
+        visitor.write_space_or_newline()?;
+        alt.accept(visitor)?;
+    }
+
+    visitor.end_expr()?;
+
+    Ok(())
 }
