@@ -15,6 +15,8 @@ pub enum TokenType {
     Comma,
     // Keywords,
     LetKeyword,
+    IfKeyword,
+    ElseKeyword,
     // Identifier
     Identifier,
     // Assignment operators
@@ -23,6 +25,7 @@ pub enum TokenType {
     // Math operators,
     AdditiveOperator,
     FactorOperator,
+    RelationalOperator,
     // Literals
     Number,
     String,

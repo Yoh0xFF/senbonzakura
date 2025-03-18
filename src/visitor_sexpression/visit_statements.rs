@@ -21,6 +21,11 @@ pub(super) fn visit_statement(
         StatementNode::VariableDeclaration { variables } => {
             visit_variable_declaration_statement(visitor, variables)
         }
+        StatementNode::Conditional {
+            condition,
+            consequent,
+            alternative,
+        } => visit_conditional_statement(visitor, condition, consequent, alternative),
     };
 
     result
@@ -89,4 +94,13 @@ fn visit_variable_declaration_statement(
     visitor.end_expr()?;
 
     Ok(())
+}
+
+fn visit_conditional_statement(
+    visitor: &mut SExpressionVisitor,
+    condition: &Expression,
+    consequent: &Statement,
+    alternative: &Option<Statement>,
+) -> Result<()> {
+    todo!()
 }

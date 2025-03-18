@@ -7,11 +7,24 @@ pub type ExpressionList = Vec<Expression>;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum StatementNode {
-    Program { body: StatementList },
-    Block { body: StatementList },
-    VariableDeclaration { variables: ExpressionList },
+    Program {
+        body: StatementList,
+    },
+    Block {
+        body: StatementList,
+    },
     Empty,
-    Expression { expression: Expression },
+    Expression {
+        expression: Expression,
+    },
+    VariableDeclaration {
+        variables: ExpressionList,
+    },
+    Conditional {
+        condition: Expression,
+        consequent: Statement,
+        alternative: Option<Statement>,
+    },
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -62,6 +75,10 @@ pub enum BinaryOperator {
     Subtract,
     Multiply,
     Divide,
+    GreaterThan,
+    GreaterThanOrEqualTo,
+    LessThan,
+    LessThanOrEqualTo,
 }
 
 impl fmt::Display for BinaryOperator {
@@ -71,6 +88,10 @@ impl fmt::Display for BinaryOperator {
             BinaryOperator::Subtract => write!(f, "-"),
             BinaryOperator::Multiply => write!(f, "*"),
             BinaryOperator::Divide => write!(f, "/"),
+            BinaryOperator::GreaterThan => write!(f, ">"),
+            BinaryOperator::GreaterThanOrEqualTo => write!(f, ">="),
+            BinaryOperator::LessThan => write!(f, "<"),
+            BinaryOperator::LessThanOrEqualTo => write!(f, "<="),
         }
     }
 }

@@ -36,6 +36,7 @@ pub(super) trait ParseStatements {
      *  | BlockStatement
      *  | EmptyStatement
      *  | VariableStatement
+     *  | ConditionalStatement
      *  ;
      */
     fn statement(&mut self) -> Statement;
@@ -50,6 +51,12 @@ pub(super) trait ParseStatements {
      *  ;
      */
     fn variable_declaration_statement(&mut self) -> Statement;
+
+    /**
+     * ConditionalStatement
+     *  : if '(' Expression ')' Statement [else Statement]
+     */
+    fn if_statement(&mut self) -> Statement;
 
     /**
      * EmptyStatement
@@ -106,6 +113,7 @@ impl<'a> ParseStatements for Parser<'a> {
             TokenType::StatementEnd => return self.empty_statement(),
             TokenType::OpeningBrace => return self.block_statement(),
             TokenType::LetKeyword => return self.variable_declaration_statement(),
+            TokenType::IfKeyword => return self.if_statement(),
             _ => return self.expression_statement(),
         }
     }
@@ -127,6 +135,29 @@ impl<'a> ParseStatements for Parser<'a> {
 
         Rc::new(StatementNode::VariableDeclaration {
             variables: variables,
+        })
+    }
+
+    fn if_statement(&mut self) -> Statement {
+        self.eat(TokenType::IfKeyword);
+
+        self.eat(TokenType::OpeningParenthesis);
+        let condition = self.expression();
+        self.eat(TokenType::ClosingParenthesis);
+
+        let consequent = self.statement();
+
+        let alternative = if self.is_token(TokenType::ElseKeyword) {
+            self.eat(TokenType::ElseKeyword);
+            Some(self.statement())
+        } else {
+            None
+        };
+
+        Rc::new(StatementNode::Conditional {
+            condition,
+            consequent,
+            alternative,
         })
     }
 

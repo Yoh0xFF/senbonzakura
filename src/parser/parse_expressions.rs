@@ -22,7 +22,7 @@ pub(super) trait ParseExpressions {
 
     /**
      * AssignmentExpression
-     *  : AdditiveExpression
+     *  : RelationalExpression
      *  | LeftHandSideExpression ASSIGNMENT_OPERATOR AssignmentExpression
      *  ;
      */
@@ -41,6 +41,14 @@ pub(super) trait ParseExpressions {
      *  ;
      */
     fn identifier_expression(&mut self) -> Expression;
+
+    /**
+     * RelationalExpression
+     *  : AdditiveExpression
+     *  | AdditiveExpression RELATIONAL_OPERATOR AdditiveExpression
+     *  ;
+     */
+    fn relational_expression(&mut self) -> Expression;
 
     /**
      * AdditiveExpression
@@ -121,7 +129,7 @@ impl<'a> ParseExpressions for Parser<'a> {
     }
 
     fn assignment_expression(&mut self) -> Expression {
-        let left = self.additive_expression();
+        let left = self.relational_expression();
 
         if !self.is_assignment_operator_token() {
             return left;
@@ -162,6 +170,32 @@ impl<'a> ParseExpressions for Parser<'a> {
         let identifier_value = &self.source[identifier_token.i..identifier_token.j];
 
         Rc::new(ExpressionNode::Identifier(String::from(identifier_value)))
+    }
+
+    fn relational_expression(&mut self) -> Expression {
+        let mut left = self.additive_expression();
+
+        while self.lookahead.token_type == TokenType::RelationalOperator {
+            let operator_token = self.eat(TokenType::RelationalOperator);
+            let operator_value = &self.source[operator_token.i..operator_token.j];
+            let operator = match operator_value {
+                ">" => BinaryOperator::GreaterThan,
+                ">=" => BinaryOperator::GreaterThanOrEqualTo,
+                "<" => BinaryOperator::LessThan,
+                "<=" => BinaryOperator::LessThanOrEqualTo,
+                _ => panic!("Unknown relational operator {}", operator_value),
+            };
+
+            let right = self.additive_expression();
+
+            left = Rc::new(ExpressionNode::Binary {
+                operator,
+                left,
+                right,
+            });
+        }
+
+        left
     }
 
     fn additive_expression(&mut self) -> Expression {

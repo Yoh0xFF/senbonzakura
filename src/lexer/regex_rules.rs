@@ -32,6 +32,9 @@ pub(super) fn init_regex_rules() -> Vec<(Regex, TokenType)> {
     // Keywords
     let let_keyword =
         Regex::new(r"^\blet\b").expect("Failed to compile regex for the 'let' keyword");
+    let if_keyword = Regex::new(r"^\bif\b").expect("Failed to compile regex for the 'if' keyword");
+    let else_keyword =
+        Regex::new(r"^\belse\b").expect("Failed to compile regex for the 'else' keyword");
 
     // Assignment operators
     let simple_assignment_operator =
@@ -44,6 +47,8 @@ pub(super) fn init_regex_rules() -> Vec<(Regex, TokenType)> {
         Regex::new(r"^[+\-]").expect("Failed to compile regex for additive operators (+, -)");
     let factor_operator =
         Regex::new(r"^[*\/]").expect("Failed to compile regex for factor operators (*, /");
+    let relational_operator = Regex::new(r"^[><]=?")
+        .expect("Failed to compile regex for relational operators (>, >=, <, <=)");
 
     // Numbers
     let number = Regex::new(r"^\d+").expect("Failed to compile regex for number literal");
@@ -68,6 +73,8 @@ pub(super) fn init_regex_rules() -> Vec<(Regex, TokenType)> {
         (closing_parenthesis, TokenType::ClosingParenthesis),
         (comma, TokenType::Comma),
         (let_keyword, TokenType::LetKeyword),
+        (if_keyword, TokenType::IfKeyword),
+        (else_keyword, TokenType::ElseKeyword),
         (
             simple_assignment_operator,
             TokenType::SimpleAssignmentOperator,
@@ -78,6 +85,7 @@ pub(super) fn init_regex_rules() -> Vec<(Regex, TokenType)> {
         ),
         (additive_operator, TokenType::AdditiveOperator),
         (factor_operator, TokenType::FactorOperator),
+        (relational_operator, TokenType::RelationalOperator),
         (number, TokenType::Number),
         (string_double_quotes, TokenType::String),
         (string_single_quotes, TokenType::String),
