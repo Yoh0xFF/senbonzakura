@@ -1,5 +1,3 @@
-use std::rc::Rc;
-
 use crate::ast::{BinaryOperator, Expression, ExpressionNode, Statement};
 use crate::{lexer::TokenType, Lexer, Token};
 
@@ -144,7 +142,7 @@ impl<'a> Parser<'a> {
 
             let right = operand_parser(self);
 
-            left = Rc::new(ExpressionNode::Binary {
+            left = Box::new(ExpressionNode::Binary {
                 operator,
                 left,
                 right,

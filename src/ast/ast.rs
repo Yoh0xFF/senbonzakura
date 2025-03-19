@@ -1,7 +1,7 @@
-use std::{fmt, rc::Rc};
+use std::fmt;
 
-pub type Statement = Rc<StatementNode>;
-pub type Expression = Rc<ExpressionNode>;
+pub type Statement = Box<StatementNode>;
+pub type Expression = Box<ExpressionNode>;
 pub type StatementList = Vec<Statement>;
 pub type ExpressionList = Vec<Expression>;
 

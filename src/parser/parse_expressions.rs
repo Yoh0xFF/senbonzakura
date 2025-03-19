@@ -1,5 +1,3 @@
-use std::rc::Rc;
-
 use crate::ast::{AssignmentOperator, BinaryOperator, Expression, ExpressionNode};
 use crate::lexer::TokenType;
 
@@ -122,7 +120,7 @@ impl<'a> ParseExpressions for Parser<'a> {
                 Some(initializer)
             };
 
-        Rc::new(ExpressionNode::VariableIntialization {
+        Box::new(ExpressionNode::VariableIntialization {
             identifier,
             initializer,
         })
@@ -154,7 +152,7 @@ impl<'a> ParseExpressions for Parser<'a> {
             panic!("Invalid left-hand side in the assignment expression");
         }
 
-        Rc::new(ExpressionNode::Assignment {
+        Box::new(ExpressionNode::Assignment {
             operator: assignment_operator,
             left: left,
             right: self.assignment_expression(),
@@ -169,7 +167,7 @@ impl<'a> ParseExpressions for Parser<'a> {
         let identifier_token = self.eat(TokenType::Identifier);
         let identifier_value = &self.source[identifier_token.i..identifier_token.j];
 
-        Rc::new(ExpressionNode::Identifier(String::from(identifier_value)))
+        Box::new(ExpressionNode::Identifier(String::from(identifier_value)))
     }
 
     fn relational_expression(&mut self) -> Expression {
@@ -241,7 +239,7 @@ impl<'a> ParseExpressions for Parser<'a> {
         let token = self.eat(TokenType::String);
         let token_value = &self.source[token.i + 1..token.j - 1];
 
-        Rc::new(ExpressionNode::StringLiteral(String::from(token_value)))
+        Box::new(ExpressionNode::StringLiteral(String::from(token_value)))
     }
 
     fn numeric_literal_expression(&mut self) -> Expression {
@@ -249,6 +247,6 @@ impl<'a> ParseExpressions for Parser<'a> {
         let token_value = &self.source[token.i..token.j];
         let token_value = token_value.trim().parse().unwrap();
 
-        Rc::new(ExpressionNode::NumericLiteral(token_value))
+        Box::new(ExpressionNode::NumericLiteral(token_value))
     }
 }
