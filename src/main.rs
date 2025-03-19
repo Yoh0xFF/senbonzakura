@@ -1,4 +1,4 @@
-use ast::StatementNode;
+use ast::Statement;
 use lexer::{Lexer, Token};
 use parser::Parser;
 use visitor_sexpression::ToSExpression;

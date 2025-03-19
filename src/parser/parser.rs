@@ -1,4 +1,4 @@
-use crate::ast::{BinaryOperator, ExpressionRef, ExpressionNode, StatementRef};
+use crate::ast::{BinaryOperator, ExpressionRef, Expression, StatementRef};
 use crate::{lexer::TokenType, Lexer, Token};
 
 use super::parse_statements::ParseStatements;
@@ -94,7 +94,7 @@ impl<'a> Parser<'a> {
     #[allow(dead_code)]
     pub(super) fn is_valid_assignment_target(&mut self, expression: &ExpressionRef) -> bool {
         match expression.as_ref() {
-            ExpressionNode::Identifier(_) => return true,
+            Expression::Identifier(_) => return true,
             _ => {
                 return false;
             }
@@ -142,7 +142,7 @@ impl<'a> Parser<'a> {
 
             let right = operand_parser(self);
 
-            left = Box::new(ExpressionNode::Binary {
+            left = Box::new(Expression::Binary {
                 operator,
                 left,
                 right,

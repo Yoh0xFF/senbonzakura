@@ -1,4 +1,7 @@
-use crate::ast::{AstVisitor, ExpressionRef, StatementRef};
+use crate::{
+    ast::{AstVisitor, Expression},
+    Statement,
+};
 use anyhow::Result;
 use std::fmt::Write;
 
@@ -88,11 +91,11 @@ impl SExpressionVisitor {
 impl AstVisitor for SExpressionVisitor {
     type Output = ();
 
-    fn visit_statement(&mut self, statement: &StatementRef) -> Result<Self::Output> {
+    fn visit_statement(&mut self, statement: &Statement) -> Result<Self::Output> {
         visit_statement(self, statement)
     }
 
-    fn visit_expression(&mut self, expression: &ExpressionRef) -> Result<Self::Output> {
+    fn visit_expression(&mut self, expression: &Expression) -> Result<Self::Output> {
         visit_expression(self, expression)
     }
 }

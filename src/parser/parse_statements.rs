@@ -1,4 +1,4 @@
-use crate::ast::{ExpressionRef, StatementNode, StatementRef, StatementRefList};
+use crate::ast::{ExpressionRef, Statement, StatementRef, StatementRefList};
 use crate::lexer::TokenType;
 
 use super::{parse_expressions::ParseExpressions, Parser};
@@ -74,7 +74,7 @@ pub(super) trait ParseStatements {
 impl<'a> ParseStatements for Parser<'a> {
     fn program(&mut self) -> StatementRef {
         let statement_list = self.statement_list(None);
-        Box::new(StatementNode::Program {
+        Box::new(Statement::Program {
             body: statement_list,
         })
     }
@@ -90,7 +90,7 @@ impl<'a> ParseStatements for Parser<'a> {
 
         self.eat(TokenType::ClosingBrace);
 
-        Box::new(StatementNode::Block { body: block })
+        Box::new(Statement::Block { body: block })
     }
 
     fn statement_list(&mut self, stop_token_type: Option<TokenType>) -> StatementRefList {
@@ -131,7 +131,7 @@ impl<'a> ParseStatements for Parser<'a> {
         }
         self.eat(TokenType::StatementEnd);
 
-        Box::new(StatementNode::VariableDeclaration {
+        Box::new(Statement::VariableDeclaration {
             variables: variables,
         })
     }
@@ -152,7 +152,7 @@ impl<'a> ParseStatements for Parser<'a> {
             None
         };
 
-        Box::new(StatementNode::Conditional {
+        Box::new(Statement::Conditional {
             condition,
             consequent,
             alternative,
@@ -162,7 +162,7 @@ impl<'a> ParseStatements for Parser<'a> {
     fn empty_statement(&mut self) -> StatementRef {
         self.eat(TokenType::StatementEnd);
 
-        Box::new(StatementNode::Empty)
+        Box::new(Statement::Empty)
     }
 
     fn expression_statement(&mut self) -> StatementRef {
@@ -170,6 +170,6 @@ impl<'a> ParseStatements for Parser<'a> {
 
         self.eat(TokenType::StatementEnd);
 
-        Box::new(StatementNode::Expression { expression })
+        Box::new(Statement::Expression { expression })
     }
 }

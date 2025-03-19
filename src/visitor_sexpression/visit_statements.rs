@@ -3,7 +3,7 @@ use crate::{
         ExpressionDispatcher, ExpressionRef, ExpressionRefList, StatementDispatcher, StatementRef,
         StatementRefList,
     },
-    StatementNode,
+    Statement,
 };
 
 use super::SExpressionVisitor;
@@ -11,17 +11,17 @@ use anyhow::Result;
 
 pub(super) fn visit_statement(
     visitor: &mut SExpressionVisitor,
-    statement: &StatementRef,
+    statement: &Statement,
 ) -> Result<()> {
-    let result = match statement.as_ref() {
-        StatementNode::Program { body } => visit_program_statement(visitor, body),
-        StatementNode::Block { body } => visit_block_statement(visitor, body),
-        StatementNode::Empty => visit_empty_statement(visitor),
-        StatementNode::Expression { expression } => visit_expression_statement(visitor, expression),
-        StatementNode::VariableDeclaration { variables } => {
+    let result = match statement {
+        Statement::Program { body } => visit_program_statement(visitor, body),
+        Statement::Block { body } => visit_block_statement(visitor, body),
+        Statement::Empty => visit_empty_statement(visitor),
+        Statement::Expression { expression } => visit_expression_statement(visitor, expression),
+        Statement::VariableDeclaration { variables } => {
             visit_variable_declaration_statement(visitor, variables)
         }
-        StatementNode::Conditional {
+        Statement::Conditional {
             condition,
             consequent,
             alternative,

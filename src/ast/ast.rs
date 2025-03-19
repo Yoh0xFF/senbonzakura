@@ -1,12 +1,12 @@
 use std::fmt;
 
-pub type StatementRef = Box<StatementNode>;
-pub type ExpressionRef = Box<ExpressionNode>;
+pub type StatementRef = Box<Statement>;
+pub type ExpressionRef = Box<Expression>;
 pub type StatementRefList = Vec<StatementRef>;
 pub type ExpressionRefList = Vec<ExpressionRef>;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub enum StatementNode {
+pub enum Statement {
     Program {
         body: StatementRefList,
     },
@@ -28,7 +28,7 @@ pub enum StatementNode {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub enum ExpressionNode {
+pub enum Expression {
     VariableIntialization {
         identifier: ExpressionRef,
         initializer: Option<ExpressionRef>,

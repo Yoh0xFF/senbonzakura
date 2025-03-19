@@ -1,6 +1,6 @@
 use anyhow::Result;
 
-use super::{ExpressionRef, StatementRef};
+use super::{Expression, Statement};
 
 /**
  * A trait for any compiler pass that processes the AST
@@ -14,12 +14,12 @@ pub trait AstVisitor {
     /**
      * Process a Statement node
      */
-    fn visit_statement(&mut self, statement: &StatementRef) -> Result<Self::Output>;
+    fn visit_statement(&mut self, statement: &Statement) -> Result<Self::Output>;
 
     /**
      * Process an Expression node
      */
-    fn visit_expression(&mut self, expression: &ExpressionRef) -> Result<Self::Output>;
+    fn visit_expression(&mut self, expression: &Expression) -> Result<Self::Output>;
 }
 
 /**
@@ -45,7 +45,7 @@ pub trait ExpressionDispatcher {
 /**
  * Implementation for Statement
  */
-impl StatementDispatcher for StatementRef {
+impl StatementDispatcher for Statement {
     fn accept<V: AstVisitor>(&self, visitor: &mut V) -> Result<V::Output> {
         visitor.visit_statement(self)
     }
@@ -54,7 +54,7 @@ impl StatementDispatcher for StatementRef {
 /**
  * Implementation for Expression
  */
-impl ExpressionDispatcher for ExpressionRef {
+impl ExpressionDispatcher for Expression {
     fn accept<V: AstVisitor>(&self, visitor: &mut V) -> Result<V::Output> {
         visitor.visit_expression(self)
     }

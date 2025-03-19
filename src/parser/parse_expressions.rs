@@ -1,4 +1,4 @@
-use crate::ast::{AssignmentOperator, BinaryOperator, ExpressionNode, ExpressionRef};
+use crate::ast::{AssignmentOperator, BinaryOperator, Expression, ExpressionRef};
 use crate::lexer::TokenType;
 
 use super::Parser;
@@ -120,7 +120,7 @@ impl<'a> ParseExpressions for Parser<'a> {
                 Some(initializer)
             };
 
-        Box::new(ExpressionNode::VariableIntialization {
+        Box::new(Expression::VariableIntialization {
             identifier,
             initializer,
         })
@@ -152,7 +152,7 @@ impl<'a> ParseExpressions for Parser<'a> {
             panic!("Invalid left-hand side in the assignment expression");
         }
 
-        Box::new(ExpressionNode::Assignment {
+        Box::new(Expression::Assignment {
             operator: assignment_operator,
             left: left,
             right: self.assignment_expression(),
@@ -167,7 +167,7 @@ impl<'a> ParseExpressions for Parser<'a> {
         let identifier_token = self.eat(TokenType::Identifier);
         let identifier_value = &self.source[identifier_token.i..identifier_token.j];
 
-        Box::new(ExpressionNode::Identifier(String::from(identifier_value)))
+        Box::new(Expression::Identifier(String::from(identifier_value)))
     }
 
     fn relational_expression(&mut self) -> ExpressionRef {
@@ -239,7 +239,7 @@ impl<'a> ParseExpressions for Parser<'a> {
         let token = self.eat(TokenType::String);
         let token_value = &self.source[token.i + 1..token.j - 1];
 
-        Box::new(ExpressionNode::StringLiteral(String::from(token_value)))
+        Box::new(Expression::StringLiteral(String::from(token_value)))
     }
 
     fn numeric_literal_expression(&mut self) -> ExpressionRef {
@@ -247,6 +247,6 @@ impl<'a> ParseExpressions for Parser<'a> {
         let token_value = &self.source[token.i..token.j];
         let token_value = token_value.trim().parse().unwrap();
 
-        Box::new(ExpressionNode::NumericLiteral(token_value))
+        Box::new(Expression::NumericLiteral(token_value))
     }
 }
