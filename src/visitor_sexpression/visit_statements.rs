@@ -1,7 +1,7 @@
 use crate::{
     ast::{
-        Expression, ExpressionDispatcher, ExpressionList, Statement, StatementDispatcher,
-        StatementList,
+        ExpressionDispatcher, ExpressionRef, ExpressionRefList, StatementDispatcher, StatementRef,
+        StatementRefList,
     },
     StatementNode,
 };
@@ -11,7 +11,7 @@ use anyhow::Result;
 
 pub(super) fn visit_statement(
     visitor: &mut SExpressionVisitor,
-    statement: &Statement,
+    statement: &StatementRef,
 ) -> Result<()> {
     let result = match statement.as_ref() {
         StatementNode::Program { body } => visit_program_statement(visitor, body),
@@ -31,7 +31,10 @@ pub(super) fn visit_statement(
     result
 }
 
-fn visit_program_statement(visitor: &mut SExpressionVisitor, body: &StatementList) -> Result<()> {
+fn visit_program_statement(
+    visitor: &mut SExpressionVisitor,
+    body: &StatementRefList,
+) -> Result<()> {
     visitor.begin_expr("program")?;
 
     if !body.is_empty() {
@@ -46,7 +49,7 @@ fn visit_program_statement(visitor: &mut SExpressionVisitor, body: &StatementLis
     Ok(())
 }
 
-fn visit_block_statement(visitor: &mut SExpressionVisitor, body: &StatementList) -> Result<()> {
+fn visit_block_statement(visitor: &mut SExpressionVisitor, body: &StatementRefList) -> Result<()> {
     visitor.begin_expr("block")?;
 
     if !body.is_empty() {
@@ -70,7 +73,7 @@ fn visit_empty_statement(visitor: &mut SExpressionVisitor) -> Result<()> {
 
 fn visit_expression_statement(
     visitor: &mut SExpressionVisitor,
-    expression: &Expression,
+    expression: &ExpressionRef,
 ) -> Result<()> {
     visitor.begin_expr("expr")?;
     visitor.write_space_or_newline()?;
@@ -82,7 +85,7 @@ fn visit_expression_statement(
 
 fn visit_variable_declaration_statement(
     visitor: &mut SExpressionVisitor,
-    variables: &ExpressionList,
+    variables: &ExpressionRefList,
 ) -> Result<()> {
     visitor.begin_expr("let")?;
 
@@ -98,9 +101,9 @@ fn visit_variable_declaration_statement(
 
 fn visit_conditional_statement(
     visitor: &mut SExpressionVisitor,
-    condition: &Expression,
-    consequent: &Statement,
-    alternative: &Option<Statement>,
+    condition: &ExpressionRef,
+    consequent: &StatementRef,
+    alternative: &Option<StatementRef>,
 ) -> Result<()> {
     visitor.begin_expr("if")?;
 

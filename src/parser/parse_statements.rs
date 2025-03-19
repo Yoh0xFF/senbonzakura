@@ -1,4 +1,4 @@
-use crate::ast::{Expression, Statement, StatementList, StatementNode};
+use crate::ast::{ExpressionRef, StatementNode, StatementRef, StatementRefList};
 use crate::lexer::TokenType;
 
 use super::{parse_expressions::ParseExpressions, Parser};
@@ -11,14 +11,14 @@ pub(super) trait ParseStatements {
      *  : StatementList
      *  ;
      */
-    fn program(&mut self) -> Statement;
+    fn program(&mut self) -> StatementRef;
 
     /**
      * BlockStatement
      *  : '{' OptStatementList '}'
      *  ;
      */
-    fn block_statement(&mut self) -> Statement;
+    fn block_statement(&mut self) -> StatementRef;
 
     /**
      * StatementList
@@ -26,7 +26,7 @@ pub(super) trait ParseStatements {
      *  | StatementList Statement
      *  ;
      */
-    fn statement_list(&mut self, stop_token_type: Option<TokenType>) -> StatementList;
+    fn statement_list(&mut self, stop_token_type: Option<TokenType>) -> StatementRefList;
 
     /**
      * Statement
@@ -37,7 +37,7 @@ pub(super) trait ParseStatements {
      *  | ConditionalStatement
      *  ;
      */
-    fn statement(&mut self) -> Statement;
+    fn statement(&mut self) -> StatementRef;
 
     /**
      * VariableDeclarationStatement
@@ -48,38 +48,38 @@ pub(super) trait ParseStatements {
      *  | VariableInitializationList ',' VariableInitialization
      *  ;
      */
-    fn variable_declaration_statement(&mut self) -> Statement;
+    fn variable_declaration_statement(&mut self) -> StatementRef;
 
     /**
      * ConditionalStatement
      *  : if '(' Expression ')' Statement [else Statement]
      */
-    fn if_statement(&mut self) -> Statement;
+    fn if_statement(&mut self) -> StatementRef;
 
     /**
      * EmptyStatement
      *  : ';'
      *  ;
      */
-    fn empty_statement(&mut self) -> Statement;
+    fn empty_statement(&mut self) -> StatementRef;
 
     /**
      * ExpressionStatement
      *  : Expression ';'
      *  ;
      */
-    fn expression_statement(&mut self) -> Statement;
+    fn expression_statement(&mut self) -> StatementRef;
 }
 
 impl<'a> ParseStatements for Parser<'a> {
-    fn program(&mut self) -> Statement {
+    fn program(&mut self) -> StatementRef {
         let statement_list = self.statement_list(None);
         Box::new(StatementNode::Program {
             body: statement_list,
         })
     }
 
-    fn block_statement(&mut self) -> Statement {
+    fn block_statement(&mut self) -> StatementRef {
         self.eat(TokenType::OpeningBrace);
 
         let block = if self.lookahead.token_type != TokenType::ClosingBrace {
@@ -93,8 +93,8 @@ impl<'a> ParseStatements for Parser<'a> {
         Box::new(StatementNode::Block { body: block })
     }
 
-    fn statement_list(&mut self, stop_token_type: Option<TokenType>) -> StatementList {
-        let mut statement_list: Vec<Statement> = vec![];
+    fn statement_list(&mut self, stop_token_type: Option<TokenType>) -> StatementRefList {
+        let mut statement_list: Vec<StatementRef> = vec![];
 
         while self.lookahead.token_type != TokenType::End
             && self.lookahead.token_type != stop_token_type.unwrap_or(TokenType::End)
@@ -106,7 +106,7 @@ impl<'a> ParseStatements for Parser<'a> {
         statement_list
     }
 
-    fn statement(&mut self) -> Statement {
+    fn statement(&mut self) -> StatementRef {
         match self.lookahead.token_type {
             TokenType::StatementEnd => return self.empty_statement(),
             TokenType::OpeningBrace => return self.block_statement(),
@@ -116,8 +116,8 @@ impl<'a> ParseStatements for Parser<'a> {
         }
     }
 
-    fn variable_declaration_statement(&mut self) -> Statement {
-        let mut variables: Vec<Expression> = vec![];
+    fn variable_declaration_statement(&mut self) -> StatementRef {
+        let mut variables: Vec<ExpressionRef> = vec![];
 
         self.eat(TokenType::LetKeyword);
         loop {
@@ -136,7 +136,7 @@ impl<'a> ParseStatements for Parser<'a> {
         })
     }
 
-    fn if_statement(&mut self) -> Statement {
+    fn if_statement(&mut self) -> StatementRef {
         self.eat(TokenType::IfKeyword);
 
         self.eat(TokenType::OpeningParenthesis);
@@ -159,13 +159,13 @@ impl<'a> ParseStatements for Parser<'a> {
         })
     }
 
-    fn empty_statement(&mut self) -> Statement {
+    fn empty_statement(&mut self) -> StatementRef {
         self.eat(TokenType::StatementEnd);
 
         Box::new(StatementNode::Empty)
     }
 
-    fn expression_statement(&mut self) -> Statement {
+    fn expression_statement(&mut self) -> StatementRef {
         let expression = self.expression();
 
         self.eat(TokenType::StatementEnd);

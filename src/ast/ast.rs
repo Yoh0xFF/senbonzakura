@@ -1,47 +1,47 @@
 use std::fmt;
 
-pub type Statement = Box<StatementNode>;
-pub type Expression = Box<ExpressionNode>;
-pub type StatementList = Vec<Statement>;
-pub type ExpressionList = Vec<Expression>;
+pub type StatementRef = Box<StatementNode>;
+pub type ExpressionRef = Box<ExpressionNode>;
+pub type StatementRefList = Vec<StatementRef>;
+pub type ExpressionRefList = Vec<ExpressionRef>;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum StatementNode {
     Program {
-        body: StatementList,
+        body: StatementRefList,
     },
     Block {
-        body: StatementList,
+        body: StatementRefList,
     },
     Empty,
     Expression {
-        expression: Expression,
+        expression: ExpressionRef,
     },
     VariableDeclaration {
-        variables: ExpressionList,
+        variables: ExpressionRefList,
     },
     Conditional {
-        condition: Expression,
-        consequent: Statement,
-        alternative: Option<Statement>,
+        condition: ExpressionRef,
+        consequent: StatementRef,
+        alternative: Option<StatementRef>,
     },
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum ExpressionNode {
     VariableIntialization {
-        identifier: Expression,
-        initializer: Option<Expression>,
+        identifier: ExpressionRef,
+        initializer: Option<ExpressionRef>,
     },
     Assignment {
         operator: AssignmentOperator,
-        left: Expression,
-        right: Expression,
+        left: ExpressionRef,
+        right: ExpressionRef,
     },
     Binary {
         operator: BinaryOperator,
-        left: Expression,
-        right: Expression,
+        left: ExpressionRef,
+        right: ExpressionRef,
     },
     StringLiteral(String),
     NumericLiteral(i32),

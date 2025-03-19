@@ -1,4 +1,4 @@
-use crate::ast::{BinaryOperator, Expression, ExpressionNode, Statement};
+use crate::ast::{BinaryOperator, ExpressionRef, ExpressionNode, StatementRef};
 use crate::{lexer::TokenType, Lexer, Token};
 
 use super::parse_statements::ParseStatements;
@@ -28,7 +28,7 @@ impl<'a> Parser<'a> {
     /**
      * Parses a string into an AST
      */
-    pub fn parse(&mut self) -> Statement {
+    pub fn parse(&mut self) -> StatementRef {
         self.program()
     }
 
@@ -92,7 +92,7 @@ impl<'a> Parser<'a> {
      * Check if the expression is valid assignment target
      */
     #[allow(dead_code)]
-    pub(super) fn is_valid_assignment_target(&mut self, expression: &Expression) -> bool {
+    pub(super) fn is_valid_assignment_target(&mut self, expression: &ExpressionRef) -> bool {
         match expression.as_ref() {
             ExpressionNode::Identifier(_) => return true,
             _ => {
@@ -128,9 +128,9 @@ impl<'a> Parser<'a> {
         token_type: TokenType,
         operand_parser: OperandParserFnType,
         operator_mapper: OperatorMapperFnType,
-    ) -> Expression
+    ) -> ExpressionRef
     where
-        OperandParserFnType: Fn(&mut Self) -> Expression,
+        OperandParserFnType: Fn(&mut Self) -> ExpressionRef,
         OperatorMapperFnType: Fn(&str) -> BinaryOperator,
     {
         let mut left = operand_parser(self);

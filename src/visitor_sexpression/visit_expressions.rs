@@ -1,5 +1,5 @@
 use crate::ast::{
-    AssignmentOperator, BinaryOperator, Expression, ExpressionDispatcher, ExpressionNode,
+    AssignmentOperator, BinaryOperator, ExpressionRef, ExpressionDispatcher, ExpressionNode,
 };
 
 use super::SExpressionVisitor;
@@ -8,7 +8,7 @@ use std::fmt::Write;
 
 pub(super) fn visit_expression(
     visitor: &mut SExpressionVisitor,
-    expression: &Expression,
+    expression: &ExpressionRef,
 ) -> Result<()> {
     let result = match expression.as_ref() {
         ExpressionNode::VariableIntialization {
@@ -35,8 +35,8 @@ pub(super) fn visit_expression(
 
 fn visit_variable_initialization_expression(
     visitor: &mut SExpressionVisitor,
-    identifier: &Expression,
-    initializer: &Option<Expression>,
+    identifier: &ExpressionRef,
+    initializer: &Option<ExpressionRef>,
 ) -> Result<()> {
     visitor.begin_expr("init")?;
 
@@ -58,8 +58,8 @@ fn visit_variable_initialization_expression(
 fn visit_assignment_expression(
     visitor: &mut SExpressionVisitor,
     operator: &AssignmentOperator,
-    left: &Expression,
-    right: &Expression,
+    left: &ExpressionRef,
+    right: &ExpressionRef,
 ) -> Result<()> {
     visitor.begin_expr("assign")?;
 
@@ -86,8 +86,8 @@ fn visit_assignment_expression(
 fn visit_binary_expression(
     visitor: &mut SExpressionVisitor,
     operator: &BinaryOperator,
-    left: &Expression,
-    right: &Expression,
+    left: &ExpressionRef,
+    right: &ExpressionRef,
 ) -> Result<()> {
     visitor.begin_expr("binary")?;
 

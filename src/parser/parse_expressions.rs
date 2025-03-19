@@ -1,4 +1,4 @@
-use crate::ast::{AssignmentOperator, BinaryOperator, Expression, ExpressionNode};
+use crate::ast::{AssignmentOperator, BinaryOperator, ExpressionNode, ExpressionRef};
 use crate::lexer::TokenType;
 
 use super::Parser;
@@ -9,14 +9,14 @@ pub(super) trait ParseExpressions {
      *  : Literal
      *  ;
      */
-    fn expression(&mut self) -> Expression;
+    fn expression(&mut self) -> ExpressionRef;
 
     /**
      * VariableInitializationExpression
      *  : Identifier ['=' Initializer]
      *  ;
      */
-    fn variable_initialization_expression(&mut self) -> Expression;
+    fn variable_initialization_expression(&mut self) -> ExpressionRef;
 
     /**
      * AssignmentExpression
@@ -24,21 +24,21 @@ pub(super) trait ParseExpressions {
      *  | LeftHandSideExpression ASSIGNMENT_OPERATOR AssignmentExpression
      *  ;
      */
-    fn assignment_expression(&mut self) -> Expression;
+    fn assignment_expression(&mut self) -> ExpressionRef;
 
     /**
      * LeftHandSideExpression
      *  : IdentifierExpression
      *  ;
      */
-    fn left_hand_side_expression(&mut self) -> Expression;
+    fn left_hand_side_expression(&mut self) -> ExpressionRef;
 
     /**
      * IdentifierExpression
      *  : IDENTIFIER
      *  ;
      */
-    fn identifier_expression(&mut self) -> Expression;
+    fn identifier_expression(&mut self) -> ExpressionRef;
 
     /**
      * RelationalExpression
@@ -46,7 +46,7 @@ pub(super) trait ParseExpressions {
      *  | AdditiveExpression RELATIONAL_OPERATOR AdditiveExpression
      *  ;
      */
-    fn relational_expression(&mut self) -> Expression;
+    fn relational_expression(&mut self) -> ExpressionRef;
 
     /**
      * AdditiveExpression
@@ -54,7 +54,7 @@ pub(super) trait ParseExpressions {
      *  | AdditiveExpression ADDITIVE_OPERATOR FactorExpression
      *  ;
      */
-    fn additive_expression(&mut self) -> Expression;
+    fn additive_expression(&mut self) -> ExpressionRef;
 
     /**
      * FactorExpression
@@ -62,7 +62,7 @@ pub(super) trait ParseExpressions {
      *  | FactorExpression FACTOR_OPERATOR PrimaryExpression
      *  ;
      */
-    fn factor_expression(&mut self) -> Expression;
+    fn factor_expression(&mut self) -> ExpressionRef;
 
     /**
      * PrimaryExpression
@@ -71,14 +71,14 @@ pub(super) trait ParseExpressions {
      *  | LeftHandSideExpression
      *  ;
      */
-    fn primary_expression(&mut self) -> Expression;
+    fn primary_expression(&mut self) -> ExpressionRef;
 
     /**
      * GroupExpression
      *  : '(' Expression ')'
      *  ;
      */
-    fn group_expression(&mut self) -> Expression;
+    fn group_expression(&mut self) -> ExpressionRef;
 
     /**
      * Literal
@@ -86,32 +86,32 @@ pub(super) trait ParseExpressions {
      *  | StringLiteral
      *  ;
      */
-    fn literal_expression(&mut self) -> Expression;
+    fn literal_expression(&mut self) -> ExpressionRef;
 
     /**
      * StringLiteral
      *  : STRING
      *  ;
      */
-    fn string_literal_expression(&mut self) -> Expression;
+    fn string_literal_expression(&mut self) -> ExpressionRef;
 
     /**
      * NumericLiteral
      *  : NUMBER
      *  ;
      */
-    fn numeric_literal_expression(&mut self) -> Expression;
+    fn numeric_literal_expression(&mut self) -> ExpressionRef;
 }
 
 impl<'a> ParseExpressions for Parser<'a> {
-    fn expression(&mut self) -> Expression {
+    fn expression(&mut self) -> ExpressionRef {
         self.assignment_expression()
     }
 
-    fn variable_initialization_expression(&mut self) -> Expression {
+    fn variable_initialization_expression(&mut self) -> ExpressionRef {
         let identifier = self.identifier_expression();
 
-        let initializer: Option<Expression> =
+        let initializer: Option<ExpressionRef> =
             if self.is_any_of_token(&[TokenType::StatementEnd, TokenType::Comma]) {
                 None
             } else {
@@ -126,7 +126,7 @@ impl<'a> ParseExpressions for Parser<'a> {
         })
     }
 
-    fn assignment_expression(&mut self) -> Expression {
+    fn assignment_expression(&mut self) -> ExpressionRef {
         let left = self.relational_expression();
 
         if !self.is_assignment_operator_token() {
@@ -159,18 +159,18 @@ impl<'a> ParseExpressions for Parser<'a> {
         })
     }
 
-    fn left_hand_side_expression(&mut self) -> Expression {
+    fn left_hand_side_expression(&mut self) -> ExpressionRef {
         self.identifier_expression()
     }
 
-    fn identifier_expression(&mut self) -> Expression {
+    fn identifier_expression(&mut self) -> ExpressionRef {
         let identifier_token = self.eat(TokenType::Identifier);
         let identifier_value = &self.source[identifier_token.i..identifier_token.j];
 
         Box::new(ExpressionNode::Identifier(String::from(identifier_value)))
     }
 
-    fn relational_expression(&mut self) -> Expression {
+    fn relational_expression(&mut self) -> ExpressionRef {
         self.parse_binary_expression(
             TokenType::RelationalOperator,
             |parser| parser.additive_expression(),
@@ -184,7 +184,7 @@ impl<'a> ParseExpressions for Parser<'a> {
         )
     }
 
-    fn additive_expression(&mut self) -> Expression {
+    fn additive_expression(&mut self) -> ExpressionRef {
         self.parse_binary_expression(
             TokenType::AdditiveOperator,
             |parser| parser.factor_expression(),
@@ -196,7 +196,7 @@ impl<'a> ParseExpressions for Parser<'a> {
         )
     }
 
-    fn factor_expression(&mut self) -> Expression {
+    fn factor_expression(&mut self) -> ExpressionRef {
         self.parse_binary_expression(
             TokenType::FactorOperator,
             |parser| parser.primary_expression(),
@@ -208,7 +208,7 @@ impl<'a> ParseExpressions for Parser<'a> {
         )
     }
 
-    fn primary_expression(&mut self) -> Expression {
+    fn primary_expression(&mut self) -> ExpressionRef {
         if self.is_literal_token() {
             return self.literal_expression();
         }
@@ -219,7 +219,7 @@ impl<'a> ParseExpressions for Parser<'a> {
         }
     }
 
-    fn group_expression(&mut self) -> Expression {
+    fn group_expression(&mut self) -> ExpressionRef {
         self.eat(TokenType::OpeningParenthesis);
         let expression_ref = self.expression();
         self.eat(TokenType::ClosingParenthesis);
@@ -227,7 +227,7 @@ impl<'a> ParseExpressions for Parser<'a> {
         expression_ref
     }
 
-    fn literal_expression(&mut self) -> Expression {
+    fn literal_expression(&mut self) -> ExpressionRef {
         match self.lookahead.token_type {
             TokenType::String => self.string_literal_expression(),
             TokenType::Number => self.numeric_literal_expression(),
@@ -235,14 +235,14 @@ impl<'a> ParseExpressions for Parser<'a> {
         }
     }
 
-    fn string_literal_expression(&mut self) -> Expression {
+    fn string_literal_expression(&mut self) -> ExpressionRef {
         let token = self.eat(TokenType::String);
         let token_value = &self.source[token.i + 1..token.j - 1];
 
         Box::new(ExpressionNode::StringLiteral(String::from(token_value)))
     }
 
-    fn numeric_literal_expression(&mut self) -> Expression {
+    fn numeric_literal_expression(&mut self) -> ExpressionRef {
         let token = self.eat(TokenType::Number);
         let token_value = &self.source[token.i..token.j];
         let token_value = token_value.trim().parse().unwrap();

@@ -1,4 +1,4 @@
-use crate::ast::{Expression, ExpressionDispatcher, Statement, StatementDispatcher};
+use crate::ast::{ExpressionRef, ExpressionDispatcher, StatementRef, StatementDispatcher};
 
 use super::{SExpressionConfig, SExpressionVisitor};
 
@@ -15,7 +15,7 @@ pub trait ToSExpression {
     fn to_pretty_sexpression(&self) -> Result<String>;
 }
 
-impl ToSExpression for Statement {
+impl ToSExpression for StatementRef {
     fn to_sexpression(&self) -> Result<String> {
         let mut visitor = SExpressionVisitor::new();
         visitor.output.clear();
@@ -36,7 +36,7 @@ impl ToSExpression for Statement {
     }
 }
 
-impl ToSExpression for Expression {
+impl ToSExpression for ExpressionRef {
     fn to_sexpression(&self) -> Result<String> {
         let mut visitor = SExpressionVisitor::new();
         visitor.output.clear();
