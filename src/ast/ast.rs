@@ -2,23 +2,23 @@ use std::fmt;
 
 pub type StatementRef = Box<Statement>;
 pub type ExpressionRef = Box<Expression>;
-pub type StatementRefList = Vec<StatementRef>;
-pub type ExpressionRefList = Vec<ExpressionRef>;
+pub type StatementList = Vec<Statement>;
+pub type ExpressionList = Vec<Expression>;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Statement {
     Program {
-        body: StatementRefList,
+        body: StatementList,
     },
     Block {
-        body: StatementRefList,
+        body: StatementList,
     },
     Empty,
     Expression {
         expression: ExpressionRef,
     },
     VariableDeclaration {
-        variables: ExpressionRefList,
+        variables: ExpressionList,
     },
     Conditional {
         condition: ExpressionRef,

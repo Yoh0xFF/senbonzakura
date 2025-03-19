@@ -1,7 +1,5 @@
 use crate::{
-    ast::{
-        Expression, ExpressionDispatcher, ExpressionRefList, StatementDispatcher, StatementRefList,
-    },
+    ast::{Expression, ExpressionDispatcher, ExpressionList, StatementDispatcher, StatementList},
     Statement,
 };
 
@@ -30,10 +28,7 @@ pub(super) fn visit_statement(
     result
 }
 
-fn visit_program_statement(
-    visitor: &mut SExpressionVisitor,
-    body: &StatementRefList,
-) -> Result<()> {
+fn visit_program_statement(visitor: &mut SExpressionVisitor, body: &StatementList) -> Result<()> {
     visitor.begin_expr("program")?;
 
     if !body.is_empty() {
@@ -48,7 +43,7 @@ fn visit_program_statement(
     Ok(())
 }
 
-fn visit_block_statement(visitor: &mut SExpressionVisitor, body: &StatementRefList) -> Result<()> {
+fn visit_block_statement(visitor: &mut SExpressionVisitor, body: &StatementList) -> Result<()> {
     visitor.begin_expr("block")?;
 
     if !body.is_empty() {
@@ -84,7 +79,7 @@ fn visit_expression_statement(
 
 fn visit_variable_declaration_statement(
     visitor: &mut SExpressionVisitor,
-    variables: &ExpressionRefList,
+    variables: &ExpressionList,
 ) -> Result<()> {
     visitor.begin_expr("let")?;
 

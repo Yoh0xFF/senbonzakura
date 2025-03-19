@@ -1,4 +1,4 @@
-use crate::ast::{ExpressionRef, Statement, StatementRef, StatementRefList};
+use crate::ast::{Expression, Statement, StatementList, StatementRef};
 use crate::lexer::TokenType;
 
 use super::{parse_expressions::ParseExpressions, Parser};
@@ -26,7 +26,7 @@ pub(super) trait ParseStatements {
      *  | StatementList Statement
      *  ;
      */
-    fn statement_list(&mut self, stop_token_type: Option<TokenType>) -> StatementRefList;
+    fn statement_list(&mut self, stop_token_type: Option<TokenType>) -> StatementList;
 
     /**
      * Statement
@@ -93,14 +93,14 @@ impl<'a> ParseStatements for Parser<'a> {
         Box::new(Statement::Block { body: block })
     }
 
-    fn statement_list(&mut self, stop_token_type: Option<TokenType>) -> StatementRefList {
-        let mut statement_list: Vec<StatementRef> = vec![];
+    fn statement_list(&mut self, stop_token_type: Option<TokenType>) -> StatementList {
+        let mut statement_list: Vec<Statement> = vec![];
 
         while self.lookahead.token_type != TokenType::End
             && self.lookahead.token_type != stop_token_type.unwrap_or(TokenType::End)
         {
             let statement = self.statement();
-            statement_list.push(statement);
+            statement_list.push(*statement);
         }
 
         statement_list
@@ -117,11 +117,11 @@ impl<'a> ParseStatements for Parser<'a> {
     }
 
     fn variable_declaration_statement(&mut self) -> StatementRef {
-        let mut variables: Vec<ExpressionRef> = vec![];
+        let mut variables: Vec<Expression> = vec![];
 
         self.eat(TokenType::LetKeyword);
         loop {
-            variables.push(self.variable_initialization_expression());
+            variables.push(*self.variable_initialization_expression());
 
             if !self.is_token(TokenType::Comma) {
                 break;
