@@ -1,7 +1,6 @@
 use crate::{
     ast::{
-        ExpressionDispatcher, ExpressionRef, ExpressionRefList, StatementDispatcher, StatementRef,
-        StatementRefList,
+        Expression, ExpressionDispatcher, ExpressionRefList, StatementDispatcher, StatementRefList,
     },
     Statement,
 };
@@ -25,7 +24,7 @@ pub(super) fn visit_statement(
             condition,
             consequent,
             alternative,
-        } => visit_conditional_statement(visitor, condition, consequent, alternative),
+        } => visit_conditional_statement(visitor, condition, consequent, alternative.as_deref()),
     };
 
     result
@@ -73,7 +72,7 @@ fn visit_empty_statement(visitor: &mut SExpressionVisitor) -> Result<()> {
 
 fn visit_expression_statement(
     visitor: &mut SExpressionVisitor,
-    expression: &ExpressionRef,
+    expression: &Expression,
 ) -> Result<()> {
     visitor.begin_expr("expr")?;
     visitor.write_space_or_newline()?;
@@ -101,9 +100,9 @@ fn visit_variable_declaration_statement(
 
 fn visit_conditional_statement(
     visitor: &mut SExpressionVisitor,
-    condition: &ExpressionRef,
-    consequent: &StatementRef,
-    alternative: &Option<StatementRef>,
+    condition: &Expression,
+    consequent: &Statement,
+    alternative: Option<&Statement>,
 ) -> Result<()> {
     visitor.begin_expr("if")?;
 

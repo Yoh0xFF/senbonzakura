@@ -1,6 +1,4 @@
-use crate::ast::{
-    AssignmentOperator, BinaryOperator, Expression, ExpressionDispatcher, ExpressionRef,
-};
+use crate::ast::{AssignmentOperator, BinaryOperator, Expression, ExpressionDispatcher};
 
 use super::SExpressionVisitor;
 use anyhow::Result;
@@ -14,17 +12,17 @@ pub(super) fn visit_expression(
         Expression::VariableIntialization {
             identifier,
             initializer,
-        } => visit_variable_initialization_expression(visitor, identifier, initializer),
+        } => visit_variable_initialization_expression(visitor, identifier, initializer.as_deref()),
         Expression::Assignment {
             operator,
             left,
             right,
-        } => visit_assignment_expression(visitor, operator, left, right),
+        } => visit_assignment_expression(visitor, *operator, left, right),
         Expression::Binary {
             operator,
             left,
             right,
-        } => visit_binary_expression(visitor, operator, left, right),
+        } => visit_binary_expression(visitor, *operator, left, right),
         Expression::StringLiteral(value) => visit_string_literal_expression(visitor, value),
         Expression::NumericLiteral(value) => visit_numeric_literal_expression(visitor, *value),
         Expression::Identifier(name) => visit_identifier_expression(visitor, name),
@@ -35,8 +33,8 @@ pub(super) fn visit_expression(
 
 fn visit_variable_initialization_expression(
     visitor: &mut SExpressionVisitor,
-    identifier: &ExpressionRef,
-    initializer: &Option<ExpressionRef>,
+    identifier: &Expression,
+    initializer: Option<&Expression>,
 ) -> Result<()> {
     visitor.begin_expr("init")?;
 
@@ -57,9 +55,9 @@ fn visit_variable_initialization_expression(
 
 fn visit_assignment_expression(
     visitor: &mut SExpressionVisitor,
-    operator: &AssignmentOperator,
-    left: &ExpressionRef,
-    right: &ExpressionRef,
+    operator: AssignmentOperator,
+    left: &Expression,
+    right: &Expression,
 ) -> Result<()> {
     visitor.begin_expr("assign")?;
 
@@ -85,9 +83,9 @@ fn visit_assignment_expression(
 
 fn visit_binary_expression(
     visitor: &mut SExpressionVisitor,
-    operator: &BinaryOperator,
-    left: &ExpressionRef,
-    right: &ExpressionRef,
+    operator: BinaryOperator,
+    left: &Expression,
+    right: &Expression,
 ) -> Result<()> {
     visitor.begin_expr("binary")?;
 
