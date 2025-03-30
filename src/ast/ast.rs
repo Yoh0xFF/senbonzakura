@@ -43,6 +43,10 @@ pub enum Expression {
         left: ExpressionRef,
         right: ExpressionRef,
     },
+    Unary {
+        operator: UnaryOperator,
+        right: ExpressionRef,
+    },
     Logical {
         operator: LogicalOperator,
         left: ExpressionRef,
@@ -103,6 +107,23 @@ impl fmt::Display for BinaryOperator {
             BinaryOperator::GreaterThanOrEqualTo => write!(f, ">="),
             BinaryOperator::LessThan => write!(f, "<"),
             BinaryOperator::LessThanOrEqualTo => write!(f, "<="),
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum UnaryOperator {
+    Plus,
+    Minus,
+    Not,
+}
+
+impl fmt::Display for UnaryOperator {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            UnaryOperator::Plus => write!(f, "+"),
+            UnaryOperator::Minus => write!(f, "-"),
+            UnaryOperator::Not => write!(f, "!"),
         }
     }
 }

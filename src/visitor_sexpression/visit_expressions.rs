@@ -1,5 +1,6 @@
 use crate::ast::{
     AssignmentOperator, BinaryOperator, Expression, ExpressionDispatcher, LogicalOperator,
+    UnaryOperator,
 };
 
 use super::SExpressionVisitor;
@@ -25,6 +26,7 @@ pub(super) fn visit_expression(
             left,
             right,
         } => visit_binary_expression(visitor, *operator, left, right),
+        Expression::Unary { operator, right } => visit_unary_expression(visitor, *operator, right),
         Expression::Logical {
             operator,
             left,
@@ -104,6 +106,25 @@ fn visit_binary_expression(
 
     visitor.write_space_or_newline()?;
     left.accept(visitor)?;
+
+    visitor.write_space_or_newline()?;
+    right.accept(visitor)?;
+
+    visitor.end_expr()?;
+
+    Ok(())
+}
+
+fn visit_unary_expression(
+    visitor: &mut SExpressionVisitor,
+    operator: UnaryOperator,
+    right: &Expression,
+) -> Result<()> {
+    visitor.begin_expr("unary")?;
+
+    visitor.write_space_or_newline()?;
+    visitor.write_indent()?;
+    write!(visitor.output, "\"{}\"", operator)?;
 
     visitor.write_space_or_newline()?;
     right.accept(visitor)?;

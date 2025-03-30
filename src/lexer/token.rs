@@ -32,6 +32,7 @@ pub enum TokenType {
     // Logical operators
     LogicalAndOperator,
     LogicalOrOperator,
+    LogicalNotOperator,
     // Literals
     Boolean,
     Nil,
