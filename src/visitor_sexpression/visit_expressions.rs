@@ -23,8 +23,10 @@ pub(super) fn visit_expression(
             left,
             right,
         } => visit_binary_expression(visitor, *operator, left, right),
-        Expression::StringLiteral(value) => visit_string_literal_expression(visitor, value),
+        Expression::BooleanLiteral(value) => visit_boolean_literal_expression(visitor, *value),
+        Expression::NilLiteral => visit_nil_literal_expression(visitor),
         Expression::NumericLiteral(value) => visit_numeric_literal_expression(visitor, *value),
+        Expression::StringLiteral(value) => visit_string_literal_expression(visitor, value),
         Expression::Identifier(name) => visit_identifier_expression(visitor, name),
     };
 
@@ -104,12 +106,16 @@ fn visit_binary_expression(
     Ok(())
 }
 
-fn visit_string_literal_expression(visitor: &mut SExpressionVisitor, value: &str) -> Result<()> {
-    visitor.begin_expr("string")?;
+fn visit_boolean_literal_expression(visitor: &mut SExpressionVisitor, value: bool) -> Result<()> {
+    visitor.begin_expr("boolean")?;
+    write!(visitor.output, " {}", value)?;
+    visitor.end_expr()?;
 
-    let escaped = value.replace('\"', "\\\"");
-    write!(visitor.output, " \"{}\"", escaped)?;
+    Ok(())
+}
 
+fn visit_nil_literal_expression(visitor: &mut SExpressionVisitor) -> Result<()> {
+    visitor.begin_expr("nil")?;
     visitor.end_expr()?;
 
     Ok(())
@@ -118,6 +124,17 @@ fn visit_string_literal_expression(visitor: &mut SExpressionVisitor, value: &str
 fn visit_numeric_literal_expression(visitor: &mut SExpressionVisitor, value: i32) -> Result<()> {
     visitor.begin_expr("number")?;
     write!(visitor.output, " {}", value)?;
+    visitor.end_expr()?;
+
+    Ok(())
+}
+
+fn visit_string_literal_expression(visitor: &mut SExpressionVisitor, value: &str) -> Result<()> {
+    visitor.begin_expr("string")?;
+
+    let escaped = value.replace('\"', "\\\"");
+    write!(visitor.output, " \"{}\"", escaped)?;
+
     visitor.end_expr()?;
 
     Ok(())

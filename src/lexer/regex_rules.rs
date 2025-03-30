@@ -30,11 +30,21 @@ pub(super) fn init_regex_rules() -> Vec<(Regex, TokenType)> {
     let comma = Regex::new(r"^\,").expect("Failed to compile regex for comma (,) symbol");
 
     // Keywords
+    let true_keyword =
+        Regex::new(r"^\btrue\b").expect("Failed to compile regex for the 'true' keyword");
+    let false_keyword =
+        Regex::new(r"^\bfalse\b").expect("Failed to compile regex for the 'false' keyword");
+    let nil_keyword =
+        Regex::new(r"^\bnil\b").expect("Failed to compile regex for the 'nil' keyword");
     let let_keyword =
         Regex::new(r"^\blet\b").expect("Failed to compile regex for the 'let' keyword");
     let if_keyword = Regex::new(r"^\bif\b").expect("Failed to compile regex for the 'if' keyword");
     let else_keyword =
         Regex::new(r"^\belse\b").expect("Failed to compile regex for the 'else' keyword");
+
+    // Equality Operator
+    let equality_operator =
+        Regex::new(r"^[=!]=").expect("Failed to compile regex for equality operator");
 
     // Assignment operators
     let simple_assignment_operator =
@@ -72,9 +82,14 @@ pub(super) fn init_regex_rules() -> Vec<(Regex, TokenType)> {
         (opening_parenthesis, TokenType::OpeningParenthesis),
         (closing_parenthesis, TokenType::ClosingParenthesis),
         (comma, TokenType::Comma),
+        (true_keyword, TokenType::Boolean),
+        (false_keyword, TokenType::Boolean),
+        (nil_keyword, TokenType::Nil),
         (let_keyword, TokenType::LetKeyword),
         (if_keyword, TokenType::IfKeyword),
         (else_keyword, TokenType::ElseKeyword),
+        // Important! Order matters this rule must be before the assignment operators
+        (equality_operator, TokenType::EqualityOperator),
         (
             simple_assignment_operator,
             TokenType::SimpleAssignmentOperator,

@@ -19,6 +19,8 @@ pub enum TokenType {
     ElseKeyword,
     // Identifier
     Identifier,
+    // Equality operators
+    EqualityOperator,
     // Assignment operators
     SimpleAssignmentOperator,
     ComplexAssignmentOperator,
@@ -27,6 +29,8 @@ pub enum TokenType {
     FactorOperator,
     RelationalOperator,
     // Literals
+    Boolean,
+    Nil,
     Number,
     String,
     // End

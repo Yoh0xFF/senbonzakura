@@ -20,7 +20,7 @@ pub(super) trait ParseExpressions {
 
     /**
      * AssignmentExpression
-     *  : RelationalExpression
+     *  : EqualityExpression
      *  | LeftHandSideExpression ASSIGNMENT_OPERATOR AssignmentExpression
      *  ;
      */
@@ -39,6 +39,14 @@ pub(super) trait ParseExpressions {
      *  ;
      */
     fn identifier_expression(&mut self) -> ExpressionRef;
+
+    /**
+     * EqualityExpression
+     *  : RelationalExpression EQUALITY_OPERATOR EqualityExpression
+     *  | RelationalExpression
+     *  ;
+     */
+    fn equality_expression(&mut self) -> ExpressionRef;
 
     /**
      * RelationalExpression
@@ -82,6 +90,8 @@ pub(super) trait ParseExpressions {
 
     /**
      * Literal
+     *  : BooleanLiteral
+     *  : NilLiteral
      *  : NumericLiteral
      *  | StringLiteral
      *  ;
@@ -89,11 +99,18 @@ pub(super) trait ParseExpressions {
     fn literal_expression(&mut self) -> ExpressionRef;
 
     /**
-     * StringLiteral
-     *  : STRING
+     * BooleanLitral
+     *  : BOOLEAN
      *  ;
      */
-    fn string_literal_expression(&mut self) -> ExpressionRef;
+    fn boolean_literal_expression(&mut self) -> ExpressionRef;
+
+    /**
+     * NilLiteral
+     *  : NIL
+     *  ;
+     */
+    fn nil_literal_expression(&mut self) -> ExpressionRef;
 
     /**
      * NumericLiteral
@@ -101,6 +118,13 @@ pub(super) trait ParseExpressions {
      *  ;
      */
     fn numeric_literal_expression(&mut self) -> ExpressionRef;
+
+    /**
+     * StringLiteral
+     *  : STRING
+     *  ;
+     */
+    fn string_literal_expression(&mut self) -> ExpressionRef;
 }
 
 impl<'a> ParseExpressions for Parser<'a> {
@@ -127,7 +151,7 @@ impl<'a> ParseExpressions for Parser<'a> {
     }
 
     fn assignment_expression(&mut self) -> ExpressionRef {
-        let left = self.relational_expression();
+        let left = self.equality_expression();
 
         if !self.is_assignment_operator_token() {
             return left;
@@ -168,6 +192,18 @@ impl<'a> ParseExpressions for Parser<'a> {
         let identifier_value = &self.source[identifier_token.i..identifier_token.j];
 
         Box::new(Expression::Identifier(String::from(identifier_value)))
+    }
+
+    fn equality_expression(&mut self) -> ExpressionRef {
+        self.parse_binary_expression(
+            TokenType::EqualityOperator,
+            |parser| parser.relational_expression(),
+            |op| match op {
+                "==" => BinaryOperator::Equal,
+                "!=" => BinaryOperator::NotEqual,
+                _ => panic!("Unknown relational operator {}", op),
+            },
+        )
     }
 
     fn relational_expression(&mut self) -> ExpressionRef {
@@ -229,17 +265,26 @@ impl<'a> ParseExpressions for Parser<'a> {
 
     fn literal_expression(&mut self) -> ExpressionRef {
         match self.lookahead.token_type {
-            TokenType::String => self.string_literal_expression(),
+            TokenType::Boolean => self.boolean_literal_expression(),
+            TokenType::Nil => self.nil_literal_expression(),
             TokenType::Number => self.numeric_literal_expression(),
+            TokenType::String => self.string_literal_expression(),
             _ => panic!("Literal: unexpected literal production"),
         }
     }
 
-    fn string_literal_expression(&mut self) -> ExpressionRef {
-        let token = self.eat(TokenType::String);
-        let token_value = &self.source[token.i + 1..token.j - 1];
+    fn boolean_literal_expression(&mut self) -> ExpressionRef {
+        let token = self.eat(TokenType::Boolean);
+        let token_value = &self.source[token.i..token.j];
+        let bool_value = token_value == "true";
 
-        Box::new(Expression::StringLiteral(String::from(token_value)))
+        Box::new(Expression::BooleanLiteral(bool_value))
+    }
+
+    fn nil_literal_expression(&mut self) -> ExpressionRef {
+        self.eat(TokenType::Nil);
+
+        Box::new(Expression::NilLiteral)
     }
 
     fn numeric_literal_expression(&mut self) -> ExpressionRef {
@@ -248,5 +293,12 @@ impl<'a> ParseExpressions for Parser<'a> {
         let token_value = token_value.trim().parse().unwrap();
 
         Box::new(Expression::NumericLiteral(token_value))
+    }
+
+    fn string_literal_expression(&mut self) -> ExpressionRef {
+        let token = self.eat(TokenType::String);
+        let token_value = &self.source[token.i + 1..token.j - 1];
+
+        Box::new(Expression::StringLiteral(String::from(token_value)))
     }
 }
