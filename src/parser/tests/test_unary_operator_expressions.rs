@@ -6,7 +6,7 @@ fn test_unary_plus_operator() {
         "+42;",
         r#"
         (program
-            (expr (unary "+" (number 42))))
+          (expr (unary "+" (number 42))))
         "#,
     )
 }
@@ -183,7 +183,13 @@ fn test_unary_operators_precedence_with_multiplication() {
         "-x * y;",
         r#"
         (program
-            (expr (binary "*" (unary "-" (id x)) (id y))))
+            (expr
+                (binary "*"
+                    (unary "-" (id x))
+                    (id y)
+                )
+            )
+        )
         "#,
     )
 }
@@ -197,7 +203,10 @@ fn test_unary_not_with_variable_declaration() {
             (let
                 (init
                     (id isNotValid)
-                    (unary "!" (id isValid)))))
+                    (unary "!" (id isValid))
+                )
+            )
+        )
         "#,
     )
 }
@@ -208,16 +217,22 @@ fn test_complex_expression_with_unary_operators() {
         "result = -x * y + !z && w;",
         r#"
         (program
-          (expr
-            (assign "="
-              (id result)
-              (logical "&&"
-                  (binary "+"
-                      (binary "*"
-                          (unary "-" (id x))
-                          (id y))
-                      (unary "!" (id z)))
-                  (id w)))))
+            (expr
+                (assign "="
+                    (id result)
+                    (logical "&&"
+                        (binary "+"
+                            (binary "*"
+                                (unary "-" (id x))
+                                (id y)
+                            )
+                            (unary "!" (id z))
+                        )
+                        (id w)
+                    )
+                )
+            )
+        )
         "#,
     )
 }
