@@ -10,11 +10,10 @@ pub(super) fn execute(source: &str, expected_sexpression: &str) {
 
     // Normalize expected s-expression by removing indentation
     let normalized_expected_sexpression = expected_sexpression
-        .lines()
-        .map(|line| line.trim())
-        .filter(|line| !line.is_empty())
+        .replace('\n', " ") // Replace newlines with spaces
+        .split_whitespace() // Split by whitespace
         .collect::<Vec<&str>>()
-        .join(" ");
+        .join(" "); // Join with single spaces
 
     assert_eq!(actual_sexp, normalized_expected_sexpression);
 }
