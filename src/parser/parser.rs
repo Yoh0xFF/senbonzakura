@@ -1,4 +1,4 @@
-use crate::ast::{BinaryOperator, ExpressionRef, Expression, StatementRef};
+use crate::ast::{BinaryOperator, Expression, ExpressionRef, StatementRef};
 use crate::{lexer::TokenType, Lexer, Token};
 
 use super::parse_statements::ParseStatements;
@@ -106,7 +106,12 @@ impl<'a> Parser<'a> {
      */
     #[allow(dead_code)]
     pub(super) fn is_literal_token(&mut self) -> bool {
-        self.is_any_of_token(&[TokenType::Number, TokenType::String])
+        self.is_any_of_token(&[
+            TokenType::Boolean,
+            TokenType::Nil,
+            TokenType::Number,
+            TokenType::String,
+        ])
     }
 
     /**
