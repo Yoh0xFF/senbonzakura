@@ -5,6 +5,8 @@ mod test_binary_additive_and_factor_operator_expressions;
 #[cfg(test)]
 mod test_binary_equality_expressions;
 #[cfg(test)]
+mod test_binary_logical_expressions;
+#[cfg(test)]
 mod test_binary_relational_operator_expressions;
 #[cfg(test)]
 mod test_block_statements;

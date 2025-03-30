@@ -57,8 +57,16 @@ pub(super) fn init_regex_rules() -> Vec<(Regex, TokenType)> {
         Regex::new(r"^[+\-]").expect("Failed to compile regex for additive operators (+, -)");
     let factor_operator =
         Regex::new(r"^[*\/]").expect("Failed to compile regex for factor operators (*, /");
+
+    // Relational operators
     let relational_operator = Regex::new(r"^[><]=?")
         .expect("Failed to compile regex for relational operators (>, >=, <, <=)");
+
+    // Logical operators
+    let logical_and_operator =
+        Regex::new(r"^&&").expect("Failed to compile regex for logical and operator");
+    let logical_or_operator =
+        Regex::new(r"^\|\|").expect("Failed to compile regex for logical or operator");
 
     // Numbers
     let number = Regex::new(r"^\d+").expect("Failed to compile regex for number literal");
@@ -101,6 +109,8 @@ pub(super) fn init_regex_rules() -> Vec<(Regex, TokenType)> {
         (additive_operator, TokenType::AdditiveOperator),
         (factor_operator, TokenType::FactorOperator),
         (relational_operator, TokenType::RelationalOperator),
+        (logical_and_operator, TokenType::LogicalAndOperator),
+        (logical_or_operator, TokenType::LogicalOrOperator),
         (number, TokenType::Number),
         (string_double_quotes, TokenType::String),
         (string_single_quotes, TokenType::String),

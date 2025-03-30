@@ -24,10 +24,14 @@ pub enum TokenType {
     // Assignment operators
     SimpleAssignmentOperator,
     ComplexAssignmentOperator,
-    // Math operators,
+    // Math operators
     AdditiveOperator,
     FactorOperator,
+    // Relational operators
     RelationalOperator,
+    // Logical operators
+    LogicalAndOperator,
+    LogicalOrOperator,
     // Literals
     Boolean,
     Nil,

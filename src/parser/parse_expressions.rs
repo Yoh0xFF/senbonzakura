@@ -1,4 +1,4 @@
-use crate::ast::{AssignmentOperator, BinaryOperator, Expression, ExpressionRef};
+use crate::ast::{AssignmentOperator, BinaryOperator, Expression, ExpressionRef, LogicalOperator};
 use crate::lexer::TokenType;
 
 use super::Parser;
@@ -20,7 +20,7 @@ pub(super) trait ParseExpressions {
 
     /**
      * AssignmentExpression
-     *  : EqualityExpression
+     *  : LogicalOrExpression
      *  | LeftHandSideExpression ASSIGNMENT_OPERATOR AssignmentExpression
      *  ;
      */
@@ -39,6 +39,22 @@ pub(super) trait ParseExpressions {
      *  ;
      */
     fn identifier_expression(&mut self) -> ExpressionRef;
+
+    /**
+     * LogicalOrExpression
+     *  : LogicalAndExpression LOGICAL_OR_OPERATOR LogicalOrExpression
+     *  | LogicalAndExpression
+     *  ;
+     */
+    fn logical_or_expression(&mut self) -> ExpressionRef;
+
+    /**
+     * LogicalAndExpression
+     *  : EqualityExpression LOGICAL_AND_OPERATOR LogicalAndExpression
+     *  | EqualityExpression
+     *  ;
+     */
+    fn logical_and_expression(&mut self) -> ExpressionRef;
 
     /**
      * EqualityExpression
@@ -151,7 +167,7 @@ impl<'a> ParseExpressions for Parser<'a> {
     }
 
     fn assignment_expression(&mut self) -> ExpressionRef {
-        let left = self.equality_expression();
+        let left = self.logical_or_expression();
 
         if !self.is_assignment_operator_token() {
             return left;
@@ -192,6 +208,28 @@ impl<'a> ParseExpressions for Parser<'a> {
         let identifier_value = &self.source[identifier_token.i..identifier_token.j];
 
         Box::new(Expression::Identifier(String::from(identifier_value)))
+    }
+
+    fn logical_or_expression(&mut self) -> ExpressionRef {
+        self.parse_logical_expression(
+            TokenType::LogicalOrOperator,
+            |parser| parser.logical_and_expression(),
+            |op| match op {
+                "||" => LogicalOperator::Or,
+                _ => panic!("Unknown logical operator {}", op),
+            },
+        )
+    }
+
+    fn logical_and_expression(&mut self) -> ExpressionRef {
+        self.parse_logical_expression(
+            TokenType::LogicalAndOperator,
+            |parser| parser.equality_expression(),
+            |op| match op {
+                "&&" => LogicalOperator::And,
+                _ => panic!("Unknown logical operator {}", op),
+            },
+        )
     }
 
     fn equality_expression(&mut self) -> ExpressionRef {

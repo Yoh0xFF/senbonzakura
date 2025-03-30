@@ -43,6 +43,11 @@ pub enum Expression {
         left: ExpressionRef,
         right: ExpressionRef,
     },
+    Logical {
+        operator: LogicalOperator,
+        left: ExpressionRef,
+        right: ExpressionRef,
+    },
     BooleanLiteral(bool),
     NilLiteral,
     StringLiteral(String),
@@ -98,6 +103,21 @@ impl fmt::Display for BinaryOperator {
             BinaryOperator::GreaterThanOrEqualTo => write!(f, ">="),
             BinaryOperator::LessThan => write!(f, "<"),
             BinaryOperator::LessThanOrEqualTo => write!(f, "<="),
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum LogicalOperator {
+    And,
+    Or,
+}
+
+impl fmt::Display for LogicalOperator {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            LogicalOperator::And => write!(f, "&&"),
+            LogicalOperator::Or => write!(f, "||"),
         }
     }
 }

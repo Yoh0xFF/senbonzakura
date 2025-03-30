@@ -1,4 +1,6 @@
-use crate::ast::{AssignmentOperator, BinaryOperator, Expression, ExpressionDispatcher};
+use crate::ast::{
+    AssignmentOperator, BinaryOperator, Expression, ExpressionDispatcher, LogicalOperator,
+};
 
 use super::SExpressionVisitor;
 use anyhow::Result;
@@ -23,6 +25,11 @@ pub(super) fn visit_expression(
             left,
             right,
         } => visit_binary_expression(visitor, *operator, left, right),
+        Expression::Logical {
+            operator,
+            left,
+            right,
+        } => visit_logical_expression(visitor, *operator, left, right),
         Expression::BooleanLiteral(value) => visit_boolean_literal_expression(visitor, *value),
         Expression::NilLiteral => visit_nil_literal_expression(visitor),
         Expression::NumericLiteral(value) => visit_numeric_literal_expression(visitor, *value),
@@ -90,6 +97,29 @@ fn visit_binary_expression(
     right: &Expression,
 ) -> Result<()> {
     visitor.begin_expr("binary")?;
+
+    visitor.write_space_or_newline()?;
+    visitor.write_indent()?;
+    write!(visitor.output, "\"{}\"", operator)?;
+
+    visitor.write_space_or_newline()?;
+    left.accept(visitor)?;
+
+    visitor.write_space_or_newline()?;
+    right.accept(visitor)?;
+
+    visitor.end_expr()?;
+
+    Ok(())
+}
+
+fn visit_logical_expression(
+    visitor: &mut SExpressionVisitor,
+    operator: LogicalOperator,
+    left: &Expression,
+    right: &Expression,
+) -> Result<()> {
+    visitor.begin_expr("logical")?;
 
     visitor.write_space_or_newline()?;
     visitor.write_indent()?;

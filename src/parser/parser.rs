@@ -1,4 +1,4 @@
-use crate::ast::{BinaryOperator, Expression, ExpressionRef, StatementRef};
+use crate::ast::{BinaryOperator, Expression, ExpressionRef, LogicalOperator, StatementRef};
 use crate::{lexer::TokenType, Lexer, Token};
 
 use super::parse_statements::ParseStatements;
@@ -148,6 +148,38 @@ impl<'a> Parser<'a> {
             let right = operand_parser(self);
 
             left = Box::new(Expression::Binary {
+                operator,
+                left,
+                right,
+            });
+        }
+
+        left
+    }
+
+    /**
+     * Parse generic logical expression
+     */
+    pub(super) fn parse_logical_expression<OperandParserFnType, OperatorMapperFnType>(
+        &mut self,
+        token_type: TokenType,
+        operand_parser: OperandParserFnType,
+        operator_mapper: OperatorMapperFnType,
+    ) -> ExpressionRef
+    where
+        OperandParserFnType: Fn(&mut Self) -> ExpressionRef,
+        OperatorMapperFnType: Fn(&str) -> LogicalOperator,
+    {
+        let mut left = operand_parser(self);
+
+        while self.lookahead.token_type == token_type {
+            let operator_token = self.eat(token_type);
+            let operator_value = &self.source[operator_token.i..operator_token.j];
+            let operator = operator_mapper(operator_value);
+
+            let right = operand_parser(self);
+
+            left = Box::new(Expression::Logical {
                 operator,
                 left,
                 right,
