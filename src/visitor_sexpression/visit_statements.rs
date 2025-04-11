@@ -141,7 +141,19 @@ fn visit_while_statement(
     condition: &Expression,
     body: &Statement,
 ) -> Result<()> {
-    todo!()
+    visitor.begin_expr("while")?;
+
+    // Process condition
+    visitor.write_space_or_newline()?;
+    condition.accept(visitor)?;
+
+    // Process body
+    visitor.write_space_or_newline()?;
+    body.accept(visitor)?;
+
+    visitor.end_expr()?;
+
+    Ok(())
 }
 
 fn visit_do_while_statement(
@@ -149,7 +161,19 @@ fn visit_do_while_statement(
     condition: &Expression,
     body: &Statement,
 ) -> Result<()> {
-    todo!()
+    visitor.begin_expr("do-while")?;
+
+    // Process body first (unlike while, do-while executes body first)
+    visitor.write_space_or_newline()?;
+    body.accept(visitor)?;
+
+    // Process condition
+    visitor.write_space_or_newline()?;
+    condition.accept(visitor)?;
+
+    visitor.end_expr()?;
+
+    Ok(())
 }
 
 fn visit_for_statement(
@@ -159,5 +183,31 @@ fn visit_for_statement(
     increment: Option<&Expression>,
     body: &Statement,
 ) -> Result<()> {
-    todo!()
+    visitor.begin_expr("for")?;
+
+    // Process initializer if present
+    if let Some(init) = initializer {
+        visitor.write_space_or_newline()?;
+        init.accept(visitor)?;
+    }
+
+    // Process condition if present
+    if let Some(cond) = condition {
+        visitor.write_space_or_newline()?;
+        cond.accept(visitor)?;
+    }
+
+    // Process increment if present
+    if let Some(inc) = increment {
+        visitor.write_space_or_newline()?;
+        inc.accept(visitor)?;
+    }
+
+    // Process body
+    visitor.write_space_or_newline()?;
+    body.accept(visitor)?;
+
+    visitor.end_expr()?;
+
+    Ok(())
 }

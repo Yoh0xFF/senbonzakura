@@ -1,4 +1,4 @@
-use crate::ast::{Expression, ExpressionRef, Statement, StatementList, StatementRef};
+use crate::ast::{Expression, Statement, StatementList, StatementRef};
 use crate::lexer::TokenType;
 
 use super::{parse_expressions::ParseExpressions, Parser};
@@ -98,7 +98,7 @@ pub(super) trait ParseStatements {
      *  : Expression ';'
      *  ;
      */
-    fn expression_statement(&mut self) -> StatementRef;
+    fn expression_statement(&mut self, consume_statement_end: bool) -> StatementRef;
 }
 
 impl<'a> ParseStatements for Parser<'a> {
@@ -145,7 +145,7 @@ impl<'a> ParseStatements for Parser<'a> {
             TokenType::WhileKeyword => self.while_statement(),
             TokenType::DoKeyword => self.do_while_statement(),
             TokenType::ForKeyword => self.for_statement(),
-            _ => self.expression_statement(),
+            _ => self.expression_statement(true),
         }
     }
 
@@ -259,7 +259,7 @@ impl<'a> ParseStatements for Parser<'a> {
         if self.is_token(TokenType::LetKeyword) {
             return self.variable_declaration_statement(false);
         }
-        self.expression_statement()
+        self.expression_statement(false)
     }
 
     fn empty_statement(&mut self) -> StatementRef {
@@ -268,10 +268,12 @@ impl<'a> ParseStatements for Parser<'a> {
         Box::new(Statement::Empty)
     }
 
-    fn expression_statement(&mut self) -> StatementRef {
+    fn expression_statement(&mut self, consume_statement_end: bool) -> StatementRef {
         let expression = self.expression();
 
-        self.eat(TokenType::StatementEnd);
+        if consume_statement_end {
+            self.eat(TokenType::StatementEnd);
+        }
 
         Box::new(Statement::Expression { expression })
     }
