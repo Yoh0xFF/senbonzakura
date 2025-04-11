@@ -94,9 +94,9 @@ impl<'a> Parser<'a> {
     #[allow(dead_code)]
     pub(super) fn is_valid_assignment_target(&mut self, expression: &ExpressionRef) -> bool {
         match expression.as_ref() {
-            Expression::Identifier(_) => return true,
+            Expression::Identifier(_) => true,
             _ => {
-                return false;
+                false
             }
         }
     }

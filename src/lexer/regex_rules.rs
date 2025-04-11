@@ -22,12 +22,12 @@ pub(super) fn init_regex_rules() -> Vec<(Regex, TokenType)> {
     let opening_brace =
         Regex::new(r"^\{").expect("Failed to compile regex for opening brace ({) symbol");
     let closing_brace =
-        Regex::new(r"^\}").expect("Failed to compile regex for closing brace (}) symbol");
+        Regex::new(r"^}").expect("Failed to compile regex for closing brace (}) symbol");
     let opening_parenthesis =
         Regex::new(r"^\(").expect("Failed to compile regex for opening parenthesis (() symbol");
     let closing_parenthesis =
         Regex::new(r"^\)").expect("Failed to compile regex for closing parenthesis ()) symbol");
-    let comma = Regex::new(r"^\,").expect("Failed to compile regex for comma (,) symbol");
+    let comma = Regex::new(r"^,").expect("Failed to compile regex for comma (,) symbol");
 
     // Keywords
     let true_keyword =
@@ -48,7 +48,7 @@ pub(super) fn init_regex_rules() -> Vec<(Regex, TokenType)> {
 
     // Assignment operators
     let simple_assignment_operator =
-        Regex::new(r"^=").expect("Failed to compile regex for simgle assignment operator");
+        Regex::new(r"^=").expect("Failed to compile regex for single assignment operator");
     let complex_assignment_operator =
         Regex::new(r"^[*/+-]=").expect("Failed to compile regex for complex assignment operator");
 
@@ -56,7 +56,7 @@ pub(super) fn init_regex_rules() -> Vec<(Regex, TokenType)> {
     let additive_operator =
         Regex::new(r"^[+\-]").expect("Failed to compile regex for additive operators (+, -)");
     let factor_operator =
-        Regex::new(r"^[*\/]").expect("Failed to compile regex for factor operators (*, /");
+        Regex::new(r"^[*/]").expect("Failed to compile regex for factor operators (*, /");
 
     // Relational operators
     let relational_operator = Regex::new(r"^[><]=?")

@@ -126,7 +126,7 @@ pub(super) trait ParseExpressions {
     fn literal_expression(&mut self) -> ExpressionRef;
 
     /**
-     * BooleanLitral
+     * BooleanLiteral
      *  : BOOLEAN
      *  ;
      */
@@ -205,7 +205,7 @@ impl<'a> ParseExpressions for Parser<'a> {
 
         Box::new(Expression::Assignment {
             operator: assignment_operator,
-            left: left,
+            left,
             right: self.assignment_expression(),
         })
     }
@@ -318,9 +318,9 @@ impl<'a> ParseExpressions for Parser<'a> {
         }
 
         match self.lookahead.token_type {
-            TokenType::OpeningParenthesis => return self.group_expression(),
-            TokenType::Identifier => return self.identifier_expression(),
-            _ => return self.left_hand_side_expression(),
+            TokenType::OpeningParenthesis => self.group_expression(),
+            TokenType::Identifier => self.identifier_expression(),
+            _ => self.left_hand_side_expression(),
         }
     }
 

@@ -108,11 +108,11 @@ impl<'a> ParseStatements for Parser<'a> {
 
     fn statement(&mut self) -> StatementRef {
         match self.lookahead.token_type {
-            TokenType::StatementEnd => return self.empty_statement(),
-            TokenType::OpeningBrace => return self.block_statement(),
-            TokenType::LetKeyword => return self.variable_declaration_statement(),
-            TokenType::IfKeyword => return self.if_statement(),
-            _ => return self.expression_statement(),
+            TokenType::StatementEnd => self.empty_statement(),
+            TokenType::OpeningBrace => self.block_statement(),
+            TokenType::LetKeyword => self.variable_declaration_statement(),
+            TokenType::IfKeyword => self.if_statement(),
+            _ => self.expression_statement(),
         }
     }
 
@@ -132,7 +132,7 @@ impl<'a> ParseStatements for Parser<'a> {
         self.eat(TokenType::StatementEnd);
 
         Box::new(Statement::VariableDeclaration {
-            variables: variables,
+            variables,
         })
     }
 
