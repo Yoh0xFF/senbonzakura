@@ -25,6 +25,20 @@ pub enum Statement {
         consequent: StatementRef,
         alternative: Option<StatementRef>,
     },
+    While {
+        condition: ExpressionRef,
+        body: StatementRef,
+    },
+    DoWhile {
+        body: StatementRef,
+        condition: ExpressionRef,
+    },
+    For {
+        initializer: Option<StatementRef>,
+        condition: Option<ExpressionRef>,
+        increment: Option<ExpressionRef>,
+        body: StatementRef,
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]

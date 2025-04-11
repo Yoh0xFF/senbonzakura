@@ -17,6 +17,9 @@ pub enum TokenType {
     LetKeyword,
     IfKeyword,
     ElseKeyword,
+    WhileKeyword,
+    DoKeyword,
+    ForKeyword,
     // Identifier
     Identifier,
     // Equality operators

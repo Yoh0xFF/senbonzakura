@@ -1,4 +1,4 @@
-use crate::ast::{Expression, Statement, StatementList, StatementRef};
+use crate::ast::{Expression, ExpressionRef, Statement, StatementList, StatementRef};
 use crate::lexer::TokenType;
 
 use super::{parse_expressions::ParseExpressions, Parser};
@@ -35,6 +35,7 @@ pub(super) trait ParseStatements {
      *  | EmptyStatement
      *  | VariableStatement
      *  | ConditionalStatement
+     *  | IterationStatement
      *  ;
      */
     fn statement(&mut self) -> StatementRef;
@@ -48,13 +49,42 @@ pub(super) trait ParseStatements {
      *  | VariableInitializationList ',' VariableInitialization
      *  ;
      */
-    fn variable_declaration_statement(&mut self) -> StatementRef;
+    fn variable_declaration_statement(&mut self, consume_statement_end: bool) -> StatementRef;
 
     /**
      * ConditionalStatement
      *  : if '(' Expression ')' Statement [else Statement]
      */
     fn if_statement(&mut self) -> StatementRef;
+
+    /**
+     * WhileStatement
+     *  : while '(' Expression ')' Statement ';'
+     *  ;
+     */
+    fn while_statement(&mut self) -> StatementRef;
+
+    /**
+     * WhileStatement
+     *  : do Statement while '(' Expression ')' ';'
+     *  ;
+     */
+    fn do_while_statement(&mut self) -> StatementRef;
+
+    /**
+     * ForStatement
+     *  : for '(' [InitExpression] ';' [Expression] ';' [Expression] ')' Statement
+     *  ;
+     */
+    fn for_statement(&mut self) -> StatementRef;
+
+    /**
+     * ForStatementInit
+     *  : VariableDeclarationStatement
+     *  | Expression
+     *  ;
+     */
+    fn for_statement_init(&mut self) -> StatementRef;
 
     /**
      * EmptyStatement
@@ -110,13 +140,16 @@ impl<'a> ParseStatements for Parser<'a> {
         match self.lookahead.token_type {
             TokenType::StatementEnd => self.empty_statement(),
             TokenType::OpeningBrace => self.block_statement(),
-            TokenType::LetKeyword => self.variable_declaration_statement(),
+            TokenType::LetKeyword => self.variable_declaration_statement(true),
             TokenType::IfKeyword => self.if_statement(),
+            TokenType::WhileKeyword => self.while_statement(),
+            TokenType::DoKeyword => self.do_while_statement(),
+            TokenType::ForKeyword => self.for_statement(),
             _ => self.expression_statement(),
         }
     }
 
-    fn variable_declaration_statement(&mut self) -> StatementRef {
+    fn variable_declaration_statement(&mut self, consume_statement_end: bool) -> StatementRef {
         let mut variables: Vec<Expression> = vec![];
 
         self.eat(TokenType::LetKeyword);
@@ -129,11 +162,11 @@ impl<'a> ParseStatements for Parser<'a> {
 
             self.eat(TokenType::Comma);
         }
-        self.eat(TokenType::StatementEnd);
+        if consume_statement_end {
+            self.eat(TokenType::StatementEnd);
+        }
 
-        Box::new(Statement::VariableDeclaration {
-            variables,
-        })
+        Box::new(Statement::VariableDeclaration { variables })
     }
 
     fn if_statement(&mut self) -> StatementRef {
@@ -157,6 +190,76 @@ impl<'a> ParseStatements for Parser<'a> {
             consequent,
             alternative,
         })
+    }
+
+    fn while_statement(&mut self) -> StatementRef {
+        self.eat(TokenType::WhileKeyword);
+
+        self.eat(TokenType::OpeningParenthesis);
+        let condition = self.expression();
+        self.eat(TokenType::ClosingParenthesis);
+
+        let body = self.statement();
+
+        Box::new(Statement::While { condition, body })
+    }
+
+    fn do_while_statement(&mut self) -> StatementRef {
+        self.eat(TokenType::DoKeyword);
+
+        let body = self.statement();
+
+        self.eat(TokenType::WhileKeyword);
+
+        self.eat(TokenType::OpeningParenthesis);
+        let condition = self.expression();
+        self.eat(TokenType::ClosingParenthesis);
+
+        self.eat(TokenType::StatementEnd);
+
+        Box::new(Statement::DoWhile { body, condition })
+    }
+
+    fn for_statement(&mut self) -> StatementRef {
+        self.eat(TokenType::ForKeyword);
+        self.eat(TokenType::OpeningParenthesis);
+
+        let initializer = if self.is_token(TokenType::StatementEnd) {
+            None
+        } else {
+            Some(self.for_statement_init())
+        };
+        self.eat(TokenType::StatementEnd);
+
+        let condition = if self.is_token(TokenType::StatementEnd) {
+            None
+        } else {
+            Some(self.expression())
+        };
+        self.eat(TokenType::StatementEnd);
+
+        let increment = if self.is_token(TokenType::ClosingParenthesis) {
+            None
+        } else {
+            Some(self.expression())
+        };
+        self.eat(TokenType::ClosingParenthesis);
+
+        let body = self.statement();
+
+        Box::new(Statement::For {
+            initializer,
+            condition,
+            increment,
+            body,
+        })
+    }
+
+    fn for_statement_init(&mut self) -> StatementRef {
+        if self.is_token(TokenType::LetKeyword) {
+            return self.variable_declaration_statement(false);
+        }
+        self.expression_statement()
     }
 
     fn empty_statement(&mut self) -> StatementRef {

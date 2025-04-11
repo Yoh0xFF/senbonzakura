@@ -23,6 +23,22 @@ pub(super) fn visit_statement(
             consequent,
             alternative,
         } => visit_conditional_statement(visitor, condition, consequent, alternative.as_deref()),
+        Statement::While { condition, body } => visit_while_statement(visitor, condition, body),
+        Statement::DoWhile { condition, body } => {
+            visit_do_while_statement(visitor, condition, body)
+        }
+        Statement::For {
+            initializer,
+            condition,
+            increment,
+            body,
+        } => visit_for_statement(
+            visitor,
+            initializer.as_deref(),
+            condition.as_deref(),
+            increment.as_deref(),
+            body,
+        ),
     };
 
     result
@@ -118,4 +134,30 @@ fn visit_conditional_statement(
     visitor.end_expr()?;
 
     Ok(())
+}
+
+fn visit_while_statement(
+    visitor: &mut SExpressionVisitor,
+    condition: &Expression,
+    body: &Statement,
+) -> Result<()> {
+    todo!()
+}
+
+fn visit_do_while_statement(
+    visitor: &mut SExpressionVisitor,
+    condition: &Expression,
+    body: &Statement,
+) -> Result<()> {
+    todo!()
+}
+
+fn visit_for_statement(
+    visitor: &mut SExpressionVisitor,
+    initializer: Option<&Statement>,
+    condition: Option<&Expression>,
+    increment: Option<&Expression>,
+    body: &Statement,
+) -> Result<()> {
+    todo!()
 }
