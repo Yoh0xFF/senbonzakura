@@ -9,21 +9,21 @@ use anyhow::Result;
  */
 pub trait ToSExpression {
     #[allow(dead_code)]
-    fn to_sexpression(&self) -> Result<String>;
+    fn to_s_expression(&self) -> Result<String>;
 
     #[allow(dead_code)]
-    fn to_pretty_sexpression(&self) -> Result<String>;
+    fn to_pretty_s_expression(&self) -> Result<String>;
 }
 
 impl ToSExpression for StatementRef {
-    fn to_sexpression(&self) -> Result<String> {
+    fn to_s_expression(&self) -> Result<String> {
         let mut visitor = SExpressionVisitor::new();
         visitor.output.clear();
         self.accept(&mut visitor)?;
         Ok(visitor.output)
     }
 
-    fn to_pretty_sexpression(&self) -> Result<String> {
+    fn to_pretty_s_expression(&self) -> Result<String> {
         let config = SExpressionConfig {
             pretty: true,
             indent_size: 2,
@@ -37,14 +37,14 @@ impl ToSExpression for StatementRef {
 }
 
 impl ToSExpression for ExpressionRef {
-    fn to_sexpression(&self) -> Result<String> {
+    fn to_s_expression(&self) -> Result<String> {
         let mut visitor = SExpressionVisitor::new();
         visitor.output.clear();
         self.accept(&mut visitor)?;
         Ok(visitor.output)
     }
 
-    fn to_pretty_sexpression(&self) -> Result<String> {
+    fn to_pretty_s_expression(&self) -> Result<String> {
         let config = SExpressionConfig {
             pretty: true,
             indent_size: 2,

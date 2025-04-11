@@ -5,7 +5,7 @@ pub(super) fn execute(source: &str, expected_sexpression: &str) {
 
     let ast = parser.parse();
     let actual_sexp = ast
-        .to_sexpression()
+        .to_s_expression()
         .expect("Failed to convert AST to s-expression");
 
     // Normalize expected s-expression by removing indentation

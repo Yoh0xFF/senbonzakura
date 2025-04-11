@@ -1,12 +1,12 @@
 use ast::Statement;
 use lexer::{Lexer, Token};
 use parser::Parser;
-use visitor_sexpression::ToSExpression;
+use visitor_s_expression::ToSExpression;
 
 mod ast;
 mod lexer;
 mod parser;
-mod visitor_sexpression;
+mod visitor_s_expression;
 
 fn main() {
     let mut lexer = Lexer::new(r#"12 17 "Hello"   'world' "#);
@@ -23,6 +23,6 @@ fn main() {
 
     let mut parser = Parser::new("12; { let x, y = 12; x = 7; let z = x + y; }");
     let ast = parser.parse();
-    let sexpression = ast.to_pretty_sexpression().unwrap();
+    let sexpression = ast.to_pretty_s_expression().unwrap();
     println!("SExpression:\n{}", sexpression);
 }
