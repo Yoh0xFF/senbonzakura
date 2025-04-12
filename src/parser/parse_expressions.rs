@@ -1,9 +1,12 @@
+use super::Parser;
 use crate::ast::{
     AssignmentOperator, BinaryOperator, Expression, ExpressionRef, LogicalOperator, UnaryOperator,
 };
 use crate::lexer::TokenType;
-
-use super::Parser;
+use crate::parser::parsers::{
+    eat, eat_any_of, is_any_of_token, is_assignment_operator_token, is_literal_token,
+    is_valid_assignment_target, parse_binary_expression, parse_logical_expression,
+};
 
 pub(super) trait ParseExpressions {
     /**
@@ -163,10 +166,10 @@ impl<'a> ParseExpressions for Parser<'a> {
         let identifier = self.identifier_expression();
 
         let initializer: Option<ExpressionRef> =
-            if self.is_any_of_token(&[TokenType::StatementEnd, TokenType::Comma]) {
+            if is_any_of_token(self, &[TokenType::StatementEnd, TokenType::Comma]) {
                 None
             } else {
-                self.eat(TokenType::SimpleAssignmentOperator);
+                eat(self, TokenType::SimpleAssignmentOperator);
                 let initializer = self.assignment_expression();
                 Some(initializer)
             };
@@ -180,14 +183,17 @@ impl<'a> ParseExpressions for Parser<'a> {
     fn assignment_expression(&mut self) -> ExpressionRef {
         let left = self.logical_or_expression();
 
-        if !self.is_assignment_operator_token() {
+        if !is_assignment_operator_token(self) {
             return left;
         }
 
-        let assignment_operator_token = self.eat_any_of(&[
-            TokenType::SimpleAssignmentOperator,
-            TokenType::ComplexAssignmentOperator,
-        ]);
+        let assignment_operator_token = eat_any_of(
+            self,
+            &[
+                TokenType::SimpleAssignmentOperator,
+                TokenType::ComplexAssignmentOperator,
+            ],
+        );
         let assignment_operator_value =
             &self.source[assignment_operator_token.i..assignment_operator_token.j];
         let assignment_operator = match assignment_operator_value {
@@ -199,7 +205,7 @@ impl<'a> ParseExpressions for Parser<'a> {
             _ => panic!("Unknown assignment operator {}", assignment_operator_value),
         };
 
-        if !self.is_valid_assignment_target(&left) {
+        if !is_valid_assignment_target(&left) {
             panic!("Invalid left-hand side in the assignment expression");
         }
 
@@ -211,7 +217,8 @@ impl<'a> ParseExpressions for Parser<'a> {
     }
 
     fn logical_or_expression(&mut self) -> ExpressionRef {
-        self.parse_logical_expression(
+        parse_logical_expression(
+            self,
             TokenType::LogicalOrOperator,
             |parser| parser.logical_and_expression(),
             |op| match op {
@@ -222,7 +229,8 @@ impl<'a> ParseExpressions for Parser<'a> {
     }
 
     fn logical_and_expression(&mut self) -> ExpressionRef {
-        self.parse_logical_expression(
+        parse_logical_expression(
+            self,
             TokenType::LogicalAndOperator,
             |parser| parser.equality_expression(),
             |op| match op {
@@ -233,7 +241,8 @@ impl<'a> ParseExpressions for Parser<'a> {
     }
 
     fn equality_expression(&mut self) -> ExpressionRef {
-        self.parse_binary_expression(
+        parse_binary_expression(
+            self,
             TokenType::EqualityOperator,
             |parser| parser.relational_expression(),
             |op| match op {
@@ -245,7 +254,8 @@ impl<'a> ParseExpressions for Parser<'a> {
     }
 
     fn relational_expression(&mut self) -> ExpressionRef {
-        self.parse_binary_expression(
+        parse_binary_expression(
+            self,
             TokenType::RelationalOperator,
             |parser| parser.additive_expression(),
             |op| match op {
@@ -259,7 +269,8 @@ impl<'a> ParseExpressions for Parser<'a> {
     }
 
     fn additive_expression(&mut self) -> ExpressionRef {
-        self.parse_binary_expression(
+        parse_binary_expression(
+            self,
             TokenType::AdditiveOperator,
             |parser| parser.factor_expression(),
             |op| match op {
@@ -271,7 +282,8 @@ impl<'a> ParseExpressions for Parser<'a> {
     }
 
     fn factor_expression(&mut self) -> ExpressionRef {
-        self.parse_binary_expression(
+        parse_binary_expression(
+            self,
             TokenType::FactorOperator,
             |parser| parser.unary_expression(),
             |op| match op {
@@ -285,9 +297,14 @@ impl<'a> ParseExpressions for Parser<'a> {
     fn unary_expression(&mut self) -> ExpressionRef {
         let mut operator: Option<UnaryOperator> = None;
 
-        if self.is_any_of_token(&[TokenType::AdditiveOperator, TokenType::LogicalNotOperator]) {
-            let token =
-                self.eat_any_of(&[TokenType::AdditiveOperator, TokenType::LogicalNotOperator]);
+        if is_any_of_token(
+            self,
+            &[TokenType::AdditiveOperator, TokenType::LogicalNotOperator],
+        ) {
+            let token = eat_any_of(
+                self,
+                &[TokenType::AdditiveOperator, TokenType::LogicalNotOperator],
+            );
             let token_value = &self.source[token.i..token.j];
 
             operator = Some(match token_value {
@@ -313,7 +330,7 @@ impl<'a> ParseExpressions for Parser<'a> {
     }
 
     fn primary_expression(&mut self) -> ExpressionRef {
-        if self.is_literal_token() {
+        if is_literal_token(self) {
             return self.literal_expression();
         }
 
@@ -325,15 +342,15 @@ impl<'a> ParseExpressions for Parser<'a> {
     }
 
     fn group_expression(&mut self) -> ExpressionRef {
-        self.eat(TokenType::OpeningParenthesis);
+        eat(self, TokenType::OpeningParenthesis);
         let expression_ref = self.expression();
-        self.eat(TokenType::ClosingParenthesis);
+        eat(self, TokenType::ClosingParenthesis);
 
         expression_ref
     }
 
     fn identifier_expression(&mut self) -> ExpressionRef {
-        let identifier_token = self.eat(TokenType::Identifier);
+        let identifier_token = eat(self, TokenType::Identifier);
         let identifier_value = &self.source[identifier_token.i..identifier_token.j];
 
         Box::new(Expression::Identifier(String::from(identifier_value)))
@@ -350,7 +367,7 @@ impl<'a> ParseExpressions for Parser<'a> {
     }
 
     fn boolean_literal_expression(&mut self) -> ExpressionRef {
-        let token = self.eat(TokenType::Boolean);
+        let token = eat(self, TokenType::Boolean);
         let token_value = &self.source[token.i..token.j];
         let bool_value = token_value == "true";
 
@@ -358,13 +375,13 @@ impl<'a> ParseExpressions for Parser<'a> {
     }
 
     fn nil_literal_expression(&mut self) -> ExpressionRef {
-        self.eat(TokenType::Nil);
+        eat(self, TokenType::Nil);
 
         Box::new(Expression::NilLiteral)
     }
 
     fn numeric_literal_expression(&mut self) -> ExpressionRef {
-        let token = self.eat(TokenType::Number);
+        let token = eat(self, TokenType::Number);
         let token_value = &self.source[token.i..token.j];
         let token_value = token_value.trim().parse().unwrap();
 
@@ -372,7 +389,7 @@ impl<'a> ParseExpressions for Parser<'a> {
     }
 
     fn string_literal_expression(&mut self) -> ExpressionRef {
-        let token = self.eat(TokenType::String);
+        let token = eat(self, TokenType::String);
         let token_value = &self.source[token.i + 1..token.j - 1];
 
         Box::new(Expression::StringLiteral(String::from(token_value)))
