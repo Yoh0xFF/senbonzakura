@@ -1,4 +1,4 @@
-use super::parser_tests::execute;
+use super::utils::execute;
 
 #[test]
 fn test_binary_expression_with_additive_operator() {

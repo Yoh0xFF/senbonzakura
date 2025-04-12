@@ -1,28 +1,20 @@
 #[cfg(test)]
-mod parser_tests;
+mod utils;
 #[cfg(test)]
-mod test_binary_additive_and_factor_operator_expressions;
+mod test_expression_parse_binary;
 #[cfg(test)]
-mod test_binary_equality_expressions;
+mod test_expression_parse_relational_and_logical;
 #[cfg(test)]
-mod test_binary_logical_expressions;
+mod test_statement_parse_block;
 #[cfg(test)]
-mod test_binary_relational_operator_expressions;
+mod test_statement_parse_conditional;
 #[cfg(test)]
-mod test_block_statements;
+mod test_statement_parse_loop;
 #[cfg(test)]
-mod test_conditional_if_statements;
+mod test_expression_parse_literals;
 #[cfg(test)]
-mod test_do_while_statement;
+mod test_expression_parse_unary;
 #[cfg(test)]
-mod test_for_statement;
+mod test_expression_parse_variable_initialization_and_assignment;
 #[cfg(test)]
-mod test_literal_expressions;
-#[cfg(test)]
-mod test_unary_operator_expressions;
-#[cfg(test)]
-mod test_variable_assignment_expressions;
-#[cfg(test)]
-mod test_variable_declaration_statements;
-#[cfg(test)]
-mod test_while_statement;
+mod test_statement_parse_variable_declaration;
