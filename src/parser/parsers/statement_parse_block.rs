@@ -12,13 +12,12 @@ use crate::parser::parsers::utils::eat;
 use crate::parser::Parser;
 use crate::parser::parsers::statement_parse_function_declaration::{parse_function_declaration_statement, parse_return_statement};
 
-/**
- * Main entry point
- *
- * Program
- *  : StatementList
- *  ;
- */
+///
+/// Main entry point
+/// Program
+///  : StatementList
+///  ;
+///
 pub(super) fn parse_program_statement(parser: &mut Parser) -> StatementRef {
     let statement_list = parse_statement_list(parser, None);
     Box::new(Statement::Program {
@@ -26,11 +25,11 @@ pub(super) fn parse_program_statement(parser: &mut Parser) -> StatementRef {
     })
 }
 
-/**
- * BlockStatement
- *  : '{' OptStatementList '}'
- *  ;
- */
+///
+/// BlockStatement
+///  : '{' OptStatementList '}'
+///  ;
+///
 pub(super) fn parse_block_statement(parser: &mut Parser) -> StatementRef {
     eat(parser, TokenType::OpeningBrace);
 
@@ -45,12 +44,12 @@ pub(super) fn parse_block_statement(parser: &mut Parser) -> StatementRef {
     Box::new(Statement::Block { body: block })
 }
 
-/**
- * StatementList
- *  : Statement
- *  | StatementList Statement
- *  ;
- */
+///
+/// StatementList
+///  : Statement
+///  | StatementList Statement
+///  ;
+///
 pub(super) fn parse_statement_list(
     parser: &mut Parser,
     stop_token_type: Option<TokenType>,
@@ -67,18 +66,18 @@ pub(super) fn parse_statement_list(
     statement_list
 }
 
-/**
- * Statement
- *  : ExpressionStatement
- *  | BlockStatement
- *  | EmptyStatement
- *  | VariableStatement
- *  | ConditionalStatement
- *  | IterationStatement
- *  | FunctionDeclarationStatement
- *  | ReturnStatement
- *  ;
- */
+///
+/// Statement
+///  : ExpressionStatement
+///  | BlockStatement
+///  | EmptyStatement
+///  | VariableStatement
+///  | ConditionalStatement
+///  | IterationStatement
+///  | FunctionDeclarationStatement
+///  | ReturnStatement
+///  ;
+///
 pub(super) fn parse_statement(parser: &mut Parser) -> StatementRef {
     match parser.lookahead.token_type {
         TokenType::StatementEnd => parse_empty_statement(parser),

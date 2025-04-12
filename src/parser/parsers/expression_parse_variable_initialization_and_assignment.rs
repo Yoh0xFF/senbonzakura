@@ -7,11 +7,11 @@ use crate::parser::parsers::utils::{
 };
 use crate::parser::Parser;
 
-/**
- * VariableInitializationExpression
- *  : Identifier ['=' Initializer]
- *  ;
- */
+///
+/// VariableInitializationExpression
+///  : Identifier ['=' Initializer]
+///  ;
+///
 pub(super) fn parse_variable_initialization_expression(parser: &mut Parser) -> ExpressionRef {
     let identifier = parse_identifier_expression(parser);
 
@@ -30,12 +30,12 @@ pub(super) fn parse_variable_initialization_expression(parser: &mut Parser) -> E
     })
 }
 
-/**
- * AssignmentExpression
- *  : LogicalOrExpression
- *  | LeftHandSideExpression ASSIGNMENT_OPERATOR AssignmentExpression
- *  ;
- */
+///
+/// AssignmentExpression
+///  : LogicalOrExpression
+///  | LeftHandSideExpression ASSIGNMENT_OPERATOR AssignmentExpression
+///  ;
+///
 pub(super) fn parse_assignment_expression(parser: &mut Parser) -> ExpressionRef {
     let left = parse_logical_or_expression(parser);
 

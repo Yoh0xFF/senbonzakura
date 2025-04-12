@@ -7,11 +7,11 @@ use crate::parser::parsers::statement_parse_variable_declaration::parse_variable
 use crate::parser::parsers::utils::{eat, is_token};
 use crate::parser::Parser;
 
-/**
- * WhileStatement
- *  : while '(' Expression ')' Statement ';'
- *  ;
- */
+///
+/// WhileStatement
+///  : while '(' Expression ')' Statement ';'
+///  ;
+///
 pub(super) fn parse_while_statement(parser: &mut Parser) -> StatementRef {
     eat(parser, TokenType::WhileKeyword);
 
@@ -24,11 +24,11 @@ pub(super) fn parse_while_statement(parser: &mut Parser) -> StatementRef {
     Box::new(Statement::While { condition, body })
 }
 
-/**
- * DoWhileStatement
- *  : do Statement while '(' Expression ')' ';'
- *  ;
- */
+///
+/// DoWhileStatement
+///  : do Statement while '(' Expression ')' ';'
+///  ;
+///
 pub(super) fn parse_do_while_statement(parser: &mut Parser) -> StatementRef {
     eat(parser, TokenType::DoKeyword);
 
@@ -45,11 +45,11 @@ pub(super) fn parse_do_while_statement(parser: &mut Parser) -> StatementRef {
     Box::new(Statement::DoWhile { body, condition })
 }
 
-/**
- * ForStatement
- *  : for '(' [InitExpression] ';' [Expression] ';' [Expression] ')' Statement
- *  ;
- */
+///
+/// ForStatement
+///  : for '(' [InitExpression] ';' [Expression] ';' [Expression] ')' Statement
+///  ;
+///
 pub(super) fn parse_for_statement(parser: &mut Parser) -> StatementRef {
     eat(parser, TokenType::ForKeyword);
     eat(parser, TokenType::OpeningParenthesis);
@@ -85,12 +85,12 @@ pub(super) fn parse_for_statement(parser: &mut Parser) -> StatementRef {
     })
 }
 
-/**
- * ForStatementInit
- *  : VariableDeclarationStatement
- *  | Expression
- *  ;
- */
+///
+/// ForStatementInit
+///  : VariableDeclarationStatement
+///  | Expression
+///  ;
+///
 pub(super) fn parse_for_statement_init_statement(parser: &mut Parser) -> StatementRef {
     if is_token(parser, TokenType::LetKeyword) {
         return parse_variable_declaration_statement(parser, false);

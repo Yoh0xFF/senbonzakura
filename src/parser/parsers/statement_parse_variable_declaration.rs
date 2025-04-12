@@ -4,15 +4,15 @@ use crate::parser::parsers::expression_parse_variable_initialization_and_assignm
 use crate::parser::parsers::utils::{eat, is_token};
 use crate::parser::Parser;
 
-/**
- * VariableDeclarationStatement
- *  : 'let' VariableInitializationList ';'
- *
- * VariableInitializationList
- *  : VariableInitialization
- *  | VariableInitializationList ',' VariableInitialization
- *  ;
- */
+///
+/// VariableDeclarationStatement
+///  : 'let' VariableInitializationList ';'
+/// 
+/// VariableInitializationList
+///  : VariableInitialization
+///  | VariableInitializationList ',' VariableInitialization
+///  ;
+///
 pub(super) fn parse_variable_declaration_statement(
     parser: &mut Parser,
     consume_statement_end: bool,

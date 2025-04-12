@@ -4,12 +4,12 @@ use crate::parser::parsers::expression_parse_binary::parse_additive_expression;
 use crate::parser::parsers::utils::{parse_binary_expression, parse_logical_expression};
 use crate::parser::Parser;
 
-/**
- * LogicalOrExpression
- *  : LogicalAndExpression LOGICAL_OR_OPERATOR LogicalOrExpression
- *  | LogicalAndExpression
- *  ;
- */
+///
+/// LogicalOrExpression
+///  : LogicalAndExpression LOGICAL_OR_OPERATOR LogicalOrExpression
+///  | LogicalAndExpression
+///  ;
+///
 pub(super) fn parse_logical_or_expression(parser: &mut Parser) -> ExpressionRef {
     parse_logical_expression(
         parser,
@@ -22,12 +22,12 @@ pub(super) fn parse_logical_or_expression(parser: &mut Parser) -> ExpressionRef 
     )
 }
 
-/**
- * LogicalAndExpression
- *  : EqualityExpression LOGICAL_AND_OPERATOR LogicalAndExpression
- *  | EqualityExpression
- *  ;
- */
+///
+/// LogicalAndExpression
+///  : EqualityExpression LOGICAL_AND_OPERATOR LogicalAndExpression
+///  | EqualityExpression
+///  ;
+///
 pub(super) fn parse_logical_and_expression(parser: &mut Parser) -> ExpressionRef {
     parse_logical_expression(
         parser,
@@ -40,12 +40,12 @@ pub(super) fn parse_logical_and_expression(parser: &mut Parser) -> ExpressionRef
     )
 }
 
-/**
- * EqualityExpression
- *  : RelationalExpression EQUALITY_OPERATOR EqualityExpression
- *  | RelationalExpression
- *  ;
- */
+///
+/// EqualityExpression
+///  : RelationalExpression EQUALITY_OPERATOR EqualityExpression
+///  | RelationalExpression
+///  ;
+///
 pub(super) fn parse_equality_expression(parser: &mut Parser) -> ExpressionRef {
     parse_binary_expression(
         parser,
@@ -59,12 +59,12 @@ pub(super) fn parse_equality_expression(parser: &mut Parser) -> ExpressionRef {
     )
 }
 
-/**
- * RelationalExpression
- *  : AdditiveExpression
- *  | AdditiveExpression RELATIONAL_OPERATOR AdditiveExpression
- *  ;
- */
+///
+/// RelationalExpression
+///  : AdditiveExpression
+///  | AdditiveExpression RELATIONAL_OPERATOR AdditiveExpression
+///  ;
+///
 pub(super) fn parse_relational_expression(parser: &mut Parser) -> ExpressionRef {
     parse_binary_expression(
         parser,

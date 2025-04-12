@@ -1,8 +1,8 @@
 use crate::{Lexer, Token};
 
-/**
- * Recursive descent parser
- */
+///
+/// Recursive descent parser
+///
 #[derive(Debug, Clone)]
 pub struct Parser<'a> {
     pub(super) source: &'a str,

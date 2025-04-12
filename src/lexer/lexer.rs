@@ -5,11 +5,10 @@ use super::{
     token::{Token, TokenType},
 };
 
-/**
- * Lexer class
- *
- * Lazily pulls a token from a stream
- */
+///
+/// Lexer class
+/// Lazily pulls a token from a stream
+///
 #[derive(Debug, Clone)]
 pub struct Lexer<'a> {
     source: &'a str,
@@ -28,9 +27,9 @@ impl<'a> Lexer<'a> {
         }
     }
 
-    /**
-     * Obtain next token
-     */
+    ///
+    /// Obtain next token
+    ///
     pub fn next_token(&mut self) -> Token {
         let current_index = self.index;
 

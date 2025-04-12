@@ -6,10 +6,10 @@ use crate::parser::parsers::statement_parse_block::parse_block_statement;
 use crate::parser::parsers::utils::{eat, is_token};
 use crate::parser::Parser;
 
-/**
- * FunctionDeclaration
- *  : def '(' [FormalParameterList] ')' BlockStatement
- */
+///
+/// FunctionDeclaration
+///  : def '(' [FormalParameterList] ')' BlockStatement
+///
 pub(super) fn parse_function_declaration_statement(parser: &mut Parser) -> StatementRef {
     eat(parser, TokenType::DefKeyword);
     let name = parse_identifier_expression(parser);
@@ -31,12 +31,12 @@ pub(super) fn parse_function_declaration_statement(parser: &mut Parser) -> State
     })
 }
 
-/**
- * FormalParameterList
- *  : IdentifierExpression
- *  | FormalParameterList ',' IdentifierExpression
- *  ;
- */
+///
+/// FormalParameterList
+///  : IdentifierExpression
+///  | FormalParameterList ',' IdentifierExpression
+///  ;
+///
 pub(super) fn parse_formal_parameter_list_expression(parser: &mut Parser) -> ExpressionList {
     let mut parameters = vec![];
 
@@ -52,10 +52,10 @@ pub(super) fn parse_formal_parameter_list_expression(parser: &mut Parser) -> Exp
     parameters
 }
 
-/**
- * ReturnStatement
- *  : return [Expression] 'l'
- */
+///
+/// ReturnStatement
+///  : return [Expression] 'l'
+///
 pub(super) fn parse_return_statement(parser: &mut Parser) -> StatementRef {
     eat(parser, TokenType::ReturnKeyword);
     let argument = if is_token(parser, TokenType::StatementEnd) {

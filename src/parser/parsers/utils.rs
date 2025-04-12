@@ -2,9 +2,9 @@ use crate::ast::{BinaryOperator, Expression, ExpressionRef, LogicalOperator};
 use crate::lexer::{Token, TokenType};
 use crate::parser::Parser;
 
-/**
- * Expects a token of a given type
- */
+///
+/// Expects a token of a given type
+///
 pub(super) fn eat(parser: &mut Parser, token_type: TokenType) -> Token {
     if parser.lookahead.token_type != token_type {
         panic!(
@@ -18,9 +18,9 @@ pub(super) fn eat(parser: &mut Parser, token_type: TokenType) -> Token {
     pre_token
 }
 
-/**
- * Expects a token of a given types
- */
+///
+/// Expects a token of a given types
+///
 pub(super) fn eat_any_of(parser: &mut Parser, token_types: &[TokenType]) -> Token {
     for token_type in token_types {
         if parser.lookahead.token_type == *token_type {
@@ -36,17 +36,17 @@ pub(super) fn eat_any_of(parser: &mut Parser, token_types: &[TokenType]) -> Toke
     );
 }
 
-/**
- * Check the current token type
- */
+///
+/// Check the current token type
+///
 #[allow(dead_code)]
 pub(super) fn is_token(parser: &mut Parser, token_type: TokenType) -> bool {
     parser.lookahead.token_type == token_type
 }
 
-/**
- * Check the current token type
- */
+///
+/// Check the current token type
+///
 #[allow(dead_code)]
 pub(super) fn is_any_of_token(parser: &mut Parser, token_types: &[TokenType]) -> bool {
     for token_type in token_types {
@@ -58,9 +58,9 @@ pub(super) fn is_any_of_token(parser: &mut Parser, token_types: &[TokenType]) ->
     false
 }
 
-/**
- * Check if the expression is valid assignment target
- */
+///
+/// Check if the expression is valid assignment target
+///
 #[allow(dead_code)]
 pub(super) fn is_valid_assignment_target(expression: &ExpressionRef) -> bool {
     match expression.as_ref() {
@@ -69,9 +69,9 @@ pub(super) fn is_valid_assignment_target(expression: &ExpressionRef) -> bool {
     }
 }
 
-/**
- * Check if the current token is literal
- */
+///
+/// Check if the current token is literal
+///
 #[allow(dead_code)]
 pub(super) fn is_literal_token(parser: &mut Parser) -> bool {
     is_any_of_token(
@@ -85,9 +85,9 @@ pub(super) fn is_literal_token(parser: &mut Parser) -> bool {
     )
 }
 
-/**
- * Check if the current token is assignment operator
- */
+///
+/// Check if the current token is assignment operator
+///
 #[allow(dead_code)]
 pub(super) fn is_assignment_operator_token(parser: &mut Parser) -> bool {
     is_any_of_token(
@@ -99,9 +99,9 @@ pub(super) fn is_assignment_operator_token(parser: &mut Parser) -> bool {
     )
 }
 
-/**
- * Parse generic binary expression
- */
+///
+/// Parse generic binary expression
+///
 pub(super) fn parse_binary_expression<OperandParserFnType, OperatorMapperFnType>(
     parser: &mut Parser,
     token_type: TokenType,
@@ -131,9 +131,9 @@ where
     left
 }
 
-/**
- * Parse generic logical expression
- */
+///
+/// Parse generic logical expression
+///
 pub(super) fn parse_logical_expression<OperandParserFnType, OperatorMapperFnType>(
     parser: &mut Parser,
     token_type: TokenType,

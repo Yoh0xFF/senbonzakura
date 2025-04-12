@@ -4,9 +4,9 @@ use super::{SExpressionConfig, SExpressionVisitor};
 
 use anyhow::Result;
 
-/**
- * Add extension trait for convenient s-expression conversion
- */
+///
+/// Add extension trait for convenient s-expression conversion
+///
 pub trait ToSExpression {
     #[allow(dead_code)]
     fn to_s_expression(&self) -> Result<String>;

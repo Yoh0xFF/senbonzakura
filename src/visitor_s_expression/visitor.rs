@@ -7,9 +7,9 @@ use std::fmt::Write;
 
 use super::{visit_expressions::visit_expression, visit_statements::visit_statement};
 
-/**
- * S-Expression Visitor Configuration
- */
+///
+/// S-Expression Visitor Configuration
+///
 #[derive(Debug, Clone, Copy)]
 pub struct SExpressionConfig {
     pub pretty: bool,
@@ -25,9 +25,9 @@ impl Default for SExpressionConfig {
     }
 }
 
-/**
- * S-Expression Visitor for AST nodes
- */
+///
+/// S-Expression Visitor for AST nodes
+///
 pub struct SExpressionVisitor {
     pub(super) config: SExpressionConfig,
     pub(super) current_indent: usize,

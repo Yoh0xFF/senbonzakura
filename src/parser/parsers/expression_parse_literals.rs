@@ -3,14 +3,14 @@ use crate::lexer::TokenType;
 use crate::parser::parsers::utils::eat;
 use crate::parser::Parser;
 
-/**
- * Literal
- *  : BooleanLiteral
- *  : NilLiteral
- *  : NumericLiteral
- *  | StringLiteral
- *  ;
- */
+///
+/// Literal
+///  : BooleanLiteral
+///  : NilLiteral
+///  : NumericLiteral
+///  | StringLiteral
+///  ;
+///
 pub(super) fn parse_literal_expression(parser: &mut Parser) -> ExpressionRef {
     match parser.lookahead.token_type {
         TokenType::Boolean => parse_boolean_literal_expression(parser),
@@ -21,11 +21,11 @@ pub(super) fn parse_literal_expression(parser: &mut Parser) -> ExpressionRef {
     }
 }
 
-/**
- * BooleanLiteral
- *  : BOOLEAN
- *  ;
- */
+///
+/// BooleanLiteral
+///  : BOOLEAN
+///  ;
+///
 pub(super) fn parse_boolean_literal_expression(parser: &mut Parser) -> ExpressionRef {
     let token = eat(parser, TokenType::Boolean);
     let token_value = &parser.source[token.i..token.j];
@@ -34,22 +34,22 @@ pub(super) fn parse_boolean_literal_expression(parser: &mut Parser) -> Expressio
     Box::new(Expression::BooleanLiteral(bool_value))
 }
 
-/**
- * NilLiteral
- *  : NIL
- *  ;
- */
+///
+/// NilLiteral
+///  : NIL
+///  ;
+///
 pub(super) fn parse_nil_literal_expression(parser: &mut Parser) -> ExpressionRef {
     eat(parser, TokenType::Nil);
 
     Box::new(Expression::NilLiteral)
 }
 
-/**
- * NumericLiteral
- *  : NUMBER
- *  ;
- */
+///
+/// NumericLiteral
+///  : NUMBER
+///  ;
+///
 pub(super) fn parse_numeric_literal_expression(parser: &mut Parser) -> ExpressionRef {
     let token = eat(parser, TokenType::Number);
     let token_value = &parser.source[token.i..token.j];
@@ -58,11 +58,11 @@ pub(super) fn parse_numeric_literal_expression(parser: &mut Parser) -> Expressio
     Box::new(Expression::NumericLiteral(token_value))
 }
 
-/**
- * StringLiteral
- *  : STRING
- *  ;
- */
+///
+/// StringLiteral
+///  : STRING
+///  ;
+///
 pub(super) fn parse_string_literal_expression(parser: &mut Parser) -> ExpressionRef {
     let token = eat(parser, TokenType::String);
     let token_value = &parser.source[token.i + 1..token.j - 1];

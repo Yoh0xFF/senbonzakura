@@ -5,10 +5,10 @@ use crate::parser::parsers::statement_parse_block::parse_statement;
 use crate::parser::parsers::utils::{eat, is_token};
 use crate::parser::Parser;
 
-/**
- * ConditionalStatement
- *  : if '(' Expression ')' Statement [else Statement]
- */
+///
+/// ConditionalStatement
+///  : if '(' Expression ')' Statement [else Statement]
+///
 pub(super) fn parse_if_statement(parser: &mut Parser) -> StatementRef {
     eat(parser, TokenType::IfKeyword);
 

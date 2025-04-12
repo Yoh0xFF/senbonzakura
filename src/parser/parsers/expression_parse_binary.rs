@@ -4,12 +4,12 @@ use crate::parser::parsers::expression_parse_unary::parse_unary_expression;
 use crate::parser::parsers::utils::parse_binary_expression;
 use crate::parser::Parser;
 
-/**
- * AdditiveExpression
- *  : FactorExpression
- *  | AdditiveExpression ADDITIVE_OPERATOR FactorExpression
- *  ;
- */
+///
+/// AdditiveExpression
+///  : FactorExpression
+///  | AdditiveExpression ADDITIVE_OPERATOR FactorExpression
+///  ;
+///
 pub(super) fn parse_additive_expression(parser: &mut Parser) -> ExpressionRef {
     parse_binary_expression(
         parser,
@@ -23,12 +23,12 @@ pub(super) fn parse_additive_expression(parser: &mut Parser) -> ExpressionRef {
     )
 }
 
-/**
- * FactorExpression
- *  : PrimaryExpression
- *  | FactorExpression FACTOR_OPERATOR PrimaryExpression
- *  ;
- */
+///
+/// FactorExpression
+///  : PrimaryExpression
+///  | FactorExpression FACTOR_OPERATOR PrimaryExpression
+///  ;
+///
 pub(super) fn parse_factor_expression(parser: &mut Parser) -> ExpressionRef {
     parse_binary_expression(
         parser,

@@ -4,13 +4,13 @@ use crate::parser::parsers::expression_parse_primary::parse_left_hand_side_expre
 use crate::parser::parsers::utils::{eat_any_of, is_any_of_token};
 use crate::parser::Parser;
 
-/**
- * UnaryExpression
- *  : LeftHandSideExpression
- *  | ADDITIVE_OPERATOR UnaryExpression
- *  | LOGICAL_NOT_OPERATOR UnaryExpression
- *  ;
- */
+///
+/// UnaryExpression
+///  : LeftHandSideExpression
+///  | ADDITIVE_OPERATOR UnaryExpression
+///  | LOGICAL_NOT_OPERATOR UnaryExpression
+///  ;
+///
 pub(super) fn parse_unary_expression(parser: &mut Parser) -> ExpressionRef {
     let mut operator: Option<UnaryOperator> = None;
 
