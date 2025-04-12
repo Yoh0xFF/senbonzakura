@@ -1,7 +1,7 @@
 use crate::ast::{Statement, StatementRef};
 use crate::lexer::TokenType;
 use crate::parser::Parser;
-use crate::parser::parsers::{eat, expression};
+use crate::parser::parsers::{eat, root_expression};
 
 /**
  * EmptyStatement
@@ -20,7 +20,7 @@ pub fn empty_statement(parser: &mut Parser) -> StatementRef {
  *  ;
  */
 pub fn expression_statement(parser: &mut Parser, consume_statement_end: bool) -> StatementRef {
-    let expression = expression(parser);
+    let expression = root_expression(parser);
 
     if consume_statement_end {
         eat(parser, TokenType::StatementEnd);

@@ -1,5 +1,3 @@
-use crate::ast::StatementRef;
-use crate::parser::parsers::program;
 use crate::{Lexer, Token};
 
 /**
@@ -22,12 +20,5 @@ impl<'a> Parser<'a> {
             lexer,
             lookahead,
         }
-    }
-
-    /**
-     * Parses a string into an AST
-     */
-    pub fn parse(&mut self) -> StatementRef {
-        program(self)
     }
 }

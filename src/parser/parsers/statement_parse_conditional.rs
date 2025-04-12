@@ -1,7 +1,7 @@
 use crate::ast::{Statement, StatementRef};
 use crate::lexer::TokenType;
 use crate::parser::Parser;
-use crate::parser::parsers::{eat, expression, is_token, statement};
+use crate::parser::parsers::{eat, root_expression, is_token, statement};
 
 /**
  * ConditionalStatement
@@ -11,7 +11,7 @@ pub fn if_statement(parser: &mut Parser) -> StatementRef {
     eat(parser, TokenType::IfKeyword);
 
     eat(parser, TokenType::OpeningParenthesis);
-    let condition = expression(parser);
+    let condition = root_expression(parser);
     eat(parser, TokenType::ClosingParenthesis);
 
     let consequent = statement(parser);

@@ -1,6 +1,6 @@
 use crate::ast::{Statement, StatementRef};
 use crate::lexer::TokenType;
-use crate::parser::parsers::{eat, expression, expression_statement, is_token, statement, variable_declaration_statement};
+use crate::parser::parsers::{eat, root_expression, expression_statement, is_token, statement, variable_declaration_statement};
 use crate::parser::Parser;
 
 /**
@@ -12,7 +12,7 @@ pub fn while_statement(parser: &mut Parser) -> StatementRef {
     eat(parser, TokenType::WhileKeyword);
 
     eat(parser, TokenType::OpeningParenthesis);
-    let condition = expression(parser);
+    let condition = root_expression(parser);
     eat(parser, TokenType::ClosingParenthesis);
 
     let body = statement(parser);
@@ -33,7 +33,7 @@ pub fn do_while_statement(parser: &mut Parser) -> StatementRef {
     eat(parser, TokenType::WhileKeyword);
 
     eat(parser, TokenType::OpeningParenthesis);
-    let condition = expression(parser);
+    let condition = root_expression(parser);
     eat(parser, TokenType::ClosingParenthesis);
 
     eat(parser, TokenType::StatementEnd);
@@ -60,14 +60,14 @@ pub fn for_statement(parser: &mut Parser) -> StatementRef {
     let condition = if is_token(parser, TokenType::StatementEnd) {
         None
     } else {
-        Some(expression(parser))
+        Some(root_expression(parser))
     };
     eat(parser, TokenType::StatementEnd);
 
     let increment = if is_token(parser, TokenType::ClosingParenthesis) {
         None
     } else {
-        Some(expression(parser))
+        Some(root_expression(parser))
     };
     eat(parser, TokenType::ClosingParenthesis);
 

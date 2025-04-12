@@ -1,6 +1,6 @@
 use crate::ast::{Expression, ExpressionRef};
 use crate::lexer::TokenType;
-use crate::parser::parsers::expression_parse_root::expression;
+use crate::parser::parsers::root::root_expression;
 use crate::parser::parsers::{eat, is_literal_token, literal_expression};
 use crate::parser::Parser;
 
@@ -39,7 +39,7 @@ pub fn primary_expression(parser: &mut Parser) -> ExpressionRef {
  */
 pub fn group_expression(parser: &mut Parser) -> ExpressionRef {
     eat(parser, TokenType::OpeningParenthesis);
-    let expression_ref = expression(parser);
+    let expression_ref = root_expression(parser);
     eat(parser, TokenType::ClosingParenthesis);
 
     expression_ref
