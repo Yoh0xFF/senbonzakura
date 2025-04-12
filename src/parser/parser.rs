@@ -1,7 +1,6 @@
 use crate::ast::StatementRef;
+use crate::parser::parsers::program;
 use crate::{Lexer, Token};
-
-use super::parse_statements::ParseStatements;
 
 /**
  * Recursive descent parser
@@ -29,6 +28,6 @@ impl<'a> Parser<'a> {
      * Parses a string into an AST
      */
     pub fn parse(&mut self) -> StatementRef {
-        self.program()
+        program(self)
     }
 }
