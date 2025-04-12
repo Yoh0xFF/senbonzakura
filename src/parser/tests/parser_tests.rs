@@ -1,5 +1,5 @@
-use crate::{Parser, ToSExpression};
 use crate::parser::root_statement;
+use crate::{Parser, ToSExpression};
 
 pub(super) fn execute(source: &str, expected_sexpression: &str) {
     let mut parser = Parser::new(source);

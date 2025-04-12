@@ -1,7 +1,15 @@
 use crate::ast::{Statement, StatementList, StatementRef};
 use crate::lexer::TokenType;
+use crate::parser::parsers::statement_parse_conditional::if_statement;
+use crate::parser::parsers::statement_parse_empty_and_expression::{
+    empty_statement, expression_statement,
+};
+use crate::parser::parsers::statement_parse_loop::{
+    do_while_statement, for_statement, while_statement,
+};
+use crate::parser::parsers::statement_parse_variable_declaration::variable_declaration_statement;
+use crate::parser::parsers::utils::eat;
 use crate::parser::Parser;
-use crate::parser::parsers::{do_while_statement, eat, empty_statement, expression_statement, for_statement, if_statement, variable_declaration_statement, while_statement};
 
 /**
  * Main entry point
@@ -10,7 +18,7 @@ use crate::parser::parsers::{do_while_statement, eat, empty_statement, expressio
  *  : StatementList
  *  ;
  */
-pub fn program(parser: &mut Parser) -> StatementRef {
+pub(super) fn program(parser: &mut Parser) -> StatementRef {
     let statement_list = statement_list(parser, None);
     Box::new(Statement::Program {
         body: statement_list,
@@ -22,7 +30,7 @@ pub fn program(parser: &mut Parser) -> StatementRef {
  *  : '{' OptStatementList '}'
  *  ;
  */
-pub fn block_statement(parser: &mut Parser) -> StatementRef {
+pub(super) fn block_statement(parser: &mut Parser) -> StatementRef {
     eat(parser, TokenType::OpeningBrace);
 
     let block = if parser.lookahead.token_type != TokenType::ClosingBrace {
@@ -42,7 +50,10 @@ pub fn block_statement(parser: &mut Parser) -> StatementRef {
  *  | StatementList Statement
  *  ;
  */
-pub fn statement_list(parser: &mut Parser, stop_token_type: Option<TokenType>) -> StatementList {
+pub(super) fn statement_list(
+    parser: &mut Parser,
+    stop_token_type: Option<TokenType>,
+) -> StatementList {
     let mut statement_list: Vec<Statement> = vec![];
 
     while parser.lookahead.token_type != TokenType::End
@@ -65,7 +76,7 @@ pub fn statement_list(parser: &mut Parser, stop_token_type: Option<TokenType>) -
  *  | IterationStatement
  *  ;
  */
-pub fn statement(parser: &mut Parser) -> StatementRef {
+pub(super) fn statement(parser: &mut Parser) -> StatementRef {
     match parser.lookahead.token_type {
         TokenType::StatementEnd => empty_statement(parser),
         TokenType::OpeningBrace => block_statement(parser),

@@ -41,9 +41,11 @@ pub(super) fn init_regex_rules() -> Vec<(Regex, TokenType)> {
     let if_keyword = Regex::new(r"^\bif\b").expect("Failed to compile regex for the 'if' keyword");
     let else_keyword =
         Regex::new(r"^\belse\b").expect("Failed to compile regex for the 'else' keyword");
-    let while_keyword = Regex::new(r"^\bwhile\b").expect("Failed to compile regex for the 'while' keyword");
+    let while_keyword =
+        Regex::new(r"^\bwhile\b").expect("Failed to compile regex for the 'while' keyword");
     let do_keyword = Regex::new(r"^\bdo\b").expect("Failed to compile regex for the 'do' keyword");
-    let for_keyword = Regex::new(r"^\bfor\b").expect("Failed to compile regex for the 'for' keyword");
+    let for_keyword =
+        Regex::new(r"^\bfor\b").expect("Failed to compile regex for the 'for' keyword");
 
     // Equality Operator
     let equality_operator =

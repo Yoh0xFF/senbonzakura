@@ -13,6 +13,10 @@ mod test_block_statements;
 #[cfg(test)]
 mod test_conditional_if_statements;
 #[cfg(test)]
+mod test_do_while_statement;
+#[cfg(test)]
+mod test_for_statement;
+#[cfg(test)]
 mod test_literal_expressions;
 #[cfg(test)]
 mod test_unary_operator_expressions;
@@ -22,7 +26,3 @@ mod test_variable_assignment_expressions;
 mod test_variable_declaration_statements;
 #[cfg(test)]
 mod test_while_statement;
-#[cfg(test)]
-mod test_do_while_statement;
-#[cfg(test)]
-mod test_for_statement;

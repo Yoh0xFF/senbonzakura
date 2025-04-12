@@ -1,4 +1,4 @@
-use crate::ast::{ExpressionRef, ExpressionDispatcher, StatementRef, StatementDispatcher};
+use crate::ast::{ExpressionDispatcher, ExpressionRef, StatementDispatcher, StatementRef};
 
 use super::{SExpressionConfig, SExpressionVisitor};
 

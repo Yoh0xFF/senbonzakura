@@ -1,8 +1,8 @@
+use crate::parser::root_statement;
 use ast::Statement;
 use lexer::{Lexer, Token};
 use parser::Parser;
 use visitor_s_expression::ToSExpression;
-use crate::parser::root_statement;
 
 mod ast;
 mod lexer;

@@ -1,7 +1,8 @@
 use crate::ast::{Expression, ExpressionRef, UnaryOperator};
 use crate::lexer::TokenType;
+use crate::parser::parsers::expression_parse_primary::left_hand_side_expression;
+use crate::parser::parsers::utils::{eat_any_of, is_any_of_token};
 use crate::parser::Parser;
-use crate::parser::parsers::{eat_any_of, is_any_of_token, left_hand_side_expression};
 
 /**
  * UnaryExpression
@@ -10,7 +11,7 @@ use crate::parser::parsers::{eat_any_of, is_any_of_token, left_hand_side_express
  *  | LOGICAL_NOT_OPERATOR UnaryExpression
  *  ;
  */
-pub fn unary_expression(parser: &mut Parser) -> ExpressionRef {
+pub(super) fn unary_expression(parser: &mut Parser) -> ExpressionRef {
     let mut operator: Option<UnaryOperator> = None;
 
     if is_any_of_token(

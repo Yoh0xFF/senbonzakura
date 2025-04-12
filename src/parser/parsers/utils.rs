@@ -5,7 +5,7 @@ use crate::parser::Parser;
 /**
  * Expects a token of a given type
  */
-pub fn eat(parser: &mut Parser, token_type: TokenType) -> Token {
+pub(super) fn eat(parser: &mut Parser, token_type: TokenType) -> Token {
     if parser.lookahead.token_type != token_type {
         panic!(
             "Unexpected token: {}, expected token: '{}'",
@@ -21,7 +21,7 @@ pub fn eat(parser: &mut Parser, token_type: TokenType) -> Token {
 /**
  * Expects a token of a given types
  */
-pub fn eat_any_of(parser: &mut Parser, token_types: &[TokenType]) -> Token {
+pub(super) fn eat_any_of(parser: &mut Parser, token_types: &[TokenType]) -> Token {
     for token_type in token_types {
         if parser.lookahead.token_type == *token_type {
             let pre_token = parser.lookahead;
@@ -40,7 +40,7 @@ pub fn eat_any_of(parser: &mut Parser, token_types: &[TokenType]) -> Token {
  * Check the current token type
  */
 #[allow(dead_code)]
-pub fn is_token(parser: &mut Parser, token_type: TokenType) -> bool {
+pub(super) fn is_token(parser: &mut Parser, token_type: TokenType) -> bool {
     parser.lookahead.token_type == token_type
 }
 
@@ -48,7 +48,7 @@ pub fn is_token(parser: &mut Parser, token_type: TokenType) -> bool {
  * Check the current token type
  */
 #[allow(dead_code)]
-pub fn is_any_of_token(parser: &mut Parser, token_types: &[TokenType]) -> bool {
+pub(super) fn is_any_of_token(parser: &mut Parser, token_types: &[TokenType]) -> bool {
     for token_type in token_types {
         if parser.lookahead.token_type == *token_type {
             return true;
@@ -62,7 +62,7 @@ pub fn is_any_of_token(parser: &mut Parser, token_types: &[TokenType]) -> bool {
  * Check if the expression is valid assignment target
  */
 #[allow(dead_code)]
-pub fn is_valid_assignment_target(expression: &ExpressionRef) -> bool {
+pub(super) fn is_valid_assignment_target(expression: &ExpressionRef) -> bool {
     match expression.as_ref() {
         Expression::Identifier(_) => true,
         _ => false,
@@ -73,7 +73,7 @@ pub fn is_valid_assignment_target(expression: &ExpressionRef) -> bool {
  * Check if the current token is literal
  */
 #[allow(dead_code)]
-pub fn is_literal_token(parser: &mut Parser) -> bool {
+pub(super) fn is_literal_token(parser: &mut Parser) -> bool {
     is_any_of_token(
         parser,
         &[
@@ -89,7 +89,7 @@ pub fn is_literal_token(parser: &mut Parser) -> bool {
  * Check if the current token is assignment operator
  */
 #[allow(dead_code)]
-pub fn is_assignment_operator_token(parser: &mut Parser) -> bool {
+pub(super) fn is_assignment_operator_token(parser: &mut Parser) -> bool {
     is_any_of_token(
         parser,
         &[
@@ -102,7 +102,7 @@ pub fn is_assignment_operator_token(parser: &mut Parser) -> bool {
 /**
  * Parse generic binary expression
  */
-pub fn parse_binary_expression<OperandParserFnType, OperatorMapperFnType>(
+pub(super) fn parse_binary_expression<OperandParserFnType, OperatorMapperFnType>(
     parser: &mut Parser,
     token_type: TokenType,
     operand_parser: OperandParserFnType,
@@ -134,7 +134,7 @@ where
 /**
  * Parse generic logical expression
  */
-pub fn parse_logical_expression<OperandParserFnType, OperatorMapperFnType>(
+pub(super) fn parse_logical_expression<OperandParserFnType, OperatorMapperFnType>(
     parser: &mut Parser,
     token_type: TokenType,
     operand_parser: OperandParserFnType,

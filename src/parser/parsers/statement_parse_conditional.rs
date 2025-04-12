@@ -1,13 +1,15 @@
 use crate::ast::{Statement, StatementRef};
 use crate::lexer::TokenType;
+use crate::parser::parsers::root_expression;
+use crate::parser::parsers::statement_parse_block::statement;
+use crate::parser::parsers::utils::{eat, is_token};
 use crate::parser::Parser;
-use crate::parser::parsers::{eat, root_expression, is_token, statement};
 
 /**
  * ConditionalStatement
  *  : if '(' Expression ')' Statement [else Statement]
  */
-pub fn if_statement(parser: &mut Parser) -> StatementRef {
+pub(super) fn if_statement(parser: &mut Parser) -> StatementRef {
     eat(parser, TokenType::IfKeyword);
 
     eat(parser, TokenType::OpeningParenthesis);

@@ -1,14 +1,18 @@
 use crate::ast::{AssignmentOperator, Expression, ExpressionRef};
 use crate::lexer::TokenType;
+use crate::parser::parsers::expression_parse_primary::identifier_expression;
+use crate::parser::parsers::expression_parse_relational_and_logical::logical_or_expression;
+use crate::parser::parsers::utils::{
+    eat, eat_any_of, is_any_of_token, is_assignment_operator_token, is_valid_assignment_target,
+};
 use crate::parser::Parser;
-use crate::parser::parsers::{eat, eat_any_of, identifier_expression, is_any_of_token, is_assignment_operator_token, is_valid_assignment_target, logical_or_expression};
 
 /**
  * VariableInitializationExpression
  *  : Identifier ['=' Initializer]
  *  ;
  */
-pub fn variable_initialization_expression(parser: &mut Parser) -> ExpressionRef {
+pub(super) fn variable_initialization_expression(parser: &mut Parser) -> ExpressionRef {
     let identifier = identifier_expression(parser);
 
     let initializer: Option<ExpressionRef> =
@@ -32,7 +36,7 @@ pub fn variable_initialization_expression(parser: &mut Parser) -> ExpressionRef 
  *  | LeftHandSideExpression ASSIGNMENT_OPERATOR AssignmentExpression
  *  ;
  */
-pub fn assignment_expression(parser: &mut Parser) -> ExpressionRef {
+pub(super) fn assignment_expression(parser: &mut Parser) -> ExpressionRef {
     let left = logical_or_expression(parser);
 
     if !is_assignment_operator_token(parser) {

@@ -1,6 +1,7 @@
 use crate::ast::{ExpressionRef, StatementRef};
+use crate::parser::parsers::expression_parse_variable_initialization_and_assignment::assignment_expression;
+use crate::parser::parsers::statement_parse_block::program;
 use crate::parser::Parser;
-use crate::parser::parsers::{assignment_expression, program};
 
 /**
  * Parses a string into an AST

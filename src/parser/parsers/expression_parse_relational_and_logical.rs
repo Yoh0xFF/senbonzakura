@@ -1,7 +1,8 @@
 use crate::ast::{BinaryOperator, ExpressionRef, LogicalOperator};
 use crate::lexer::TokenType;
+use crate::parser::parsers::expression_parse_binary::additive_expression;
+use crate::parser::parsers::utils::{parse_binary_expression, parse_logical_expression};
 use crate::parser::Parser;
-use crate::parser::parsers::{additive_expression, parse_binary_expression, parse_logical_expression};
 
 /**
  * LogicalOrExpression
@@ -9,7 +10,7 @@ use crate::parser::parsers::{additive_expression, parse_binary_expression, parse
  *  | LogicalAndExpression
  *  ;
  */
-pub fn logical_or_expression(parser: &mut Parser) -> ExpressionRef {
+pub(super) fn logical_or_expression(parser: &mut Parser) -> ExpressionRef {
     parse_logical_expression(
         parser,
         TokenType::LogicalOrOperator,
@@ -27,7 +28,7 @@ pub fn logical_or_expression(parser: &mut Parser) -> ExpressionRef {
  *  | EqualityExpression
  *  ;
  */
-pub fn logical_and_expression(parser: &mut Parser) -> ExpressionRef {
+pub(super) fn logical_and_expression(parser: &mut Parser) -> ExpressionRef {
     parse_logical_expression(
         parser,
         TokenType::LogicalAndOperator,
@@ -45,7 +46,7 @@ pub fn logical_and_expression(parser: &mut Parser) -> ExpressionRef {
  *  | RelationalExpression
  *  ;
  */
-pub fn equality_expression(parser: &mut Parser) -> ExpressionRef {
+pub(super) fn equality_expression(parser: &mut Parser) -> ExpressionRef {
     parse_binary_expression(
         parser,
         TokenType::EqualityOperator,
@@ -64,7 +65,7 @@ pub fn equality_expression(parser: &mut Parser) -> ExpressionRef {
  *  | AdditiveExpression RELATIONAL_OPERATOR AdditiveExpression
  *  ;
  */
-pub fn relational_expression(parser: &mut Parser) -> ExpressionRef {
+pub(super) fn relational_expression(parser: &mut Parser) -> ExpressionRef {
     parse_binary_expression(
         parser,
         TokenType::RelationalOperator,

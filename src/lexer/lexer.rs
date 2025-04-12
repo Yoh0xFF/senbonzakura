@@ -71,7 +71,7 @@ impl<'a> Lexer<'a> {
                         j: crnt_index + token_len,
                     }
                 }
-            }
+            };
         }
 
         // If we get here, no token matched

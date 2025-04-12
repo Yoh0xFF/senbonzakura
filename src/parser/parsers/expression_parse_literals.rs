@@ -1,7 +1,7 @@
 use crate::ast::{Expression, ExpressionRef};
 use crate::lexer::TokenType;
+use crate::parser::parsers::utils::eat;
 use crate::parser::Parser;
-use crate::parser::parsers::eat;
 
 /**
  * Literal
@@ -11,7 +11,7 @@ use crate::parser::parsers::eat;
  *  | StringLiteral
  *  ;
  */
-pub fn literal_expression(parser: &mut Parser) -> ExpressionRef {
+pub(super) fn literal_expression(parser: &mut Parser) -> ExpressionRef {
     match parser.lookahead.token_type {
         TokenType::Boolean => boolean_literal_expression(parser),
         TokenType::Nil => nil_literal_expression(parser),
@@ -26,7 +26,7 @@ pub fn literal_expression(parser: &mut Parser) -> ExpressionRef {
  *  : BOOLEAN
  *  ;
  */
-pub fn boolean_literal_expression(parser: &mut Parser) -> ExpressionRef {
+pub(super) fn boolean_literal_expression(parser: &mut Parser) -> ExpressionRef {
     let token = eat(parser, TokenType::Boolean);
     let token_value = &parser.source[token.i..token.j];
     let bool_value = token_value == "true";
@@ -39,7 +39,7 @@ pub fn boolean_literal_expression(parser: &mut Parser) -> ExpressionRef {
  *  : NIL
  *  ;
  */
-pub fn nil_literal_expression(parser: &mut Parser) -> ExpressionRef {
+pub(super) fn nil_literal_expression(parser: &mut Parser) -> ExpressionRef {
     eat(parser, TokenType::Nil);
 
     Box::new(Expression::NilLiteral)
@@ -50,7 +50,7 @@ pub fn nil_literal_expression(parser: &mut Parser) -> ExpressionRef {
  *  : NUMBER
  *  ;
  */
-pub fn numeric_literal_expression(parser: &mut Parser) -> ExpressionRef {
+pub(super) fn numeric_literal_expression(parser: &mut Parser) -> ExpressionRef {
     let token = eat(parser, TokenType::Number);
     let token_value = &parser.source[token.i..token.j];
     let token_value = token_value.trim().parse().unwrap();
@@ -63,7 +63,7 @@ pub fn numeric_literal_expression(parser: &mut Parser) -> ExpressionRef {
  *  : STRING
  *  ;
  */
-pub fn string_literal_expression(parser: &mut Parser) -> ExpressionRef {
+pub(super) fn string_literal_expression(parser: &mut Parser) -> ExpressionRef {
     let token = eat(parser, TokenType::String);
     let token_value = &parser.source[token.i + 1..token.j - 1];
 

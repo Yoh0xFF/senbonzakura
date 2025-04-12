@@ -38,7 +38,7 @@ pub enum Statement {
         condition: Option<ExpressionRef>,
         increment: Option<ExpressionRef>,
         body: StatementRef,
-    }
+    },
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]

@@ -1,6 +1,10 @@
 use crate::ast::{Statement, StatementRef};
 use crate::lexer::TokenType;
-use crate::parser::parsers::{eat, root_expression, expression_statement, is_token, statement, variable_declaration_statement};
+use crate::parser::parsers::root_expression;
+use crate::parser::parsers::statement_parse_block::statement;
+use crate::parser::parsers::statement_parse_empty_and_expression::expression_statement;
+use crate::parser::parsers::statement_parse_variable_declaration::variable_declaration_statement;
+use crate::parser::parsers::utils::{eat, is_token};
 use crate::parser::Parser;
 
 /**
@@ -8,7 +12,7 @@ use crate::parser::Parser;
  *  : while '(' Expression ')' Statement ';'
  *  ;
  */
-pub fn while_statement(parser: &mut Parser) -> StatementRef {
+pub(super) fn while_statement(parser: &mut Parser) -> StatementRef {
     eat(parser, TokenType::WhileKeyword);
 
     eat(parser, TokenType::OpeningParenthesis);
@@ -25,7 +29,7 @@ pub fn while_statement(parser: &mut Parser) -> StatementRef {
  *  : do Statement while '(' Expression ')' ';'
  *  ;
  */
-pub fn do_while_statement(parser: &mut Parser) -> StatementRef {
+pub(super) fn do_while_statement(parser: &mut Parser) -> StatementRef {
     eat(parser, TokenType::DoKeyword);
 
     let body = statement(parser);
@@ -46,7 +50,7 @@ pub fn do_while_statement(parser: &mut Parser) -> StatementRef {
  *  : for '(' [InitExpression] ';' [Expression] ';' [Expression] ')' Statement
  *  ;
  */
-pub fn for_statement(parser: &mut Parser) -> StatementRef {
+pub(super) fn for_statement(parser: &mut Parser) -> StatementRef {
     eat(parser, TokenType::ForKeyword);
     eat(parser, TokenType::OpeningParenthesis);
 
@@ -87,7 +91,7 @@ pub fn for_statement(parser: &mut Parser) -> StatementRef {
  *  | Expression
  *  ;
  */
-pub fn for_statement_init(parser: &mut Parser) -> StatementRef {
+pub(super) fn for_statement_init(parser: &mut Parser) -> StatementRef {
     if is_token(parser, TokenType::LetKeyword) {
         return variable_declaration_statement(parser, false);
     }
