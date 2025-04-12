@@ -32,19 +32,19 @@ impl<'a> Lexer<'a> {
      * Obtain next token
      */
     pub fn next_token(&mut self) -> Token {
-        let crnt_index = self.index;
+        let current_index = self.index;
 
         // Check if we're at the end of the source
-        if crnt_index >= self.source.len() {
+        if current_index >= self.source.len() {
             return Token {
                 token_type: TokenType::End,
-                i: crnt_index,
-                j: crnt_index,
+                i: current_index,
+                j: current_index,
             };
         }
 
         // Slice the string starting from the current position
-        let expression = &self.source[crnt_index..];
+        let expression = &self.source[current_index..];
 
         for (regex, token_type) in &self.rules {
             let token: &str;
@@ -59,16 +59,16 @@ impl<'a> Lexer<'a> {
                 | TokenType::SingleLineComment
                 | TokenType::MultiLineComment => {
                     // Skip whitespace and comments
-                    self.index = crnt_index + token_len;
+                    self.index = current_index + token_len;
                     self.next_token()
                 }
                 _ => {
                     // Return the matched token
-                    self.index = crnt_index + token_len;
+                    self.index = current_index + token_len;
                     Token {
                         token_type: *token_type,
-                        i: crnt_index,
-                        j: crnt_index + token_len,
+                        i: current_index,
+                        j: current_index + token_len,
                     }
                 }
             };
@@ -77,8 +77,8 @@ impl<'a> Lexer<'a> {
         // If we get here, no token matched
         panic!(
             "Invalid token at index {}, remaining text: '{}'",
-            crnt_index,
-            &self.source[crnt_index..]
+            current_index,
+            &self.source[current_index..]
         );
     }
 }

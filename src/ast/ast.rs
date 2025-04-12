@@ -39,6 +39,14 @@ pub enum Statement {
         increment: Option<ExpressionRef>,
         body: StatementRef,
     },
+    FunctionDeclaration {
+        name: ExpressionRef,
+        parameters: ExpressionList,
+        body: StatementRef,
+    },
+    Return {
+        argument: Option<ExpressionRef>,
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]

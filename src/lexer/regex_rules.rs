@@ -46,6 +46,8 @@ pub(super) fn init_regex_rules() -> Vec<(Regex, TokenType)> {
     let do_keyword = Regex::new(r"^\bdo\b").expect("Failed to compile regex for the 'do' keyword");
     let for_keyword =
         Regex::new(r"^\bfor\b").expect("Failed to compile regex for the 'for' keyword");
+    let def_keyword = Regex::new(r"^\bdefer\b").expect("Failed to compile regex for the 'defer' keyword");
+    let return_keyword = Regex::new(r"^\breturn\b").expect("Failed to compile regex for the 'return' keyword");
 
     // Equality Operator
     let equality_operator =
@@ -106,6 +108,8 @@ pub(super) fn init_regex_rules() -> Vec<(Regex, TokenType)> {
         (while_keyword, TokenType::WhileKeyword),
         (do_keyword, TokenType::DoKeyword),
         (for_keyword, TokenType::ForKeyword),
+        (def_keyword, TokenType::DefKeyword),
+        (return_keyword, TokenType::ReturnKeyword),
         // Important! Order matters this rule must be before the assignment operators
         (equality_operator, TokenType::EqualityOperator),
         (

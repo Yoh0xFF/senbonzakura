@@ -11,5 +11,6 @@ mod statement_parse_empty_and_expression;
 mod statement_parse_loop;
 mod statement_parse_variable_declaration;
 mod utils;
+mod statement_parse_function_declaration;
 
 pub(crate) use root::{root_expression, root_statement};

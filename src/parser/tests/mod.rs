@@ -18,3 +18,4 @@ mod test_expression_parse_unary;
 mod test_expression_parse_variable_initialization_and_assignment;
 #[cfg(test)]
 mod test_statement_parse_variable_declaration;
+mod test_statement_parse_function_declaration;

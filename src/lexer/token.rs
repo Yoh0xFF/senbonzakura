@@ -20,6 +20,8 @@ pub enum TokenType {
     WhileKeyword,
     DoKeyword,
     ForKeyword,
+    DefKeyword,
+    ReturnKeyword,
     // Identifier
     Identifier,
     // Equality operators

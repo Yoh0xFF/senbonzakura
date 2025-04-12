@@ -10,6 +10,7 @@ use crate::parser::parsers::statement_parse_loop::{
 use crate::parser::parsers::statement_parse_variable_declaration::variable_declaration_statement;
 use crate::parser::parsers::utils::eat;
 use crate::parser::Parser;
+use crate::parser::parsers::statement_parse_function_declaration::{parse_function_declaration_statement, parse_return_statement};
 
 /**
  * Main entry point
@@ -74,6 +75,8 @@ pub(super) fn statement_list(
  *  | VariableStatement
  *  | ConditionalStatement
  *  | IterationStatement
+ *  | FunctionDeclarationStatement
+ *  | ReturnStatement
  *  ;
  */
 pub(super) fn statement(parser: &mut Parser) -> StatementRef {
@@ -85,6 +88,8 @@ pub(super) fn statement(parser: &mut Parser) -> StatementRef {
         TokenType::WhileKeyword => while_statement(parser),
         TokenType::DoKeyword => do_while_statement(parser),
         TokenType::ForKeyword => for_statement(parser),
+        TokenType::DefKeyword => parse_function_declaration_statement(parser),
+        TokenType::ReturnKeyword => parse_return_statement(parser),
         _ => expression_statement(parser, true),
     }
 }

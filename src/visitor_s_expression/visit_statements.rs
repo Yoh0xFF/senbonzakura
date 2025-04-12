@@ -39,6 +39,12 @@ pub(super) fn visit_statement(
             increment.as_deref(),
             body,
         ),
+        Statement::FunctionDeclaration {
+            name,
+            parameters,
+            body,
+        } => visit_function_declaration_statement(visitor, name, parameters, body),
+        Statement::Return { argument } => visit_return_statement(visitor, argument.as_deref()),
     };
 
     result
@@ -210,4 +216,20 @@ fn visit_for_statement(
     visitor.end_expr()?;
 
     Ok(())
+}
+
+fn visit_function_declaration_statement(
+    visitor: &mut SExpressionVisitor,
+    name: &Expression,
+    parameters: &ExpressionList,
+    body: &Statement,
+) -> Result<()> {
+    todo!()
+}
+
+fn visit_return_statement(
+    visitor: &mut SExpressionVisitor,
+    argument: Option<&Expression>,
+) -> Result<()> {
+    todo!()
 }
