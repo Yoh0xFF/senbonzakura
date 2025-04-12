@@ -1,10 +1,10 @@
-use crate::parser::root_statement;
+use crate::parser::parse_root_statement;
 use crate::{Parser, ToSExpression};
 
 pub(super) fn execute(source: &str, expected_s_expression: &str) {
     let mut parser = Parser::new(source);
 
-    let ast = root_statement(&mut parser);
+    let ast = parse_root_statement(&mut parser);
     let actual_s_expression = ast
         .to_s_expression()
         .expect("Failed to convert AST to s-expression");

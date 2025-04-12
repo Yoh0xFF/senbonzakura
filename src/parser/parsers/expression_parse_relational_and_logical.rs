@@ -1,6 +1,6 @@
 use crate::ast::{BinaryOperator, ExpressionRef, LogicalOperator};
 use crate::lexer::TokenType;
-use crate::parser::parsers::expression_parse_binary::additive_expression;
+use crate::parser::parsers::expression_parse_binary::parse_additive_expression;
 use crate::parser::parsers::utils::{parse_binary_expression, parse_logical_expression};
 use crate::parser::Parser;
 
@@ -10,11 +10,11 @@ use crate::parser::Parser;
  *  | LogicalAndExpression
  *  ;
  */
-pub(super) fn logical_or_expression(parser: &mut Parser) -> ExpressionRef {
+pub(super) fn parse_logical_or_expression(parser: &mut Parser) -> ExpressionRef {
     parse_logical_expression(
         parser,
         TokenType::LogicalOrOperator,
-        |parser| logical_and_expression(parser),
+        |parser| parse_logical_and_expression(parser),
         |op| match op {
             "||" => LogicalOperator::Or,
             _ => panic!("Unknown logical operator {}", op),
@@ -28,11 +28,11 @@ pub(super) fn logical_or_expression(parser: &mut Parser) -> ExpressionRef {
  *  | EqualityExpression
  *  ;
  */
-pub(super) fn logical_and_expression(parser: &mut Parser) -> ExpressionRef {
+pub(super) fn parse_logical_and_expression(parser: &mut Parser) -> ExpressionRef {
     parse_logical_expression(
         parser,
         TokenType::LogicalAndOperator,
-        |parser| equality_expression(parser),
+        |parser| parse_equality_expression(parser),
         |op| match op {
             "&&" => LogicalOperator::And,
             _ => panic!("Unknown logical operator {}", op),
@@ -46,11 +46,11 @@ pub(super) fn logical_and_expression(parser: &mut Parser) -> ExpressionRef {
  *  | RelationalExpression
  *  ;
  */
-pub(super) fn equality_expression(parser: &mut Parser) -> ExpressionRef {
+pub(super) fn parse_equality_expression(parser: &mut Parser) -> ExpressionRef {
     parse_binary_expression(
         parser,
         TokenType::EqualityOperator,
-        |parser| relational_expression(parser),
+        |parser| parse_relational_expression(parser),
         |op| match op {
             "==" => BinaryOperator::Equal,
             "!=" => BinaryOperator::NotEqual,
@@ -65,11 +65,11 @@ pub(super) fn equality_expression(parser: &mut Parser) -> ExpressionRef {
  *  | AdditiveExpression RELATIONAL_OPERATOR AdditiveExpression
  *  ;
  */
-pub(super) fn relational_expression(parser: &mut Parser) -> ExpressionRef {
+pub(super) fn parse_relational_expression(parser: &mut Parser) -> ExpressionRef {
     parse_binary_expression(
         parser,
         TokenType::RelationalOperator,
-        |parser| additive_expression(parser),
+        |parser| parse_additive_expression(parser),
         |op| match op {
             ">" => BinaryOperator::GreaterThan,
             ">=" => BinaryOperator::GreaterThanOrEqualTo,

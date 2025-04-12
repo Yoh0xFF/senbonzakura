@@ -1,4 +1,4 @@
-use crate::parser::root_statement;
+use crate::parser::parse_root_statement;
 use ast::Statement;
 use lexer::{Lexer, Token};
 use parser::Parser;
@@ -23,7 +23,7 @@ fn main() {
     println!("Token: {}", next_token);
 
     let mut parser = Parser::new("12; { let x, y = 12; x = 7; let z = x + y; }");
-    let ast = root_statement(&mut parser);
+    let ast = parse_root_statement(&mut parser);
     let sexpression = ast.to_pretty_s_expression().unwrap();
     println!("SExpression:\n{}", sexpression);
 }

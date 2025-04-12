@@ -13,4 +13,4 @@ mod statement_parse_variable_declaration;
 mod utils;
 mod statement_parse_function_declaration;
 
-pub(crate) use root::{root_expression, root_statement};
+pub(crate) use root::{parse_root_expression, parse_root_statement};

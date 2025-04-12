@@ -1,6 +1,6 @@
 use crate::ast::{Expression, Statement, StatementRef};
 use crate::lexer::TokenType;
-use crate::parser::parsers::expression_parse_variable_initialization_and_assignment::variable_initialization_expression;
+use crate::parser::parsers::expression_parse_variable_initialization_and_assignment::parse_variable_initialization_expression;
 use crate::parser::parsers::utils::{eat, is_token};
 use crate::parser::Parser;
 
@@ -13,7 +13,7 @@ use crate::parser::Parser;
  *  | VariableInitializationList ',' VariableInitialization
  *  ;
  */
-pub(super) fn variable_declaration_statement(
+pub(super) fn parse_variable_declaration_statement(
     parser: &mut Parser,
     consume_statement_end: bool,
 ) -> StatementRef {
@@ -21,7 +21,7 @@ pub(super) fn variable_declaration_statement(
 
     eat(parser, TokenType::LetKeyword);
     loop {
-        variables.push(*variable_initialization_expression(parser));
+        variables.push(*parse_variable_initialization_expression(parser));
 
         if !is_token(parser, TokenType::Comma) {
             break;

@@ -1,6 +1,6 @@
 use crate::ast::{BinaryOperator, ExpressionRef};
 use crate::lexer::TokenType;
-use crate::parser::parsers::expression_parse_unary::unary_expression;
+use crate::parser::parsers::expression_parse_unary::parse_unary_expression;
 use crate::parser::parsers::utils::parse_binary_expression;
 use crate::parser::Parser;
 
@@ -10,11 +10,11 @@ use crate::parser::Parser;
  *  | AdditiveExpression ADDITIVE_OPERATOR FactorExpression
  *  ;
  */
-pub(super) fn additive_expression(parser: &mut Parser) -> ExpressionRef {
+pub(super) fn parse_additive_expression(parser: &mut Parser) -> ExpressionRef {
     parse_binary_expression(
         parser,
         TokenType::AdditiveOperator,
-        |parser| factor_expression(parser),
+        |parser| parse_factor_expression(parser),
         |op| match op {
             "+" => BinaryOperator::Add,
             "-" => BinaryOperator::Subtract,
@@ -29,11 +29,11 @@ pub(super) fn additive_expression(parser: &mut Parser) -> ExpressionRef {
  *  | FactorExpression FACTOR_OPERATOR PrimaryExpression
  *  ;
  */
-pub(super) fn factor_expression(parser: &mut Parser) -> ExpressionRef {
+pub(super) fn parse_factor_expression(parser: &mut Parser) -> ExpressionRef {
     parse_binary_expression(
         parser,
         TokenType::FactorOperator,
-        |parser| unary_expression(parser),
+        |parser| parse_unary_expression(parser),
         |op| match op {
             "*" => BinaryOperator::Multiply,
             "/" => BinaryOperator::Divide,

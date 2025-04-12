@@ -1,7 +1,7 @@
 use crate::ast::{Expression, ExpressionRef};
 use crate::lexer::TokenType;
-use crate::parser::parsers::expression_parse_literals::literal_expression;
-use crate::parser::parsers::root::root_expression;
+use crate::parser::parsers::expression_parse_literals::parse_literal_expression;
+use crate::parser::parsers::root::parse_root_expression;
 use crate::parser::parsers::utils::{eat, is_literal_token};
 use crate::parser::Parser;
 
@@ -10,8 +10,8 @@ use crate::parser::Parser;
  *  : PrimaryExpression
  *  ;
  */
-pub(super) fn left_hand_side_expression(parser: &mut Parser) -> ExpressionRef {
-    primary_expression(parser)
+pub(super) fn parse_left_hand_side_expression(parser: &mut Parser) -> ExpressionRef {
+    parse_primary_expression(parser)
 }
 
 /**
@@ -21,15 +21,15 @@ pub(super) fn left_hand_side_expression(parser: &mut Parser) -> ExpressionRef {
  *  | IdentifierExpression
  *  ;
  */
-pub(super) fn primary_expression(parser: &mut Parser) -> ExpressionRef {
+pub(super) fn parse_primary_expression(parser: &mut Parser) -> ExpressionRef {
     if is_literal_token(parser) {
-        return literal_expression(parser);
+        return parse_literal_expression(parser);
     }
 
     match parser.lookahead.token_type {
-        TokenType::OpeningParenthesis => group_expression(parser),
-        TokenType::Identifier => identifier_expression(parser),
-        _ => left_hand_side_expression(parser),
+        TokenType::OpeningParenthesis => parse_group_expression(parser),
+        TokenType::Identifier => parse_identifier_expression(parser),
+        _ => parse_left_hand_side_expression(parser),
     }
 }
 
@@ -38,9 +38,9 @@ pub(super) fn primary_expression(parser: &mut Parser) -> ExpressionRef {
  *  : '(' Expression ')'
  *  ;
  */
-pub(super) fn group_expression(parser: &mut Parser) -> ExpressionRef {
+pub(super) fn parse_group_expression(parser: &mut Parser) -> ExpressionRef {
     eat(parser, TokenType::OpeningParenthesis);
-    let expression_ref = root_expression(parser);
+    let expression_ref = parse_root_expression(parser);
     eat(parser, TokenType::ClosingParenthesis);
 
     expression_ref
@@ -51,7 +51,7 @@ pub(super) fn group_expression(parser: &mut Parser) -> ExpressionRef {
  *  : IDENTIFIER
  *  ;
  */
-pub(super) fn identifier_expression(parser: &mut Parser) -> ExpressionRef {
+pub(super) fn parse_identifier_expression(parser: &mut Parser) -> ExpressionRef {
     let identifier_token = eat(parser, TokenType::Identifier);
     let identifier_value = &parser.source[identifier_token.i..identifier_token.j];
 

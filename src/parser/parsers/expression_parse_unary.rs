@@ -1,6 +1,6 @@
 use crate::ast::{Expression, ExpressionRef, UnaryOperator};
 use crate::lexer::TokenType;
-use crate::parser::parsers::expression_parse_primary::left_hand_side_expression;
+use crate::parser::parsers::expression_parse_primary::parse_left_hand_side_expression;
 use crate::parser::parsers::utils::{eat_any_of, is_any_of_token};
 use crate::parser::Parser;
 
@@ -11,7 +11,7 @@ use crate::parser::Parser;
  *  | LOGICAL_NOT_OPERATOR UnaryExpression
  *  ;
  */
-pub(super) fn unary_expression(parser: &mut Parser) -> ExpressionRef {
+pub(super) fn parse_unary_expression(parser: &mut Parser) -> ExpressionRef {
     let mut operator: Option<UnaryOperator> = None;
 
     if is_any_of_token(
@@ -35,9 +35,9 @@ pub(super) fn unary_expression(parser: &mut Parser) -> ExpressionRef {
     if operator.is_some() {
         return Box::new(Expression::Unary {
             operator: operator.unwrap(),
-            right: unary_expression(parser),
+            right: parse_unary_expression(parser),
         });
     }
 
-    left_hand_side_expression(parser)
+    parse_left_hand_side_expression(parser)
 }
