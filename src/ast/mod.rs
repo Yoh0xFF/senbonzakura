@@ -1,5 +1,5 @@
 mod ast;
 mod visitor_ast;
 
-pub(crate) use self::ast::*;
-pub(crate) use self::visitor_ast::*;
+pub use self::ast::*;
+pub use self::visitor_ast::*;
