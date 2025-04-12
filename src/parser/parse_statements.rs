@@ -1,7 +1,7 @@
 use crate::ast::{Expression, Statement, StatementList, StatementRef};
 use crate::lexer::TokenType;
-use crate::parser::parsers::{eat, is_token};
-use super::{parse_expressions::ParseExpressions, Parser};
+use crate::parser::parsers::{eat, expression, is_token, variable_initialization_expression};
+use super::{Parser};
 
 pub(super) trait ParseStatements {
     /**
@@ -154,7 +154,7 @@ impl<'a> ParseStatements for Parser<'a> {
 
         eat(self, TokenType::LetKeyword);
         loop {
-            variables.push(*self.variable_initialization_expression());
+            variables.push(*variable_initialization_expression(self));
 
             if !is_token(self, TokenType::Comma) {
                 break;
@@ -173,7 +173,7 @@ impl<'a> ParseStatements for Parser<'a> {
         eat(self, TokenType::IfKeyword);
 
         eat(self, TokenType::OpeningParenthesis);
-        let condition = self.expression();
+        let condition = expression(self);
         eat(self, TokenType::ClosingParenthesis);
 
         let consequent = self.statement();
@@ -196,7 +196,7 @@ impl<'a> ParseStatements for Parser<'a> {
         eat(self, TokenType::WhileKeyword);
 
         eat(self, TokenType::OpeningParenthesis);
-        let condition = self.expression();
+        let condition = expression(self);
         eat(self, TokenType::ClosingParenthesis);
 
         let body = self.statement();
@@ -212,7 +212,7 @@ impl<'a> ParseStatements for Parser<'a> {
         eat(self, TokenType::WhileKeyword);
 
         eat(self, TokenType::OpeningParenthesis);
-        let condition = self.expression();
+        let condition = expression(self);
         eat(self, TokenType::ClosingParenthesis);
 
         eat(self, TokenType::StatementEnd);
@@ -234,14 +234,14 @@ impl<'a> ParseStatements for Parser<'a> {
         let condition = if is_token(self, TokenType::StatementEnd) {
             None
         } else {
-            Some(self.expression())
+            Some(expression(self))
         };
         eat(self, TokenType::StatementEnd);
 
         let increment = if is_token(self, TokenType::ClosingParenthesis) {
             None
         } else {
-            Some(self.expression())
+            Some(expression(self))
         };
         eat(self, TokenType::ClosingParenthesis);
 
@@ -269,7 +269,7 @@ impl<'a> ParseStatements for Parser<'a> {
     }
 
     fn expression_statement(&mut self, consume_statement_end: bool) -> StatementRef {
-        let expression = self.expression();
+        let expression = expression(self);
 
         if consume_statement_end {
             eat(self, TokenType::StatementEnd);
