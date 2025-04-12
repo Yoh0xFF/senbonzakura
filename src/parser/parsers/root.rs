@@ -12,7 +12,7 @@ pub fn parse_root_statement(parser: &mut Parser) -> StatementRef {
 
 /**
  * Expression
- *  : Literal
+ *  : AssignmentExpression
  *  ;
  */
 pub fn parse_root_expression(parser: &mut Parser) -> ExpressionRef {
