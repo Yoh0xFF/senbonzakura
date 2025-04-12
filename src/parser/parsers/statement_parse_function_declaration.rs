@@ -38,20 +38,18 @@ pub(super) fn parse_function_declaration_statement(parser: &mut Parser) -> State
  *  ;
  */
 pub(super) fn parse_formal_parameter_list(parser: &mut Parser) -> ExpressionList {
-    let mut params = vec![];
+    let mut parameters = vec![];
 
-    loop {
-        params.push(*identifier_expression(parser));
+    // Parse first parameter
+    parameters.push(*identifier_expression(parser));
 
-        if is_token(parser, TokenType::Comma) {
-            eat(parser, TokenType::Comma);
-            break;
-        } else {
-            break;
-        }
+    // Parse additional parameters if any
+    while is_token(parser, TokenType::Comma) {
+        eat(parser, TokenType::Comma);
+        parameters.push(*identifier_expression(parser));
     }
 
-    params
+    parameters
 }
 
 /**
@@ -66,6 +64,6 @@ pub(super) fn parse_return_statement(parser: &mut Parser) -> StatementRef {
         Some(root_expression(parser))
     };
     eat(parser, TokenType::StatementEnd);
-    
+
     Box::new(Statement::Return { argument })
 }

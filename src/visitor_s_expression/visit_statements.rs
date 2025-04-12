@@ -224,12 +224,47 @@ fn visit_function_declaration_statement(
     parameters: &ExpressionList,
     body: &Statement,
 ) -> Result<()> {
-    todo!()
+    visitor.begin_expr("def")?;
+
+    // Process function name
+    visitor.write_space_or_newline()?;
+    name.accept(visitor)?;
+
+    // Process parameters
+    if !parameters.is_empty() {
+        visitor.write_space_or_newline()?;
+        visitor.begin_expr("params")?;
+
+        for param in parameters.iter() {
+            visitor.write_space_or_newline()?;
+            param.accept(visitor)?;
+        }
+
+        visitor.end_expr()?;
+    }
+
+    // Process function body
+    visitor.write_space_or_newline()?;
+    body.accept(visitor)?;
+
+    visitor.end_expr()?;
+
+    Ok(())
 }
 
 fn visit_return_statement(
     visitor: &mut SExpressionVisitor,
     argument: Option<&Expression>,
 ) -> Result<()> {
-    todo!()
+    visitor.begin_expr("return")?;
+
+    // Process return argument if present
+    if let Some(arg) = argument {
+        visitor.write_space_or_newline()?;
+        arg.accept(visitor)?;
+    }
+
+    visitor.end_expr()?;
+
+    Ok(())
 }
