@@ -20,7 +20,7 @@ pub enum Statement {
     VariableDeclaration {
         variables: ExpressionList,
     },
-    Conditional {
+    If {
         condition: ExpressionRef,
         consequent: StatementRef,
         alternative: Option<StatementRef>,
@@ -46,7 +46,7 @@ pub enum Statement {
     },
     Return {
         argument: Option<ExpressionRef>,
-    }
+    },
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]

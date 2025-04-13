@@ -25,7 +25,7 @@ pub(super) fn parse_if_statement(parser: &mut Parser) -> StatementRef {
         None
     };
 
-    Box::new(Statement::Conditional {
+    Box::new(Statement::If {
         condition,
         consequent,
         alternative,

@@ -18,7 +18,7 @@ pub(super) fn visit_statement(
         Statement::VariableDeclaration { variables } => {
             visit_variable_declaration_statement(visitor, variables)
         }
-        Statement::Conditional {
+        Statement::If {
             condition,
             consequent,
             alternative,
