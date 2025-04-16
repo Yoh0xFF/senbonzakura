@@ -14,6 +14,8 @@ use crate::parser::parsers::statement_parse_variable_declaration::parse_variable
 use crate::parser::parsers::utils::eat;
 use crate::parser::Parser;
 
+use super::utils::is_token;
+
 ///
 /// Main entry point
 /// Program
@@ -35,7 +37,7 @@ pub(super) fn parse_program_statement(parser: &mut Parser) -> StatementRef {
 pub(super) fn parse_block_statement(parser: &mut Parser) -> StatementRef {
     eat(parser, TokenType::OpeningBrace);
 
-    let block = if parser.lookahead.token_type != TokenType::ClosingBrace {
+    let block = if !is_token(parser, TokenType::ClosingBrace) {
         parse_statement_list(parser, Some(TokenType::ClosingBrace))
     } else {
         vec![]
@@ -58,8 +60,8 @@ pub(super) fn parse_statement_list(
 ) -> StatementList {
     let mut statement_list: Vec<Statement> = vec![];
 
-    while parser.lookahead.token_type != TokenType::End
-        && parser.lookahead.token_type != stop_token_type.unwrap_or(TokenType::End)
+    while !is_token(parser, TokenType::End)
+        && !is_token(parser, stop_token_type.unwrap_or(TokenType::End))
     {
         let statement = parse_statement(parser);
         statement_list.push(*statement);
