@@ -63,10 +63,10 @@ pub(super) fn is_any_of_token(parser: &mut Parser, token_types: &[TokenType]) ->
 ///
 #[allow(dead_code)]
 pub(super) fn is_valid_assignment_target(expression: &ExpressionRef) -> bool {
-    match expression.as_ref() {
-        Expression::Identifier(_) => true,
-        _ => false,
-    }
+    matches!(
+        expression.as_ref(),
+        Expression::Identifier(_) | Expression::Member { .. }
+    )
 }
 
 ///

@@ -2,16 +2,54 @@ use crate::ast::{Expression, ExpressionRef};
 use crate::lexer::TokenType;
 use crate::parser::parsers::expression_parse_literals::parse_literal_expression;
 use crate::parser::parsers::root::parse_root_expression;
-use crate::parser::parsers::utils::{eat, is_literal_token};
+use crate::parser::parsers::utils::{eat, is_any_of_token, is_literal_token, is_token};
 use crate::parser::Parser;
 
 ///
 /// LeftHandSideExpression
-///  : PrimaryExpression
+///  : MemberExpression
 ///  ;
 ///
 pub(super) fn parse_left_hand_side_expression(parser: &mut Parser) -> ExpressionRef {
-    parse_primary_expression(parser)
+    parse_member_expression(parser)
+}
+
+///
+/// MemberExpression
+///  : PrimaryExpression
+///  | MemberExpression '.' Identifier
+///  | MemberExpression '[' Expression ']'
+///  ;
+///
+pub(super) fn parse_member_expression(parser: &mut Parser) -> ExpressionRef {
+    let mut object = parse_primary_expression(parser);
+
+    while is_any_of_token(parser, &[TokenType::Dot, TokenType::OpeningBracket]) {
+        if is_token(parser, TokenType::Dot) {
+            eat(parser, TokenType::Dot);
+            let property = parse_identifier_expression(parser);
+
+            object = Box::new(Expression::Member {
+                computed: false,
+                object,
+                property,
+            });
+        }
+
+        if is_token(parser, TokenType::OpeningBracket) {
+            eat(parser, TokenType::OpeningBracket);
+            let property = parse_root_expression(parser);
+            eat(parser, TokenType::ClosingBracket);
+
+            object = Box::new(Expression::Member {
+                computed: true,
+                object,
+                property,
+            });
+        }
+    }
+
+    todo!()
 }
 
 ///

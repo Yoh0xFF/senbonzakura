@@ -4,13 +4,15 @@ use crate::parser::parsers::statement_parse_conditional::parse_if_statement;
 use crate::parser::parsers::statement_parse_empty_and_expression::{
     parse_empty_statement, parse_expression_statement,
 };
+use crate::parser::parsers::statement_parse_function_declaration::{
+    parse_function_declaration_statement, parse_return_statement,
+};
 use crate::parser::parsers::statement_parse_loop::{
     parse_do_while_statement, parse_for_statement, parse_while_statement,
 };
 use crate::parser::parsers::statement_parse_variable_declaration::parse_variable_declaration_statement;
 use crate::parser::parsers::utils::eat;
 use crate::parser::Parser;
-use crate::parser::parsers::statement_parse_function_declaration::{parse_function_declaration_statement, parse_return_statement};
 
 ///
 /// Main entry point

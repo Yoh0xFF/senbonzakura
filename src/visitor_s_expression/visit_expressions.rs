@@ -37,6 +37,11 @@ pub(super) fn visit_expression(
         Expression::NumericLiteral(value) => visit_numeric_literal_expression(visitor, *value),
         Expression::StringLiteral(value) => visit_string_literal_expression(visitor, value),
         Expression::Identifier(name) => visit_identifier_expression(visitor, name),
+        Expression::Member {
+            computed,
+            object,
+            property,
+        } => visit_member_expression(visitor, *computed, object, property),
     };
 
     result
@@ -200,4 +205,14 @@ fn visit_identifier_expression(visitor: &mut SExpressionVisitor, name: &str) -> 
     visitor.end_expr()?;
 
     Ok(())
+}
+
+fn visit_member_expression(
+    visitor: &mut SExpressionVisitor,
+    computed: bool,
+    object: &Expression,
+    property: &Expression,
+) -> Result<()> {
+    // TODO Implement visitor for the member expression
+    todo!()
 }

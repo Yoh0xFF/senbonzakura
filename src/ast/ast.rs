@@ -79,6 +79,11 @@ pub enum Expression {
     StringLiteral(String),
     NumericLiteral(i32),
     Identifier(String),
+    Member {
+        computed: bool,
+        object: ExpressionRef,
+        property: ExpressionRef,
+    },
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]

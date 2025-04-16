@@ -27,7 +27,12 @@ pub(super) fn init_regex_rules() -> Vec<(Regex, TokenType)> {
         Regex::new(r"^\(").expect("Failed to compile regex for opening parenthesis (() symbol");
     let closing_parenthesis =
         Regex::new(r"^\)").expect("Failed to compile regex for closing parenthesis ()) symbol");
+    let opening_bracket =
+        Regex::new(r"^[").expect("Failed to compile regex for opening bracket ([) symbol");
+    let closing_bracket =
+        Regex::new(r"^]").expect("Failed to compile regex for closing bracket (]) symbol");
     let comma = Regex::new(r"^,").expect("Failed to compile regex for comma (,) symbol");
+    let dot = Regex::new(r"^\.").expect("Failed to compile regex for dot (.) symbol");
 
     // Keywords
     let true_keyword =
@@ -46,8 +51,10 @@ pub(super) fn init_regex_rules() -> Vec<(Regex, TokenType)> {
     let do_keyword = Regex::new(r"^\bdo\b").expect("Failed to compile regex for the 'do' keyword");
     let for_keyword =
         Regex::new(r"^\bfor\b").expect("Failed to compile regex for the 'for' keyword");
-    let def_keyword = Regex::new(r"^\bdefer\b").expect("Failed to compile regex for the 'defer' keyword");
-    let return_keyword = Regex::new(r"^\breturn\b").expect("Failed to compile regex for the 'return' keyword");
+    let def_keyword =
+        Regex::new(r"^\bdefer\b").expect("Failed to compile regex for the 'defer' keyword");
+    let return_keyword =
+        Regex::new(r"^\breturn\b").expect("Failed to compile regex for the 'return' keyword");
 
     // Equality Operator
     let equality_operator =
@@ -98,7 +105,10 @@ pub(super) fn init_regex_rules() -> Vec<(Regex, TokenType)> {
         (closing_brace, TokenType::ClosingBrace),
         (opening_parenthesis, TokenType::OpeningParenthesis),
         (closing_parenthesis, TokenType::ClosingParenthesis),
+        (opening_bracket, TokenType::OpeningBracket),
+        (closing_bracket, TokenType::ClosingBracket),
         (comma, TokenType::Comma),
+        (dot, TokenType::Dot),
         (true_keyword, TokenType::Boolean),
         (false_keyword, TokenType::Boolean),
         (nil_keyword, TokenType::Nil),
