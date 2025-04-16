@@ -49,7 +49,7 @@ pub(super) fn parse_member_expression(parser: &mut Parser) -> ExpressionRef {
         }
     }
 
-    todo!()
+    object
 }
 
 ///

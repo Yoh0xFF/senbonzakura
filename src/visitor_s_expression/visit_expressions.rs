@@ -213,6 +213,26 @@ fn visit_member_expression(
     object: &Expression,
     property: &Expression,
 ) -> Result<()> {
-    // TODO Implement visitor for the member expression
-    todo!()
+    visitor.begin_expr("member")?;
+
+    // Indicate whether the member access is computed (bracket notation) or not (dot notation)
+    visitor.write_space_or_newline()?;
+    visitor.write_indent()?;
+    write!(
+        visitor.output,
+        "\"{}\"",
+        if computed { "computed" } else { "static" }
+    )?;
+
+    // Process object expression (the left part of the member access)
+    visitor.write_space_or_newline()?;
+    object.accept(visitor)?;
+
+    // Process property expression (the right part of the member access)
+    visitor.write_space_or_newline()?;
+    property.accept(visitor)?;
+
+    visitor.end_expr()?;
+
+    Ok(())
 }

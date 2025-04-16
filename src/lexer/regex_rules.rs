@@ -28,9 +28,9 @@ pub(super) fn init_regex_rules() -> Vec<(Regex, TokenType)> {
     let closing_parenthesis =
         Regex::new(r"^\)").expect("Failed to compile regex for closing parenthesis ()) symbol");
     let opening_bracket =
-        Regex::new(r"^[").expect("Failed to compile regex for opening bracket ([) symbol");
+        Regex::new(r"^\[").expect("Failed to compile regex for opening bracket ([) symbol");
     let closing_bracket =
-        Regex::new(r"^]").expect("Failed to compile regex for closing bracket (]) symbol");
+        Regex::new(r"^\]").expect("Failed to compile regex for closing bracket (]) symbol");
     let comma = Regex::new(r"^,").expect("Failed to compile regex for comma (,) symbol");
     let dot = Regex::new(r"^\.").expect("Failed to compile regex for dot (.) symbol");
 
