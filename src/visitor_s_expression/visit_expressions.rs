@@ -12,7 +12,7 @@ pub(super) fn visit_expression(
     expression: &Expression,
 ) -> Result<()> {
     let result = match expression {
-        Expression::VariableIntialization {
+        Expression::VariableInitialization {
             identifier,
             initializer,
         } => visit_variable_initialization_expression(visitor, identifier, initializer.as_deref()),

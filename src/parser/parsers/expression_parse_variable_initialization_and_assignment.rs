@@ -24,7 +24,7 @@ pub(super) fn parse_variable_initialization_expression(parser: &mut Parser) -> E
             Some(initializer)
         };
 
-    Box::new(Expression::VariableIntialization {
+    Box::new(Expression::VariableInitialization {
         identifier,
         initializer,
     })
