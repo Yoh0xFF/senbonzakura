@@ -249,11 +249,21 @@ fn visit_call_expression(
     visitor.write_space_or_newline()?;
     callee.accept(visitor)?;
 
+    // Write opening parenthesis for arguments
+    visitor.write_space_or_newline()?;
+    visitor.write_indent()?;
+    write!(visitor.output, "(")?;
+
     // Process each argument
-    for arg in arguments {
-        visitor.write_space_or_newline()?;
+    for (i, arg) in arguments.iter().enumerate() {
+        if i > 0 {
+            visitor.write_space_or_newline()?;
+        }
         arg.accept(visitor)?;
     }
+
+    // Write closing parenthesis for arguments
+    write!(visitor.output, ")")?;
 
     visitor.end_expr()?;
 
