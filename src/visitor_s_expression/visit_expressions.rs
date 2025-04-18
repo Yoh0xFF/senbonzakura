@@ -243,5 +243,19 @@ fn visit_call_expression(
     callee: &ExpressionRef,
     arguments: &ExpressionList,
 ) -> Result<()> {
-    todo!()
+    visitor.begin_expr("call")?;
+
+    // Process callee expression
+    visitor.write_space_or_newline()?;
+    callee.accept(visitor)?;
+
+    // Process each argument
+    for arg in arguments {
+        visitor.write_space_or_newline()?;
+        arg.accept(visitor)?;
+    }
+
+    visitor.end_expr()?;
+
+    Ok(())
 }

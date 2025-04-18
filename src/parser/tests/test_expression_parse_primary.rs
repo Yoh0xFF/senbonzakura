@@ -1,5 +1,9 @@
 use super::utils::execute;
 
+///
+/// Test member expression
+///
+
 #[test]
 fn test_simple_member_access() {
     execute(
@@ -222,6 +226,240 @@ fn test_member_access_with_unary_operation() {
         r#"
         (program
             (expr (unary "!" (member "static" (id obj) (id enabled)))))
+        "#,
+    )
+}
+
+///
+/// Test call expression
+///
+
+#[test]
+fn test_simple_call_expression() {
+    execute(
+        "foo();",
+        r#"
+        (program
+            (expr (call (id foo) ())))
+        "#,
+    )
+}
+
+#[test]
+fn test_call_with_single_argument() {
+    execute(
+        "foo(42);",
+        r#"
+        (program
+            (expr (call (id foo) ((number 42)))))
+        "#,
+    )
+}
+
+#[test]
+fn test_call_with_multiple_arguments() {
+    execute(
+        "foo(x, y, 42);",
+        r#"
+        (program
+            (expr (call (id foo) ((id x) (id y) (number 42)))))
+        "#,
+    )
+}
+
+#[test]
+fn test_call_with_expression_argument() {
+    execute(
+        "foo(x + y);",
+        r#"
+        (program
+            (expr (call (id foo) ((binary "+" (id x) (id y))))))
+        "#,
+    )
+}
+
+#[test]
+fn test_chained_calls() {
+    execute(
+        "foo()();",
+        r#"
+        (program
+            (expr (call (call (id foo) ()) ())))
+        "#,
+    )
+}
+
+#[test]
+fn test_call_with_member_expression() {
+    execute(
+        "obj.method();",
+        r#"
+        (program
+            (expr (call (member "static" (id obj) (id method)) ())))
+        "#,
+    )
+}
+
+#[test]
+fn test_call_with_computed_member_expression() {
+    execute(
+        "obj['method']();",
+        r#"
+        (program
+            (expr (call (member "computed" (id obj) (string "method")) ())))
+        "#,
+    )
+}
+
+#[test]
+fn test_member_expression_on_call_result() {
+    execute(
+        "foo().property;",
+        r#"
+        (program
+            (expr (member "static" (call (id foo) ()) (id property))))
+        "#,
+    )
+}
+
+#[test]
+fn test_computed_member_expression_on_call_result() {
+    execute(
+        "foo()[index];",
+        r#"
+        (program
+            (expr (member "computed" (call (id foo) ()) (id index))))
+        "#,
+    )
+}
+
+#[test]
+fn test_complex_nested_call_expressions() {
+    execute(
+        "foo(bar(), baz(42));",
+        r#"
+        (program
+            (expr (call (id foo) ((call (id bar) ()) (call (id baz) ((number 42)))))))
+        "#,
+    )
+}
+
+#[test]
+fn test_call_in_binary_expression() {
+    execute(
+        "foo() + bar();",
+        r#"
+        (program
+            (expr (binary "+" (call (id foo) ()) (call (id bar) ()))))
+        "#,
+    )
+}
+
+#[test]
+fn test_call_in_logical_expression() {
+    execute(
+        "isValid() && hasPermission();",
+        r#"
+        (program
+            (expr (logical "&&" (call (id isValid) ()) (call (id hasPermission) ()))))
+        "#,
+    )
+}
+
+#[test]
+fn test_call_in_assignment() {
+    execute(
+        "result = getValue();",
+        r#"
+        (program
+            (expr (assign "=" (id result) (call (id getValue) ()))))
+        "#,
+    )
+}
+
+#[test]
+fn test_call_with_nested_expressions() {
+    execute(
+        "calculate(x + y, z * 2, obj.property);",
+        r#"
+        (program
+            (expr (call (id calculate) ((binary "+" (id x) (id y)) (binary "*" (id z) (number 2)) (member "static" (id obj) (id property))))))
+        "#,
+    )
+}
+
+#[test]
+fn test_variable_declaration_with_call() {
+    execute(
+        "let result = getValue();",
+        r#"
+        (program
+            (let
+                (init
+                    (id result)
+                    (call (id getValue) ()))))
+        "#,
+    )
+}
+
+#[test]
+fn test_if_with_call_condition() {
+    execute(
+        r#"
+        if (isAdmin()) {
+            grantAccess();
+        }
+        "#,
+        r#"
+        (program
+            (if
+                (call (id isAdmin) ())
+                (block
+                    (expr (call (id grantAccess) ())))))
+        "#,
+    )
+}
+
+#[test]
+fn test_member_access_chain_with_call() {
+    execute(
+        "obj.getInner().property;",
+        r#"
+        (program
+            (expr (member "static" (call (member "static" (id obj) (id getInner)) ()) (id property))))
+        "#,
+    )
+}
+
+#[test]
+fn test_complex_call_chain() {
+    execute(
+        "a().b().c();",
+        r#"
+        (program
+            (expr (call (member "static" (call (member "static" (call (id a) ()) (id b)) ()) (id c)) ())))
+        "#,
+    )
+}
+
+#[test]
+fn test_call_with_boolean_argument() {
+    execute(
+        "setEnabled(true);",
+        r#"
+        (program
+            (expr (call (id setEnabled) ((boolean true)))))
+        "#,
+    )
+}
+
+#[test]
+fn test_call_with_string_argument() {
+    execute(
+        r#"log("Hello, world!");"#,
+        r#"
+        (program
+            (expr (call (id log) ((string "Hello, world!")))))
         "#,
     )
 }
