@@ -84,6 +84,10 @@ pub enum Expression {
         object: ExpressionRef,
         property: ExpressionRef,
     },
+    Call {
+        callee: ExpressionRef,
+        arguments: ExpressionList,
+    },
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]

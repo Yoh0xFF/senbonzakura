@@ -1,6 +1,6 @@
 use crate::ast::{
-    AssignmentOperator, BinaryOperator, Expression, ExpressionDispatcher, LogicalOperator,
-    UnaryOperator,
+    AssignmentOperator, BinaryOperator, Expression, ExpressionDispatcher, ExpressionList,
+    ExpressionRef, LogicalOperator, UnaryOperator,
 };
 
 use super::SExpressionVisitor;
@@ -42,6 +42,7 @@ pub(super) fn visit_expression(
             object,
             property,
         } => visit_member_expression(visitor, *computed, object, property),
+        Expression::Call { callee, arguments } => visit_call_expression(visitor, callee, arguments),
     };
 
     result
@@ -235,4 +236,12 @@ fn visit_member_expression(
     visitor.end_expr()?;
 
     Ok(())
+}
+
+fn visit_call_expression(
+    visitor: &mut SExpressionVisitor,
+    callee: &ExpressionRef,
+    arguments: &ExpressionList,
+) -> Result<()> {
+    todo!()
 }
