@@ -153,7 +153,7 @@ fn test_this_with_method_call() {
         "this.method();",
         r#"
         (program
-            (expr (call (member "static" (this) (id method)) ())))
+            (expr (call (member "static" (this) (id method)))))
         "#,
     )
 }
@@ -186,7 +186,7 @@ fn test_super_with_method_call() {
         "super.method();",
         r#"
         (program
-            (expr (call (member "static" (super) (id method)) ())))
+            (expr (call (member "static" (super) (id method)))))
         "#,
     )
 }
@@ -197,7 +197,7 @@ fn test_super_with_arguments() {
         "super(arg1, arg2);",
         r#"
         (program
-            (expr (call (super) ((id arg1) (id arg2)))))
+            (expr (call (super) (args (id arg1) (id arg2)))))
         "#,
     )
 }
@@ -252,7 +252,7 @@ fn test_new_expression_with_complex_arguments() {
         "new Constructor(x + y, obj.method(), 42);",
         r#"
         (program
-            (expr (new (id Constructor) ((binary "+" (id x) (id y)) (call (member "static" (id obj) (id method)) ()) (number 42)))))
+            (expr (new (id Constructor) ((binary "+" (id x) (id y)) (call (member "static" (id obj) (id method))) (number 42)))))
         "#,
     )
 }
@@ -274,7 +274,7 @@ fn test_primary_expression_in_logical_context() {
         "(a > b) && this.isValid();",
         r#"
         (program
-            (expr (logical "&&" (binary ">" (id a) (id b)) (call (member "static" (this) (id isValid)) ()))))
+            (expr (logical "&&" (binary ">" (id a) (id b)) (call (member "static" (this) (id isValid))))))
         "#,
     )
 }
@@ -315,7 +315,7 @@ fn test_primary_expression_in_conditional() {
         r#"
         (program
             (if
-                (call (member "static" (this) (id isAdmin)) ())
+                (call (member "static" (this) (id isAdmin)))
                 (block
                     (return (boolean true)))))
         "#,
@@ -333,9 +333,9 @@ fn test_primary_expression_in_loop() {
         r#"
         (program
             (while
-                (call (member "static" (this) (id hasNext)) ())
+                (call (member "static" (this) (id hasNext)))
                 (block
-                    (expr (call (member "static" (this) (id process)) ())))))
+                    (expr (call (member "static" (this) (id process)))))))
         "#,
     )
 }
@@ -353,10 +353,10 @@ fn test_mixed_primary_expressions() {
                     (id result)
                     (binary "*"
                         (binary "+"
-                            (call (member "static" (this) (id calculate)) ((id x) (id y)))
-                            (call (member "static" (super) (id getValue)) ())
+                            (call (member "static" (this) (id calculate)) (args (id x) (id y)))
+                            (call (member "static" (super) (id getValue)))
                         )
-                        (call (member "static" (new (id Factor) ((number 42))) (id apply)) ())
+                        (call (member "static" (new (id Factor) ((number 42))) (id apply)))
                     )
                 )
             ))

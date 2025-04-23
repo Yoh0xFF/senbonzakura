@@ -45,6 +45,9 @@ fn main() {
                 return super.getName() + ", " + this.university;
             }
         }
+
+        def test() {
+        }
         "#,
     );
     let ast = parse_root_statement(&mut parser);

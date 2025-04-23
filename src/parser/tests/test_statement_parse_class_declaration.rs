@@ -179,12 +179,12 @@ fn test_class_with_super_calls() {
                             (id name)
                             (id age))
                         (block
-                            (expr (call (super) ((id name))))
+                            (expr (call (super) (args (id name))))
                             (expr (assign "=" (member "static" (this) (id age)) (id age)))))
                     (def
                         (id describe)
                         (block
-                            (return (binary "+" (binary "+" (binary "+" (call (member "static" (super) (id getName)) ()) (string " is ")) (member "static" (this) (id age))) (string " years old"))))))))
+                            (return (binary "+" (binary "+" (binary "+" (call (member "static" (super) (id getName))) (string " is ")) (member "static" (this) (id age))) (string " years old"))))))))
         "#,
     )
 }
@@ -330,7 +330,7 @@ fn test_class_with_method_using_function_calls() {
                                 (binary "<=" (id n) (number 1))
                                 (block
                                     (return (number 1))))
-                            (return (binary "*" (id n) (call (member "static" (this) (id factorial)) ((binary "-" (id n) (number 1)))))))))))
+                            (return (binary "*" (id n) (call (member "static" (this) (id factorial)) (args (binary "-" (id n) (number 1)))))))))))
         "#,
     )
 }
