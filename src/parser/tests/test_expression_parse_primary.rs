@@ -208,7 +208,7 @@ fn test_new_expression_no_arguments() {
         "new Object();",
         r#"
         (program
-            (expr (new (id Object) ())))
+            (expr (new (id Object))))
         "#,
     )
 }
@@ -219,7 +219,7 @@ fn test_new_expression_with_arguments() {
         "new Point(10, 20);",
         r#"
         (program
-            (expr (new (id Point) ((number 10) (number 20)))))
+            (expr (new (id Point) (args (number 10) (number 20)))))
         "#,
     )
 }
@@ -230,7 +230,7 @@ fn test_new_expression_with_member_access() {
         "new namespace.Class();",
         r#"
         (program
-            (expr (new (member "static" (id namespace) (id Class)) ())))
+            (expr (new (member "static" (id namespace) (id Class)))))
         "#,
     )
 }
@@ -241,7 +241,7 @@ fn test_new_expression_with_computed_member_access() {
         "new objects[type]();",
         r#"
         (program
-            (expr (new (member "computed" (id objects) (id type)) ())))
+            (expr (new (member "computed" (id objects) (id type)))))
         "#,
     )
 }
@@ -252,7 +252,7 @@ fn test_new_expression_with_complex_arguments() {
         "new Constructor(x + y, obj.method(), 42);",
         r#"
         (program
-            (expr (new (id Constructor) ((binary "+" (id x) (id y)) (call (member "static" (id obj) (id method))) (number 42)))))
+            (expr (new (id Constructor) (args (binary "+" (id x) (id y)) (call (member "static" (id obj) (id method))) (number 42)))))
         "#,
     )
 }
@@ -299,7 +299,7 @@ fn test_primary_expression_in_initialization() {
             (let
                 (init
                     (id value)
-                    (new (id Vector) ((number 1) (number 2) (number 3))))))
+                    (new (id Vector) (args (number 1) (number 2) (number 3))))))
         "#,
     )
 }
@@ -356,7 +356,7 @@ fn test_mixed_primary_expressions() {
                             (call (member "static" (this) (id calculate)) (args (id x) (id y)))
                             (call (member "static" (super) (id getValue)))
                         )
-                        (call (member "static" (new (id Factor) ((number 42))) (id apply)))
+                        (call (member "static" (new (id Factor) (args (number 42))) (id apply)))
                     )
                 )
             ))

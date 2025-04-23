@@ -364,7 +364,7 @@ fn test_class_instantiation() {
             (let
                 (init
                     (id p)
-                    (new (id Point) ((number 10) (number 20))))))
+                    (new (id Point) (args (number 10) (number 20))))))
         "#,
     )
 }

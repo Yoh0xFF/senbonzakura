@@ -300,21 +300,19 @@ fn visit_new_expression(
     visitor.write_space_or_newline()?;
     callee.accept(visitor)?;
 
-    // Write opening parenthesis for arguments
-    visitor.write_space_or_newline()?;
-    visitor.write_indent()?;
-    write!(visitor.output, "(")?;
+    if !arguments.is_empty() {
+        // Create args expression
+        visitor.write_space_or_newline()?;
+        visitor.begin_expr("args")?;
 
-    // Process each argument
-    for (i, arg) in arguments.iter().enumerate() {
-        if i > 0 {
+        // Process each argument
+        for arg in arguments.iter() {
             visitor.write_space_or_newline()?;
+            arg.accept(visitor)?;
         }
-        arg.accept(visitor)?;
-    }
 
-    // Write closing parenthesis for arguments
-    write!(visitor.output, ")")?;
+        visitor.end_expr()?; // Close args expression
+    }
 
     visitor.end_expr()?;
 
