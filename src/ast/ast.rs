@@ -47,6 +47,11 @@ pub enum Statement {
     Return {
         argument: Option<ExpressionRef>,
     },
+    ClassDeclaration {
+        name: ExpressionRef,
+        super_class: Option<ExpressionRef>,
+        body: StatementRef,
+    },
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -85,6 +90,12 @@ pub enum Expression {
         property: ExpressionRef,
     },
     Call {
+        callee: ExpressionRef,
+        arguments: ExpressionList,
+    },
+    This {},
+    Super {},
+    New {
         callee: ExpressionRef,
         arguments: ExpressionList,
     },

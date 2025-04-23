@@ -45,6 +45,11 @@ pub(super) fn visit_statement(
             body,
         } => visit_function_declaration_statement(visitor, name, parameters, body),
         Statement::Return { argument } => visit_return_statement(visitor, argument.as_deref()),
+        Statement::ClassDeclaration {
+            name,
+            super_class,
+            body,
+        } => visit_class_declaration_statement(visitor, name, super_class.as_deref(), body),
     };
 
     result
@@ -267,4 +272,14 @@ fn visit_return_statement(
     visitor.end_expr()?;
 
     Ok(())
+}
+
+fn visit_class_declaration_statement(
+    visitor: &mut SExpressionVisitor,
+    name: &Expression,
+    super_class: Option<&Expression>,
+    body: &Statement,
+) -> Result<()> {
+    // TODO implement class declaration statement visitor
+    todo!()
 }

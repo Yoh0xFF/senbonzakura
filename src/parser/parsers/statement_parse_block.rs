@@ -14,6 +14,7 @@ use crate::parser::parsers::statement_parse_variable_declaration::parse_variable
 use crate::parser::parsers::utils::eat;
 use crate::parser::Parser;
 
+use super::statement_parse_class_declaration::parse_class_declaration;
 use super::utils::is_token;
 
 ///
@@ -80,6 +81,7 @@ pub(super) fn parse_statement_list(
 ///  | IterationStatement
 ///  | FunctionDeclarationStatement
 ///  | ReturnStatement
+///  | ClassDeclaration
 ///  ;
 ///
 pub(super) fn parse_statement(parser: &mut Parser) -> StatementRef {
@@ -93,6 +95,7 @@ pub(super) fn parse_statement(parser: &mut Parser) -> StatementRef {
         TokenType::ForKeyword => parse_for_statement(parser),
         TokenType::DefKeyword => parse_function_declaration_statement(parser),
         TokenType::ReturnKeyword => parse_return_statement(parser),
+        TokenType::ClassKeyword => parse_class_declaration(parser),
         _ => parse_expression_statement(parser, true),
     }
 }

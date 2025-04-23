@@ -1,6 +1,8 @@
 #[cfg(test)]
 mod test_expression_parse_binary;
 #[cfg(test)]
+mod test_expression_parse_left_hand_side;
+#[cfg(test)]
 mod test_expression_parse_literals;
 #[cfg(test)]
 mod test_expression_parse_primary;

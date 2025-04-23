@@ -55,6 +55,16 @@ pub(super) fn init_regex_rules() -> Vec<(Regex, TokenType)> {
         Regex::new(r"^\bdefer\b").expect("Failed to compile regex for the 'defer' keyword");
     let return_keyword =
         Regex::new(r"^\breturn\b").expect("Failed to compile regex for the 'return' keyword");
+    let class_keyword =
+        Regex::new(r"^\bclass\b").expect("Failed to compile regex for the 'class' keyword");
+    let extends_keyword =
+        Regex::new(r"^\bextends\b").expect("Failed to compile regex for the 'extends' keyword");
+    let this_keyword =
+        Regex::new(r"^\bthis\b").expect("Failed to compile regex for the 'this' keyword");
+    let super_keyword =
+        Regex::new(r"^\bsuper\b").expect("Failed to compile regex for the 'super' keyword");
+    let new_keyword =
+        Regex::new(r"^\bnew\b").expect("Failed to compile regex for the 'new' keyword");
 
     // Equality Operator
     let equality_operator =
@@ -120,6 +130,11 @@ pub(super) fn init_regex_rules() -> Vec<(Regex, TokenType)> {
         (for_keyword, TokenType::ForKeyword),
         (def_keyword, TokenType::DefKeyword),
         (return_keyword, TokenType::ReturnKeyword),
+        (class_keyword, TokenType::ClassKeyword),
+        (extends_keyword, TokenType::ExtendsKeyword),
+        (this_keyword, TokenType::ThisKeyword),
+        (super_keyword, TokenType::SuperKeyword),
+        (new_keyword, TokenType::NewKeyword),
         // Important! Order matters this rule must be before the assignment operators
         (equality_operator, TokenType::EqualityOperator),
         (

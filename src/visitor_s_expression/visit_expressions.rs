@@ -43,6 +43,9 @@ pub(super) fn visit_expression(
             property,
         } => visit_member_expression(visitor, *computed, object, property),
         Expression::Call { callee, arguments } => visit_call_expression(visitor, callee, arguments),
+        Expression::This {} => visit_this_expression(visitor),
+        Expression::Super {} => visit_super_expression(visitor),
+        Expression::New { callee, arguments } => visit_new_expression(visitor, callee, arguments),
     };
 
     result
@@ -268,4 +271,27 @@ fn visit_call_expression(
     visitor.end_expr()?;
 
     Ok(())
+}
+
+fn visit_this_expression(
+    visitor: &mut SExpressionVisitor,
+) -> std::result::Result<(), anyhow::Error> {
+    // TODO implement this expression visitor
+    todo!()
+}
+
+fn visit_super_expression(
+    visitor: &mut SExpressionVisitor,
+) -> std::result::Result<(), anyhow::Error> {
+    // TODO implement super expression visitor
+    todo!()
+}
+
+fn visit_new_expression(
+    visitor: &mut SExpressionVisitor,
+    callee: &Expression,
+    arguments: &ExpressionList,
+) -> std::result::Result<(), anyhow::Error> {
+    // TODO implement new expression visitor
+    todo!()
 }

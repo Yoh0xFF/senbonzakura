@@ -25,6 +25,11 @@ pub enum TokenType {
     ForKeyword,
     DefKeyword,
     ReturnKeyword,
+    ClassKeyword,
+    ExtendsKeyword,
+    ThisKeyword,
+    SuperKeyword,
+    NewKeyword,
     // Identifier
     Identifier,
     // Equality operators
