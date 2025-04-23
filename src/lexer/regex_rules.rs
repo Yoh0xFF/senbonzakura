@@ -52,7 +52,7 @@ pub(super) fn init_regex_rules() -> Vec<(Regex, TokenType)> {
     let for_keyword =
         Regex::new(r"^\bfor\b").expect("Failed to compile regex for the 'for' keyword");
     let def_keyword =
-        Regex::new(r"^\bdefer\b").expect("Failed to compile regex for the 'defer' keyword");
+        Regex::new(r"^\bdef\b").expect("Failed to compile regex for the 'defer' keyword");
     let return_keyword =
         Regex::new(r"^\breturn\b").expect("Failed to compile regex for the 'return' keyword");
     let class_keyword =

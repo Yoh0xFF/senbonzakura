@@ -4,7 +4,7 @@ use super::utils::execute;
 fn test_simple_function_declaration() {
     execute(
         r#"
-        defer myFunction() {
+        def myFunction() {
             x = 10;
         }
         "#,
@@ -22,7 +22,7 @@ fn test_simple_function_declaration() {
 fn test_function_declaration_with_single_parameter() {
     execute(
         r#"
-        defer add(x) {
+        def add(x) {
             return x + 1;
         }
         "#,
@@ -42,7 +42,7 @@ fn test_function_declaration_with_single_parameter() {
 fn test_function_declaration_with_multiple_parameters() {
     execute(
         r#"
-        defer add(x, y, z) {
+        def add(x, y, z) {
             return x + y + z;
         }
         "#,
@@ -64,7 +64,7 @@ fn test_function_declaration_with_multiple_parameters() {
 fn test_function_declaration_with_empty_body() {
     execute(
         r#"
-        defer emptyFunction() {
+        def emptyFunction() {
         }
         "#,
         r#"
@@ -80,7 +80,7 @@ fn test_function_declaration_with_empty_body() {
 fn test_function_declaration_with_variable_declaration() {
     execute(
         r#"
-        defer initFunction() {
+        def initFunction() {
             let x = 10;
             let y = 20;
             return x + y;
@@ -108,7 +108,7 @@ fn test_function_declaration_with_variable_declaration() {
 fn test_function_declaration_with_if_statement() {
     execute(
         r#"
-        defer max(a, b) {
+        def max(a, b) {
             if (a > b) {
                 return a;
             } else {
@@ -138,7 +138,7 @@ fn test_function_declaration_with_if_statement() {
 fn test_function_declaration_with_while_loop() {
     execute(
         r#"
-        defer factorial(n) {
+        def factorial(n) {
             let result = 1;
             while (n > 1) {
                 result = result * n;
@@ -172,7 +172,7 @@ fn test_function_declaration_with_while_loop() {
 fn test_function_declaration_with_return_no_argument() {
     execute(
         r#"
-        defer earlyReturn(x) {
+        def earlyReturn(x) {
             if (x <= 0) {
                 return;
             }
@@ -199,7 +199,7 @@ fn test_function_declaration_with_return_no_argument() {
 fn test_function_declaration_with_complex_expression() {
     execute(
         r#"
-        defer evaluate(a, b, c) {
+        def evaluate(a, b, c) {
             return a * b + c * (a + b);
         }
         "#,
@@ -221,11 +221,11 @@ fn test_function_declaration_with_complex_expression() {
 fn test_multiple_function_declarations() {
     execute(
         r#"
-        defer add(a, b) {
+        def add(a, b) {
             return a + b;
         }
 
-        defer subtract(a, b) {
+        def subtract(a, b) {
             return a - b;
         }
         "#,

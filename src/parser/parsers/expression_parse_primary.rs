@@ -25,6 +25,7 @@ pub(super) fn parse_primary_expression(parser: &mut Parser) -> ExpressionRef {
         TokenType::OpeningParenthesis => parse_group_expression(parser),
         TokenType::Identifier => parse_identifier_expression(parser),
         TokenType::ThisKeyword => parse_this_expression(parser),
+        TokenType::SuperKeyword => parse_super_expression(parser),
         TokenType::NewKeyword => parse_new_expression(parser),
         _ => parse_left_hand_side_expression(parser),
     }
@@ -63,6 +64,16 @@ pub(super) fn parse_identifier_expression(parser: &mut Parser) -> ExpressionRef 
 pub(super) fn parse_this_expression(parser: &mut Parser) -> ExpressionRef {
     eat(parser, TokenType::ThisKeyword);
     Box::new(Expression::This {})
+}
+
+///
+/// SuperExpression
+///  : super
+///  ;
+///
+pub(super) fn parse_super_expression(parser: &mut Parser) -> ExpressionRef {
+    eat(parser, TokenType::SuperKeyword);
+    Box::new(Expression::Super {})
 }
 
 ///

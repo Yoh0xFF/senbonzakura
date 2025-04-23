@@ -27,12 +27,6 @@ pub(super) fn parse_left_hand_side_expression(parser: &mut Parser) -> Expression
 /// ;
 ///
 pub(super) fn parse_call_member_expression(parser: &mut Parser) -> ExpressionRef {
-    // Super call
-    if is_token(parser, TokenType::SuperKeyword) {
-        let super_expression = parse_super_expression(parser);
-        return parse_call_expression(parser, super_expression);
-    }
-
     // Member part might be part of a call
     let member = parse_member_expression(parser);
 
@@ -43,16 +37,6 @@ pub(super) fn parse_call_member_expression(parser: &mut Parser) -> ExpressionRef
 
     // Simple member expression
     member
-}
-
-///
-/// SuperExpression
-///  : super
-///  ;
-///
-pub(super) fn parse_super_expression(parser: &mut Parser) -> ExpressionRef {
-    eat(parser, TokenType::SuperKeyword);
-    Box::new(Expression::Super {})
 }
 
 ///
