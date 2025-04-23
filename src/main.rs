@@ -25,23 +25,24 @@ fn main() {
     let mut parser = Parser::new(
         r#"
         class Person {
-            def constructor(name) {
+            def constructor(name, surname) {
                 this.name = name;
+                this.surname = surname;
             }
 
             def getName() {
-                return this.name;
+                return this.name + " " + this.surname;
             }
         }
 
         class Student extends Person {
-            def constructor(name, university) {
-                super(name);
+            def constructor(name, surname, university) {
+                super(name, surname);
                 this.university = university;
             }
 
             def getInfo() {
-                return super.getName() + " " + this.university;
+                return super.getName() + ", " + this.university;
             }
         }
         "#,
