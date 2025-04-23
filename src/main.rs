@@ -22,8 +22,31 @@ fn main() {
     let next_token = lexer.next_token();
     println!("Token: {}", next_token);
 
-    let mut parser = Parser::new("12; { let x, y = 12; x = 7; let z = x + y; }");
+    let mut parser = Parser::new(
+        r#"
+        class Person {
+            def constructor(name) {
+                this.name = name;
+            }
+
+            def getName() {
+                return this.name;
+            }
+        }
+
+        class Student extends Person {
+            def constructor(name, university) {
+                super(name);
+                this.university = university;
+            }
+
+            def getInfo() {
+                return super.getName() + " " + this.university;
+            }
+        }
+        "#,
+    );
     let ast = parse_root_statement(&mut parser);
-    let sexpression = ast.to_pretty_s_expression().unwrap();
-    println!("SExpression:\n{}", sexpression);
+    let s_expression = ast.to_pretty_s_expression().unwrap();
+    println!("SExpression:\n{}", s_expression);
 }
