@@ -46,8 +46,11 @@ fn main() {
             }
         }
 
-        def test() {
+        def add(x, y) {
+            return x + y;
         }
+
+        add(2, 5);
         "#,
     );
     let ast = parse_root_statement(&mut parser);
