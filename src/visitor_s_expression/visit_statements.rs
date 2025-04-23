@@ -280,6 +280,26 @@ fn visit_class_declaration_statement(
     super_class: Option<&Expression>,
     body: &Statement,
 ) -> Result<()> {
-    // TODO implement class declaration statement visitor
-    todo!()
+    visitor.begin_expr("class")?;
+
+    // Process class name
+    visitor.write_space_or_newline()?;
+    name.accept(visitor)?;
+
+    // Process superclass if present
+    if let Some(super_cls) = super_class {
+        visitor.write_space_or_newline()?;
+        visitor.begin_expr("extends")?;
+        visitor.write_space_or_newline()?;
+        super_cls.accept(visitor)?;
+        visitor.end_expr()?;
+    }
+
+    // Process class body
+    visitor.write_space_or_newline()?;
+    body.accept(visitor)?;
+
+    visitor.end_expr()?;
+
+    Ok(())
 }

@@ -276,15 +276,19 @@ fn visit_call_expression(
 fn visit_this_expression(
     visitor: &mut SExpressionVisitor,
 ) -> std::result::Result<(), anyhow::Error> {
-    // TODO implement this expression visitor
-    todo!()
+    visitor.begin_expr("this")?;
+    visitor.end_expr()?;
+
+    Ok(())
 }
 
 fn visit_super_expression(
     visitor: &mut SExpressionVisitor,
 ) -> std::result::Result<(), anyhow::Error> {
-    // TODO implement super expression visitor
-    todo!()
+    visitor.begin_expr("super")?;
+    visitor.end_expr()?;
+
+    Ok(())
 }
 
 fn visit_new_expression(
@@ -292,6 +296,29 @@ fn visit_new_expression(
     callee: &Expression,
     arguments: &ExpressionList,
 ) -> std::result::Result<(), anyhow::Error> {
-    // TODO implement new expression visitor
-    todo!()
+    visitor.begin_expr("new")?;
+
+    // Process callee expression
+    visitor.write_space_or_newline()?;
+    callee.accept(visitor)?;
+
+    // Write opening parenthesis for arguments
+    visitor.write_space_or_newline()?;
+    visitor.write_indent()?;
+    write!(visitor.output, "(")?;
+
+    // Process each argument
+    for (i, arg) in arguments.iter().enumerate() {
+        if i > 0 {
+            visitor.write_space_or_newline()?;
+        }
+        arg.accept(visitor)?;
+    }
+
+    // Write closing parenthesis for arguments
+    write!(visitor.output, ")")?;
+
+    visitor.end_expr()?;
+
+    Ok(())
 }
