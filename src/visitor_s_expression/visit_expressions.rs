@@ -256,9 +256,6 @@ fn visit_call_expression(
     visitor.write_space_or_newline()?;
     visitor.write_indent()?;
     write!(visitor.output, "(")?;
-    if arguments.len() > 0 {
-        visitor.write_space_or_newline()?;
-    }
 
     // Process each argument
     for (i, arg) in arguments.iter().enumerate() {
