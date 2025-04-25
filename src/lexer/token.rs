@@ -16,6 +16,7 @@ pub enum TokenType {
     ClosingBracket,
     Comma,
     Dot,
+    Colon,
     // Keywords,
     LetKeyword,
     IfKeyword,
@@ -30,6 +31,11 @@ pub enum TokenType {
     ThisKeyword,
     SuperKeyword,
     NewKeyword,
+    TypeKeyword,
+    NumberTypeKeyword,
+    StringTypeKeyword,
+    BooleanTypeKeyword,
+    VoidTypeKeyword,
     // Identifier
     Identifier,
     // Equality operators

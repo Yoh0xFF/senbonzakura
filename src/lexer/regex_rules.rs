@@ -33,6 +33,7 @@ pub(super) fn init_regex_rules() -> Vec<(Regex, TokenType)> {
         Regex::new(r"^]").expect("Failed to compile regex for closing bracket (]) symbol");
     let comma = Regex::new(r"^,").expect("Failed to compile regex for comma (,) symbol");
     let dot = Regex::new(r"^\.").expect("Failed to compile regex for dot (.) symbol");
+    let colon = Regex::new(r"^:").expect("Failed to compile regex for colon (:) symbol");
 
     // Keywords
     let true_keyword =
@@ -65,6 +66,15 @@ pub(super) fn init_regex_rules() -> Vec<(Regex, TokenType)> {
         Regex::new(r"^\bsuper\b").expect("Failed to compile regex for the 'super' keyword");
     let new_keyword =
         Regex::new(r"^\bnew\b").expect("Failed to compile regex for the 'new' keyword");
+    let type_keyword = Regex::new(r"^\btype\b").expect("Failed to compile regex for type keyword");
+    let number_type_keyword =
+        Regex::new(r"^\bnumber\b").expect("Failed to compile regex for number type");
+    let string_type_keyword =
+        Regex::new(r"^\bstring\b").expect("Failed to compile regex for string type");
+    let boolean_type_keyword =
+        Regex::new(r"^\bboolean\b").expect("Failed to compile regex for boolean type");
+    let void_type_keyword =
+        Regex::new(r"^\bvoid\b").expect("Failed to compile regex for void type");
 
     // Equality Operator
     let equality_operator =
@@ -119,6 +129,7 @@ pub(super) fn init_regex_rules() -> Vec<(Regex, TokenType)> {
         (closing_bracket, TokenType::ClosingBracket),
         (comma, TokenType::Comma),
         (dot, TokenType::Dot),
+        (colon, TokenType::Colon),
         (true_keyword, TokenType::Boolean),
         (false_keyword, TokenType::Boolean),
         (nil_keyword, TokenType::Nil),
@@ -135,6 +146,11 @@ pub(super) fn init_regex_rules() -> Vec<(Regex, TokenType)> {
         (this_keyword, TokenType::ThisKeyword),
         (super_keyword, TokenType::SuperKeyword),
         (new_keyword, TokenType::NewKeyword),
+        (type_keyword, TokenType::TypeKeyword),
+        (number_type_keyword, TokenType::NumberTypeKeyword),
+        (string_type_keyword, TokenType::StringTypeKeyword),
+        (boolean_type_keyword, TokenType::BooleanTypeKeyword),
+        (void_type_keyword, TokenType::VoidTypeKeyword),
         // Important! Order matters this rule must be before the assignment operators
         (equality_operator, TokenType::EqualityOperator),
         (

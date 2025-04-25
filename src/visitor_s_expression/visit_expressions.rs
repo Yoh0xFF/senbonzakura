@@ -1,6 +1,6 @@
 use crate::ast::{
     AssignmentOperator, BinaryOperator, Expression, ExpressionDispatcher, ExpressionList,
-    ExpressionRef, LogicalOperator, UnaryOperator,
+    ExpressionRef, LogicalOperator, Type, UnaryOperator,
 };
 
 use super::SExpressionVisitor;
@@ -14,8 +14,14 @@ pub(super) fn visit_expression(
     let result = match expression {
         Expression::VariableInitialization {
             identifier,
+            type_annotation,
             initializer,
-        } => visit_variable_initialization_expression(visitor, identifier, initializer.as_deref()),
+        } => visit_variable_initialization_expression(
+            visitor,
+            identifier,
+            type_annotation,
+            initializer.as_deref(),
+        ),
         Expression::Assignment {
             operator,
             left,
@@ -54,6 +60,7 @@ pub(super) fn visit_expression(
 fn visit_variable_initialization_expression(
     visitor: &mut SExpressionVisitor,
     identifier: &Expression,
+    type_annotation: &Type,
     initializer: Option<&Expression>,
 ) -> Result<()> {
     visitor.begin_expr("init")?;
@@ -61,6 +68,8 @@ fn visit_variable_initialization_expression(
     // Process identifier
     visitor.write_space_or_newline()?;
     identifier.accept(visitor)?;
+
+    // TODO Process type annotation
 
     // Process initializer if present
     if let Some(init) = initializer {
