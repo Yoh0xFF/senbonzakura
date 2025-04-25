@@ -5,8 +5,8 @@ use crate::{
 };
 
 use super::{
+    expression_parse_assignment::parse_assignment_expression,
     expression_parse_primary::{parse_identifier_expression, parse_primary_expression},
-    expression_parse_variable_initialization_and_assignment::parse_assignment_expression,
     parse_root_expression,
     utils::{eat, is_any_of_token, is_token},
 };

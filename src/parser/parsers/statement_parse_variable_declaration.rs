@@ -1,16 +1,20 @@
-use crate::ast::{Expression, Statement, StatementRef};
+use crate::ast::{Expression, ExpressionRef, Statement, StatementRef};
 use crate::lexer::TokenType;
-use crate::parser::parsers::expression_parse_variable_initialization_and_assignment::parse_variable_initialization_expression;
 use crate::parser::parsers::utils::{eat, is_token};
 use crate::parser::Parser;
 
+use super::expression_parse_assignment::parse_assignment_expression;
+use super::expression_parse_primary::parse_identifier_expression;
+use super::type_parse_annotations::parse_type;
+use super::utils::is_any_of_token;
+
 ///
 /// VariableDeclarationStatement
-///  : 'let' VariableInitializationList ';'
-/// 
-/// VariableInitializationList
-///  : VariableInitialization
-///  | VariableInitializationList ',' VariableInitialization
+///  : 'let' VariableList ';'
+///
+/// VariableList
+///  : VariableExpression
+///  | VariableList ',' VariableExpression
 ///  ;
 ///
 pub(super) fn parse_variable_declaration_statement(
@@ -21,7 +25,7 @@ pub(super) fn parse_variable_declaration_statement(
 
     eat(parser, TokenType::LetKeyword);
     loop {
-        variables.push(*parse_variable_initialization_expression(parser));
+        variables.push(*parse_variable_expression(parser));
 
         if !is_token(parser, TokenType::Comma) {
             break;
@@ -34,4 +38,32 @@ pub(super) fn parse_variable_declaration_statement(
     }
 
     Box::new(Statement::VariableDeclaration { variables })
+}
+
+///
+/// VariableInitializationExpression
+///  : Identifier ['=' Initializer]
+///  ;
+///
+pub(super) fn parse_variable_expression(parser: &mut Parser) -> ExpressionRef {
+    let identifier = parse_identifier_expression(parser);
+
+    // Require type annotation
+    eat(parser, TokenType::Colon);
+    let type_annotation = parse_type(parser);
+
+    let initializer: Option<ExpressionRef> =
+        if is_any_of_token(parser, &[TokenType::StatementEnd, TokenType::Comma]) {
+            None
+        } else {
+            eat(parser, TokenType::SimpleAssignmentOperator);
+            let initializer = parse_assignment_expression(parser);
+            Some(initializer)
+        };
+
+    Box::new(Expression::Variable {
+        identifier,
+        type_annotation,
+        initializer,
+    })
 }

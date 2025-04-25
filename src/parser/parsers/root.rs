@@ -1,5 +1,5 @@
 use crate::ast::{ExpressionRef, StatementRef};
-use crate::parser::parsers::expression_parse_variable_initialization_and_assignment::parse_assignment_expression;
+use crate::parser::parsers::expression_parse_assignment::parse_assignment_expression;
 use crate::parser::parsers::statement_parse_block::parse_program_statement;
 use crate::parser::Parser;
 

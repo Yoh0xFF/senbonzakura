@@ -12,7 +12,7 @@ pub(super) fn visit_expression(
     expression: &Expression,
 ) -> Result<()> {
     let result = match expression {
-        Expression::VariableInitialization {
+        Expression::Variable {
             identifier,
             type_annotation,
             initializer,
