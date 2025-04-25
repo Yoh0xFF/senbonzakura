@@ -326,12 +326,13 @@ fn test_assignment_with_logical_expression() {
 #[test]
 fn test_variable_initialization_with_logical_expression() {
     execute(
-        "let isValid = x > 0 && x < 100;",
+        "let isValid: boolean = x > 0 && x < 100;",
         r#"
         (program
             (let
                 (init
                     (id isValid)
+                    (type Boolean)
                     (logical "&&" (binary ">" (id x) (number 0)) (binary "<" (id x) (number 100))))))
         "#,
     )

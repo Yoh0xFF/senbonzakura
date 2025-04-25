@@ -267,8 +267,8 @@ fn test_class_with_method_using_loops() {
         r#"
         class Summation {
             def sum(n) {
-                let result = 0;
-                for (let i = 1; i <= n; i = i + 1) {
+                let result: number = 0;
+                for (let i: number = 1; i <= n; i = i + 1) {
                     result = result + i;
                 }
                 return result;
@@ -288,11 +288,13 @@ fn test_class_with_method_using_loops() {
                             (let
                                 (init
                                     (id result)
+                                    (type Number)
                                     (number 0)))
                             (for
                                 (let
                                     (init
                                         (id i)
+                                        (type Number)
                                         (number 1)))
                                 (binary "<=" (id i) (id n))
                                 (assign "=" (id i) (binary "+" (id i) (number 1)))
@@ -346,7 +348,7 @@ fn test_class_instantiation() {
             }
         }
 
-        let p = new Point(10, 20);
+        let p: Point = new Point(10, 20);
         "#,
         r#"
         (program
@@ -364,6 +366,7 @@ fn test_class_instantiation() {
             (let
                 (init
                     (id p)
+                    (type(class Point))
                     (new (id Point) (args (number 10) (number 20))))))
         "#,
     )

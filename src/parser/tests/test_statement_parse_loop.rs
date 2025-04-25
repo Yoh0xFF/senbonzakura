@@ -237,7 +237,7 @@ fn test_do_while_loop_with_unary_condition() {
 fn test_simple_for_loop() {
     execute(
         r#"
-        for (let i = 0; i < 10; i = i + 1) {
+        for (let i: number = 0; i < 10; i = i + 1) {
             sum = sum + i;
         }
         "#,
@@ -247,6 +247,7 @@ fn test_simple_for_loop() {
                 (let
                     (init
                         (id i)
+                        (type Number)
                         (number 0)))
                 (binary "<" (id i) (number 10))
                 (assign "=" (id i) (binary "+" (id i) (number 1)))
@@ -280,7 +281,7 @@ fn test_for_loop_with_expression_initializer() {
 fn test_for_loop_with_multiple_initializations() {
     execute(
         r#"
-        for (let i = 0, j = 10; i < j; i = i + 1) {
+        for (let i: number = 0, j: number = 10; i < j; i = i + 1) {
             sum = sum + i;
         }
         "#,
@@ -290,9 +291,11 @@ fn test_for_loop_with_multiple_initializations() {
                 (let
                     (init
                         (id i)
+                        (type Number)
                         (number 0))
                     (init
                         (id j)
+                        (type Number)
                         (number 10)))
                 (binary "<" (id i) (id j))
                 (assign "=" (id i) (binary "+" (id i) (number 1)))
@@ -325,7 +328,7 @@ fn test_for_loop_without_initializer() {
 fn test_for_loop_without_condition() {
     execute(
         r#"
-        for (let i = 0; ; i = i + 1) {
+        for (let i: number = 0; ; i = i + 1) {
             if (i >= 10) {
                 i = 0;
             }
@@ -338,6 +341,7 @@ fn test_for_loop_without_condition() {
                 (let
                     (init
                         (id i)
+                        (type Number)
                         (number 0)))
                 (assign "=" (id i) (binary "+" (id i) (number 1)))
                 (block
@@ -354,7 +358,7 @@ fn test_for_loop_without_condition() {
 fn test_for_loop_without_increment() {
     execute(
         r#"
-        for (let i = 0; i < 10;) {
+        for (let i: number = 0; i < 10;) {
             sum = sum + i;
             i = i + 1;
         }
@@ -365,6 +369,7 @@ fn test_for_loop_without_increment() {
                 (let
                     (init
                         (id i)
+                        (type Number)
                         (number 0)))
                 (binary "<" (id i) (number 10))
                 (block
@@ -400,8 +405,8 @@ fn test_empty_for_loop() {
 fn test_nested_for_loops() {
     execute(
         r#"
-        for (let i = 0; i < 3; i = i + 1) {
-            for (let j = 0; j < 3; j = j + 1) {
+        for (let i: number = 0; i < 3; i = i + 1) {
+            for (let j: number = 0; j < 3; j = j + 1) {
                 result = i * j;
             }
         }
@@ -412,6 +417,7 @@ fn test_nested_for_loops() {
                 (let
                     (init
                         (id i)
+                        (type Number)
                         (number 0)))
                 (binary "<" (id i) (number 3))
                 (assign "=" (id i) (binary "+" (id i) (number 1)))
@@ -420,6 +426,7 @@ fn test_nested_for_loops() {
                         (let
                             (init
                                 (id j)
+                                (type Number)
                                 (number 0)))
                         (binary "<" (id j) (number 3))
                         (assign "=" (id j) (binary "+" (id j) (number 1)))
@@ -433,7 +440,7 @@ fn test_nested_for_loops() {
 fn test_for_loop_with_complex_expressions() {
     execute(
         r#"
-        for (let i = a * b + c; i < max && !done; i = i + 1) {
+        for (let i: number = a * b + c; i < max && !done; i = i + 1) {
             sum = sum + i;
         }
         "#,
@@ -443,6 +450,7 @@ fn test_for_loop_with_complex_expressions() {
                 (let
                     (init
                         (id i)
+                        (type Number)
                         (binary "+" (binary "*" (id a) (id b)) (id c))))
                 (logical "&&" (binary "<" (id i) (id max)) (unary "!" (id done)))
                 (assign "=" (id i) (binary "+" (id i) (number 1)))

@@ -238,10 +238,10 @@ fn test_new_expression_with_member_access() {
 #[test]
 fn test_new_expression_with_computed_member_access() {
     execute(
-        "new objects[type]();",
+        "new objects[member]();",
         r#"
         (program
-            (expr (new (member "computed" (id objects) (id type)))))
+            (expr (new (member "computed" (id objects) (id member)))))
         "#,
     )
 }
@@ -293,12 +293,13 @@ fn test_primary_expression_in_assignment() {
 #[test]
 fn test_primary_expression_in_initialization() {
     execute(
-        "let value = new Vector(1, 2, 3);",
+        "let value: Vector = new Vector(1, 2, 3);",
         r#"
         (program
             (let
                 (init
                     (id value)
+                    (type(class Vector))
                     (new (id Vector) (args (number 1) (number 2) (number 3))))))
         "#,
     )
@@ -344,13 +345,14 @@ fn test_primary_expression_in_loop() {
 fn test_mixed_primary_expressions() {
     execute(
         r#"
-        let result = (this.calculate(x, y) + super.getValue()) * new Factor(42).apply();
+        let result: number = (this.calculate(x, y) + super.getValue()) * new Factor(42).apply();
         "#,
         r#"
         (program
             (let
                 (init
                     (id result)
+                    (type Number)
                     (binary "*"
                         (binary "+"
                             (call (member "static" (this) (id calculate)) (args (id x) (id y)))

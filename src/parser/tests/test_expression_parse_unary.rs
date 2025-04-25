@@ -102,12 +102,13 @@ fn test_unary_operators_with_assignment() {
 #[test]
 fn test_unary_minus_with_numeric_literal() {
     execute(
-        "let x = -5;",
+        "let x: number = -5;",
         r#"
         (program
             (let
                 (init
                     (id x)
+                    (type Number)
                     (unary "-" (number 5)))))
         "#,
     )
@@ -197,12 +198,13 @@ fn test_unary_operators_precedence_with_multiplication() {
 #[test]
 fn test_unary_not_with_variable_declaration() {
     execute(
-        "let isNotValid = !isValid;",
+        "let isNotValid: boolean = !isValid;",
         r#"
         (program
             (let
                 (init
                     (id isNotValid)
+                    (type Boolean)
                     (unary "!" (id isValid))
                 )
             )

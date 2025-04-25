@@ -3,12 +3,13 @@ use super::utils::execute;
 #[test]
 fn test_simple_variable_declaration() {
     execute(
-        "let x = 5;",
+        "let x: number = 5;",
         r#"
         (program
             (let
                 (init
                     (id x)
+                    (type Number)
                     (number 5))))
         "#,
     )
@@ -17,12 +18,13 @@ fn test_simple_variable_declaration() {
 #[test]
 fn test_variable_declaration_without_initializer() {
     execute(
-        "let x;",
+        "let x: string;",
         r#"
         (program
             (let
                 (init
-                    (id x))))
+                    (id x)
+                    (type String))))
         "#,
     )
 }
@@ -30,15 +32,17 @@ fn test_variable_declaration_without_initializer() {
 #[test]
 fn test_multiple_variable_declarations() {
     execute(
-        "let x = 5, y = 10;",
+        "let x: number = 5, y: number = 10;",
         r#"
         (program
             (let
                 (init
                     (id x)
+                    (type Number)
                     (number 5))
                 (init
                     (id y)
+                    (type Number)
                     (number 10))))
         "#,
     )
@@ -47,15 +51,17 @@ fn test_multiple_variable_declarations() {
 #[test]
 fn test_mixed_variable_declarations() {
     execute(
-        "let x = 5, y;",
+        "let x: number = 5, y: number;",
         r#"
         (program
             (let
                 (init
                     (id x)
+                    (type Number)
                     (number 5))
                 (init
-                    (id y))))
+                    (id y)
+                    (type Number))))
         "#,
     )
 }
@@ -63,12 +69,13 @@ fn test_mixed_variable_declarations() {
 #[test]
 fn test_variable_initialization_with_expression() {
     execute(
-        "let x = 2 + 3;",
+        "let x: number = 2 + 3;",
         r#"
         (program
             (let
                 (init
                     (id x)
+                    (type Number)
                     (binary "+" (number 2) (number 3)))))
         "#,
     )
@@ -77,12 +84,13 @@ fn test_variable_initialization_with_expression() {
 #[test]
 fn test_variable_initialization_with_complex_expression() {
     execute(
-        "let x = (2 + 3) * 4;",
+        "let x: number = (2 + 3) * 4;",
         r#"
         (program
             (let
                 (init
                     (id x)
+                    (type Number)
                     (binary "*" (binary "+" (number 2) (number 3)) (number 4)))))
         "#,
     )
@@ -91,12 +99,13 @@ fn test_variable_initialization_with_complex_expression() {
 #[test]
 fn test_variable_initialization_with_string() {
     execute(
-        r#"let message = "Hello, world!";"#,
+        r#"let message: string = "Hello, world!";"#,
         r#"
         (program
             (let
                 (init
                     (id message)
+                    (type String)
                     (string "Hello, world!"))))
         "#,
     )
@@ -105,15 +114,17 @@ fn test_variable_initialization_with_string() {
 #[test]
 fn test_variable_declarations_with_multiple_types() {
     execute(
-        r#"let count = 42, name = "John";"#,
+        r#"let count: number = 42, name: string = "John";"#,
         r#"
         (program
             (let
                 (init
                     (id count)
+                    (type Number)
                     (number 42))
                 (init
                     (id name)
+                    (type String)
                     (string "John"))))
         "#,
     )
@@ -122,15 +133,17 @@ fn test_variable_declarations_with_multiple_types() {
 #[test]
 fn test_multiple_variable_declarations_with_complex_expressions() {
     execute(
-        "let x = 2 + 3, y = x * 4;",
+        "let x: number = 2 + 3, y: number = x * 4;",
         r#"
         (program
             (let
                 (init
                     (id x)
+                    (type Number)
                     (binary "+" (number 2) (number 3)))
                 (init
                     (id y)
+                    (type Number)
                     (binary "*" (id x) (number 4)))))
         "#,
     )

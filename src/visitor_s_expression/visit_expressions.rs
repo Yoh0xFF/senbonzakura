@@ -3,7 +3,7 @@ use crate::ast::{
     ExpressionRef, LogicalOperator, Type, UnaryOperator,
 };
 
-use super::SExpressionVisitor;
+use super::{visit_types::visit_type, SExpressionVisitor};
 use anyhow::Result;
 use std::fmt::Write;
 
@@ -16,12 +16,9 @@ pub(super) fn visit_expression(
             identifier,
             type_annotation,
             initializer,
-        } => visit_variable_initialization_expression(
-            visitor,
-            identifier,
-            type_annotation,
-            initializer.as_deref(),
-        ),
+        } => {
+            visit_variable_expression(visitor, identifier, type_annotation, initializer.as_deref())
+        }
         Expression::Assignment {
             operator,
             left,
@@ -57,7 +54,7 @@ pub(super) fn visit_expression(
     result
 }
 
-fn visit_variable_initialization_expression(
+fn visit_variable_expression(
     visitor: &mut SExpressionVisitor,
     identifier: &Expression,
     type_annotation: &Type,
@@ -69,7 +66,11 @@ fn visit_variable_initialization_expression(
     visitor.write_space_or_newline()?;
     identifier.accept(visitor)?;
 
-    // TODO Process type annotation
+    // Add type annotation to S-expression
+    visitor.write_space_or_newline()?;
+    visitor.begin_expr("type")?;
+    visit_type(visitor, type_annotation)?;
+    visitor.end_expr()?;
 
     // Process initializer if present
     if let Some(init) = initializer {

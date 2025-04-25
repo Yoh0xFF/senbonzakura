@@ -81,8 +81,8 @@ fn test_function_declaration_with_variable_declaration() {
     execute(
         r#"
         def initFunction() {
-            let x = 10;
-            let y = 20;
+            let x: number = 10;
+            let y: number = 20;
             return x + y;
         }
         "#,
@@ -94,10 +94,12 @@ fn test_function_declaration_with_variable_declaration() {
                     (let
                         (init
                             (id x)
+                            (type Number)
                             (number 10)))
                     (let
                         (init
                             (id y)
+                            (type Number)
                             (number 20)))
                     (return (binary "+" (id x) (id y))))))
         "#,
@@ -139,7 +141,7 @@ fn test_function_declaration_with_while_loop() {
     execute(
         r#"
         def factorial(n) {
-            let result = 1;
+            let result: number = 1;
             while (n > 1) {
                 result = result * n;
                 n = n - 1;
@@ -157,6 +159,7 @@ fn test_function_declaration_with_while_loop() {
                     (let
                         (init
                             (id result)
+                            (type Number)
                             (number 1)))
                     (while
                         (binary ">" (id n) (number 1))

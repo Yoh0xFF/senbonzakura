@@ -161,12 +161,13 @@ fn test_member_access_in_logical_expression() {
 #[test]
 fn test_variable_declaration_with_member_access() {
     execute(
-        "let value = obj.property;",
+        "let value: string = obj.property;",
         r#"
         (program
             (let
                 (init
                     (id value)
+                    (type String)
                     (member "static" (id obj) (id property)))))
         "#,
     )
@@ -391,12 +392,13 @@ fn test_call_with_nested_expressions() {
 #[test]
 fn test_variable_declaration_with_call() {
     execute(
-        "let result = getValue();",
+        "let result: string = getValue();",
         r#"
         (program
             (let
                 (init
                     (id result)
+                    (type String)
                     (call (id getValue)))))
         "#,
     )
