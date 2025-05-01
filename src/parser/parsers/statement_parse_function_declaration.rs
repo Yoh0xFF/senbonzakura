@@ -1,10 +1,12 @@
-use crate::ast::{ExpressionList, Statement, StatementRef};
+use crate::ast::{ParameterList, Statement, StatementRef, Type};
 use crate::lexer::TokenType;
 use crate::parser::parsers::expression_parse_primary::parse_identifier_expression;
 use crate::parser::parsers::parse_root_expression;
 use crate::parser::parsers::statement_parse_block::parse_block_statement;
 use crate::parser::parsers::utils::{eat, is_token};
 use crate::parser::Parser;
+
+use super::type_parse_annotations::parse_type;
 
 ///
 /// FunctionDeclaration
@@ -22,11 +24,20 @@ pub(super) fn parse_function_declaration_statement(parser: &mut Parser) -> State
     };
     eat(parser, TokenType::ClosingParenthesis);
 
+    // Parse return type
+    let return_type = if is_token(parser, TokenType::Colon) {
+        eat(parser, TokenType::Colon);
+        parse_type(parser)
+    } else {
+        Type::Void
+    };
+
     let body = parse_block_statement(parser);
 
     Box::new(Statement::FunctionDeclaration {
         name,
         parameters,
+        return_type,
         body,
     })
 }
@@ -37,16 +48,22 @@ pub(super) fn parse_function_declaration_statement(parser: &mut Parser) -> State
 ///  | FormalParameterList ',' IdentifierExpression
 ///  ;
 ///
-pub(super) fn parse_formal_parameter_list_expression(parser: &mut Parser) -> ExpressionList {
+pub(super) fn parse_formal_parameter_list_expression(parser: &mut Parser) -> ParameterList {
     let mut parameters = vec![];
 
     // Parse first parameter
-    parameters.push(*parse_identifier_expression(parser));
+    let param_name = *parse_identifier_expression(parser);
+    eat(parser, TokenType::Colon);
+    let param_type = parse_type(parser);
+    parameters.push((param_name, param_type));
 
     // Parse additional parameters if any
     while is_token(parser, TokenType::Comma) {
         eat(parser, TokenType::Comma);
-        parameters.push(*parse_identifier_expression(parser));
+        let param_name = *parse_identifier_expression(parser);
+        eat(parser, TokenType::Colon);
+        let param_type = parse_type(parser);
+        parameters.push((param_name, param_type));
     }
 
     parameters

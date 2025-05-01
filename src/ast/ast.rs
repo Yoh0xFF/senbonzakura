@@ -7,6 +7,7 @@ pub type StatementRef = Box<Statement>;
 pub type ExpressionRef = Box<Expression>;
 pub type StatementList = Vec<Statement>;
 pub type ExpressionList = Vec<Expression>;
+pub type ParameterList = Vec<(Expression, Type)>;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Statement {
@@ -44,7 +45,8 @@ pub enum Statement {
     },
     FunctionDeclaration {
         name: ExpressionRef,
-        parameters: ExpressionList,
+        parameters: ParameterList,
+        return_type: Type,
         body: StatementRef,
     },
     Return {

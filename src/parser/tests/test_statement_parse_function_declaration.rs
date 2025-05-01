@@ -12,6 +12,7 @@ fn test_simple_function_declaration() {
         (program
             (def
                 (id myFunction)
+                (return_type "void")
                 (block
                     (expr (assign "=" (id x) (number 10))))))
         "#,
@@ -22,7 +23,7 @@ fn test_simple_function_declaration() {
 fn test_function_declaration_with_single_parameter() {
     execute(
         r#"
-        def add(x) {
+        def add(x: number): number {
             return x + 1;
         }
         "#,
@@ -31,7 +32,8 @@ fn test_function_declaration_with_single_parameter() {
             (def
                 (id add)
                 (params
-                    (id x))
+                    (param (id x) (type Number)))
+                (return_type Number)
                 (block
                     (return (binary "+" (id x) (number 1))))))
         "#,
@@ -42,7 +44,7 @@ fn test_function_declaration_with_single_parameter() {
 fn test_function_declaration_with_multiple_parameters() {
     execute(
         r#"
-        def add(x, y, z) {
+        def add(x: number, y: number, z: number): number {
             return x + y + z;
         }
         "#,
@@ -51,9 +53,10 @@ fn test_function_declaration_with_multiple_parameters() {
             (def
                 (id add)
                 (params
-                    (id x)
-                    (id y)
-                    (id z))
+                    (param (id x) (type Number))
+                    (param (id y) (type Number))
+                    (param (id z) (type Number)))
+                (return_type Number)
                 (block
                     (return (binary "+" (binary "+" (id x) (id y)) (id z))))))
         "#,
@@ -71,6 +74,7 @@ fn test_function_declaration_with_empty_body() {
         (program
             (def
                 (id emptyFunction)
+                (return_type "void")
                 (block)))
         "#,
     )
@@ -80,7 +84,7 @@ fn test_function_declaration_with_empty_body() {
 fn test_function_declaration_with_variable_declaration() {
     execute(
         r#"
-        def initFunction() {
+        def initFunction(): number {
             let x: number = 10;
             let y: number = 20;
             return x + y;
@@ -90,6 +94,7 @@ fn test_function_declaration_with_variable_declaration() {
         (program
             (def
                 (id initFunction)
+                (return_type Number)
                 (block
                     (let
                         (init
@@ -110,7 +115,7 @@ fn test_function_declaration_with_variable_declaration() {
 fn test_function_declaration_with_if_statement() {
     execute(
         r#"
-        def max(a, b) {
+        def max(a: number, b: number): number {
             if (a > b) {
                 return a;
             } else {
@@ -123,8 +128,9 @@ fn test_function_declaration_with_if_statement() {
             (def
                 (id max)
                 (params
-                    (id a)
-                    (id b))
+                    (param (id a) (type Number))
+                    (param (id b) (type Number)))
+                (return_type Number)
                 (block
                     (if
                         (binary ">" (id a) (id b))
@@ -140,7 +146,7 @@ fn test_function_declaration_with_if_statement() {
 fn test_function_declaration_with_while_loop() {
     execute(
         r#"
-        def factorial(n) {
+        def factorial(n: number): number {
             let result: number = 1;
             while (n > 1) {
                 result = result * n;
@@ -154,7 +160,8 @@ fn test_function_declaration_with_while_loop() {
             (def
                 (id factorial)
                 (params
-                    (id n))
+                    (param (id n) (type Number)))
+                (return_type Number)
                 (block
                     (let
                         (init
@@ -175,9 +182,9 @@ fn test_function_declaration_with_while_loop() {
 fn test_function_declaration_with_return_no_argument() {
     execute(
         r#"
-        def earlyReturn(x) {
+        def earlyReturn(x: number): number {
             if (x <= 0) {
-                return;
+                return 0;
             }
             return x;
         }
@@ -187,12 +194,13 @@ fn test_function_declaration_with_return_no_argument() {
             (def
                 (id earlyReturn)
                 (params
-                    (id x))
+                    (param (id x) (type Number)))
+                (return_type Number)
                 (block
                     (if
                         (binary "<=" (id x) (number 0))
                         (block
-                            (return)))
+                            (return (number 0))))
                     (return (id x)))))
         "#,
     )
@@ -202,7 +210,7 @@ fn test_function_declaration_with_return_no_argument() {
 fn test_function_declaration_with_complex_expression() {
     execute(
         r#"
-        def evaluate(a, b, c) {
+        def evaluate(a: number, b: number, c: number): number {
             return a * b + c * (a + b);
         }
         "#,
@@ -211,9 +219,10 @@ fn test_function_declaration_with_complex_expression() {
             (def
                 (id evaluate)
                 (params
-                    (id a)
-                    (id b)
-                    (id c))
+                    (param (id a) (type Number))
+                    (param (id b) (type Number))
+                    (param (id c) (type Number)))
+                (return_type Number)
                 (block
                     (return (binary "+" (binary "*" (id a) (id b)) (binary "*" (id c) (binary "+" (id a) (id b))))))))
         "#,
@@ -224,11 +233,11 @@ fn test_function_declaration_with_complex_expression() {
 fn test_multiple_function_declarations() {
     execute(
         r#"
-        def add(a, b) {
+        def add(a: number, b: number): number {
             return a + b;
         }
 
-        def subtract(a, b) {
+        def subtract(a: number, b: number): number {
             return a - b;
         }
         "#,
@@ -237,15 +246,17 @@ fn test_multiple_function_declarations() {
             (def
                 (id add)
                 (params
-                    (id a)
-                    (id b))
+                    (param (id a) (type Number))
+                    (param (id b) (type Number)))
+                (return_type Number)
                 (block
                     (return (binary "+" (id a) (id b)))))
             (def
                 (id subtract)
                 (params
-                    (id a)
-                    (id b))
+                    (param (id a) (type Number))
+                    (param (id b) (type Number)))
+                (return_type Number)
                 (block
                     (return (binary "-" (id a) (id b))))))
         "#,

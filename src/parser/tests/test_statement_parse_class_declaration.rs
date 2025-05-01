@@ -38,10 +38,12 @@ fn test_class_with_methods() {
                 (block
                     (def
                         (id getName)
+                        (return_type "void")
                         (block
                             (return (string "John"))))
                     (def
                         (id getAge)
+                        (return_type "void")
                         (block
                             (return (number 30)))))))
         "#,
@@ -66,6 +68,7 @@ fn test_class_with_inheritance() {
                 (block
                     (def
                         (id getGrade)
+                        (return_type "void")
                         (block
                             (return (string "A")))))))
         "#,
@@ -77,7 +80,7 @@ fn test_class_with_constructor_like_method() {
     execute(
         r#"
         class Person {
-            def constructor(name, age) {
+            def constructor(name: string, age: number) {
                 this.name = name;
                 this.age = age;
             }
@@ -99,17 +102,20 @@ fn test_class_with_constructor_like_method() {
                     (def
                         (id constructor)
                         (params
-                            (id name)
-                            (id age))
+                            (param (id name) (type String))
+                            (param (id age) (type Number)))
+                        (return_type "void")
                         (block
                             (expr (assign "=" (member "static" (this) (id name)) (id name)))
                             (expr (assign "=" (member "static" (this) (id age)) (id age)))))
                     (def
                         (id getName)
+                        (return_type "void")
                         (block
                             (return (member "static" (this) (id name)))))
                     (def
                         (id getAge)
+                        (return_type "void")
                         (block
                             (return (member "static" (this) (id age))))))))
         "#,
@@ -121,12 +127,12 @@ fn test_class_with_instance_variables() {
     execute(
         r#"
         class Rectangle {
-            def constructor(width, height) {
+            def constructor(width: number, height: number) {
                 this.width = width;
                 this.height = height;
             }
 
-            def getArea() {
+            def getArea(): number {
                 return this.width * this.height;
             }
         }
@@ -139,13 +145,15 @@ fn test_class_with_instance_variables() {
                     (def
                         (id constructor)
                         (params
-                            (id width)
-                            (id height))
+                            (param (id width) (type Number))
+                            (param (id height) (type Number)))
+                        (return_type "void")
                         (block
                             (expr (assign "=" (member "static" (this) (id width)) (id width)))
                             (expr (assign "=" (member "static" (this) (id height)) (id height)))))
                     (def
                         (id getArea)
+                        (return_type Number)
                         (block
                             (return (binary "*" (member "static" (this) (id width)) (member "static" (this) (id height)))))))))
         "#,
@@ -157,12 +165,12 @@ fn test_class_with_super_calls() {
     execute(
         r#"
         class Child extends Parent {
-            def constructor(name, age) {
+            def constructor(name: string, age: number) {
                 super(name);
                 this.age = age;
             }
 
-            def describe() {
+            def describe(): string {
                 return super.getName() + " is " + this.age + " years old";
             }
         }
@@ -176,13 +184,15 @@ fn test_class_with_super_calls() {
                     (def
                         (id constructor)
                         (params
-                            (id name)
-                            (id age))
+                            (param (id name) (type String))
+                            (param (id age) (type Number)))
+                        (return_type "void")
                         (block
                             (expr (call (super) (args (id name))))
                             (expr (assign "=" (member "static" (this) (id age)) (id age)))))
                     (def
                         (id describe)
+                        (return_type String)
                         (block
                             (return (binary "+" (binary "+" (binary "+" (call (member "static" (super) (id getName))) (string " is ")) (member "static" (this) (id age))) (string " years old"))))))))
         "#,
@@ -194,13 +204,13 @@ fn test_multiple_classes() {
     execute(
         r#"
         class Animal {
-            def makeSound() {
+            def makeSound(): string {
                 return "Generic animal sound";
             }
         }
 
         class Dog extends Animal {
-            def makeSound() {
+            def makeSound(): string {
                 return "Woof";
             }
         }
@@ -212,6 +222,7 @@ fn test_multiple_classes() {
                 (block
                     (def
                         (id makeSound)
+                        (return_type String)
                         (block
                             (return (string "Generic animal sound"))))))
             (class
@@ -220,6 +231,7 @@ fn test_multiple_classes() {
                 (block
                     (def
                         (id makeSound)
+                        (return_type String)
                         (block
                             (return (string "Woof")))))))
         "#,
@@ -231,7 +243,7 @@ fn test_class_with_method_using_if_statement() {
     execute(
         r#"
         class Calculator {
-            def max(a, b) {
+            def max(a: number, b: number): number {
                 if (a > b) {
                     return a;
                 } else {
@@ -248,8 +260,9 @@ fn test_class_with_method_using_if_statement() {
                     (def
                         (id max)
                         (params
-                            (id a)
-                            (id b))
+                            (param (id a) (type Number))
+                            (param (id b) (type Number)))
+                        (return_type Number)
                         (block
                             (if
                                 (binary ">" (id a) (id b))
@@ -266,7 +279,7 @@ fn test_class_with_method_using_loops() {
     execute(
         r#"
         class Summation {
-            def sum(n) {
+            def sum(n: number): number {
                 let result: number = 0;
                 for (let i: number = 1; i <= n; i = i + 1) {
                     result = result + i;
@@ -283,7 +296,8 @@ fn test_class_with_method_using_loops() {
                     (def
                         (id sum)
                         (params
-                            (id n))
+                            (param (id n) (type Number)))
+                        (return_type Number)
                         (block
                             (let
                                 (init
@@ -310,7 +324,7 @@ fn test_class_with_method_using_function_calls() {
     execute(
         r#"
         class MathUtils {
-            def factorial(n) {
+            def factorial(n: number): number {
                 if (n <= 1) {
                     return 1;
                 }
@@ -326,7 +340,8 @@ fn test_class_with_method_using_function_calls() {
                     (def
                         (id factorial)
                         (params
-                            (id n))
+                            (param (id n) (type Number)))
+                        (return_type Number)
                         (block
                             (if
                                 (binary "<=" (id n) (number 1))
@@ -342,7 +357,7 @@ fn test_class_instantiation() {
     execute(
         r#"
         class Point {
-            def constructor(x, y) {
+            def constructor(x: number, y: number) {
                 this.x = x;
                 this.y = y;
             }
@@ -358,8 +373,9 @@ fn test_class_instantiation() {
                     (def
                         (id constructor)
                         (params
-                            (id x)
-                            (id y))
+                            (param (id x) (type Number))
+                            (param (id y) (type Number)))
+                        (return_type "void")
                         (block
                             (expr (assign "=" (member "static" (this) (id x)) (id x)))
                             (expr (assign "=" (member "static" (this) (id y)) (id y)))))))

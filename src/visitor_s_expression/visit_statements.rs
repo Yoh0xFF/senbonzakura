@@ -1,9 +1,12 @@
 use crate::{
-    ast::{Expression, ExpressionDispatcher, ExpressionList, StatementDispatcher, StatementList},
+    ast::{
+        Expression, ExpressionDispatcher, ExpressionList, ParameterList, StatementDispatcher,
+        StatementList, Type,
+    },
     Statement,
 };
 
-use super::SExpressionVisitor;
+use super::{visit_types::visit_type, SExpressionVisitor};
 use anyhow::Result;
 
 pub(super) fn visit_statement(
@@ -42,8 +45,9 @@ pub(super) fn visit_statement(
         Statement::FunctionDeclaration {
             name,
             parameters,
+            return_type,
             body,
-        } => visit_function_declaration_statement(visitor, name, parameters, body),
+        } => visit_function_declaration_statement(visitor, name, parameters, return_type, body),
         Statement::Return { argument } => visit_return_statement(visitor, argument.as_deref()),
         Statement::ClassDeclaration {
             name,
@@ -226,7 +230,8 @@ fn visit_for_statement(
 fn visit_function_declaration_statement(
     visitor: &mut SExpressionVisitor,
     name: &Expression,
-    parameters: &ExpressionList,
+    parameters: &ParameterList,
+    return_type: &Type,
     body: &Statement,
 ) -> Result<()> {
     visitor.begin_expr("def")?;
@@ -240,13 +245,29 @@ fn visit_function_declaration_statement(
         visitor.write_space_or_newline()?;
         visitor.begin_expr("params")?;
 
-        for param in parameters.iter() {
+        for (param_name, param_type) in parameters {
             visitor.write_space_or_newline()?;
-            param.accept(visitor)?;
+            visitor.begin_expr("param")?;
+
+            visitor.write_space_or_newline()?;
+            param_name.accept(visitor)?;
+
+            visitor.write_space_or_newline()?;
+            visitor.begin_expr("type")?;
+            visit_type(visitor, param_type)?;
+            visitor.end_expr()?;
+
+            visitor.end_expr()?;
         }
 
         visitor.end_expr()?;
     }
+
+    // Process return type if present
+    visitor.write_space_or_newline()?;
+    visitor.begin_expr("return_type")?;
+    visit_type(visitor, return_type)?;
+    visitor.end_expr()?;
 
     // Process function body
     visitor.write_space_or_newline()?;
