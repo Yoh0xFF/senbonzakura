@@ -10,7 +10,7 @@ use super::type_parse_annotations::parse_type;
 
 ///
 /// FunctionDeclaration
-///  : def '(' [FormalParameterList] ')' BlockStatement
+///  : def '(' [FormalParameterList] ')' [':' Type] BlockStatement
 ///
 pub(super) fn parse_function_declaration_statement(parser: &mut Parser) -> StatementRef {
     eat(parser, TokenType::DefKeyword);
@@ -44,8 +44,8 @@ pub(super) fn parse_function_declaration_statement(parser: &mut Parser) -> State
 
 ///
 /// FormalParameterList
-///  : IdentifierExpression
-///  | FormalParameterList ',' IdentifierExpression
+///  : IdentifierExpression ':' Type
+///  | FormalParameterList ',' IdentifierExpression ':' Type
 ///  ;
 ///
 pub(super) fn parse_formal_parameter_list_expression(parser: &mut Parser) -> ParameterList {

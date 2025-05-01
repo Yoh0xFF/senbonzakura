@@ -42,7 +42,7 @@ pub(super) fn parse_variable_declaration_statement(
 
 ///
 /// VariableInitializationExpression
-///  : Identifier ['=' Initializer]
+///  : Identifier ':' Type ['=' Initializer]
 ///  ;
 ///
 pub(super) fn parse_variable_expression(parser: &mut Parser) -> ExpressionRef {
