@@ -53,7 +53,9 @@ pub(super) fn parse_identifier_expression(parser: &mut Parser) -> ExpressionRef 
     let identifier_token = eat(parser, TokenType::Identifier);
     let identifier_value = &parser.source[identifier_token.i..identifier_token.j];
 
-    Box::new(Expression::Identifier(String::from(identifier_value)))
+    Box::new(Expression::Identifier {
+        name: String::from(identifier_value),
+    })
 }
 
 ///

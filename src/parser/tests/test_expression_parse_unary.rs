@@ -2,6 +2,9 @@ use super::utils::execute;
 
 #[test]
 fn test_unary_plus_operator() {
+    let current_dir = env!("CARGO_MANIFEST_DIR");
+    println!("Current dir: {}", current_dir);
+
     execute(
         "+42;",
         r#"

@@ -24,36 +24,12 @@ fn main() {
 
     let mut parser = Parser::new(
         r#"
-        class Person {
-            def constructor(name: string, surname: string) {
-                this.name = name;
-                this.surname = surname;
-            }
-
-            def getName(): string {
-                return this.name + " " + this.surname;
-            }
-        }
-
-        class Student extends Person {
-            def constructor(name: string, surname: string, university: string) {
-                super(name, surname);
-                this.university = university;
-            }
-
-            def getInfo(): string {
-                return super.getName() + ", " + this.university;
-            }
-        }
-
-        def add(x: number, y: number): number {
-            return x + y;
-        }
-
-        add(2, 5);
+        let x: number = 42;
         "#,
     );
     let ast = parse_root_statement(&mut parser);
     let s_expression = ast.to_pretty_s_expression().unwrap();
     println!("SExpression:\n{}", s_expression);
+
+    println!("Yaml:\n{}", serde_yaml::to_string(&ast).unwrap());
 }

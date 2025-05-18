@@ -31,7 +31,7 @@ pub(super) fn parse_boolean_literal_expression(parser: &mut Parser) -> Expressio
     let token_value = &parser.source[token.i..token.j];
     let bool_value = token_value == "true";
 
-    Box::new(Expression::BooleanLiteral(bool_value))
+    Box::new(Expression::BooleanLiteral { value: bool_value })
 }
 
 ///
@@ -55,7 +55,7 @@ pub(super) fn parse_numeric_literal_expression(parser: &mut Parser) -> Expressio
     let token_value = &parser.source[token.i..token.j];
     let token_value = token_value.trim().parse().unwrap();
 
-    Box::new(Expression::NumericLiteral(token_value))
+    Box::new(Expression::NumericLiteral { value: token_value })
 }
 
 ///
@@ -67,5 +67,7 @@ pub(super) fn parse_string_literal_expression(parser: &mut Parser) -> Expression
     let token = eat(parser, TokenType::String);
     let token_value = &parser.source[token.i + 1..token.j - 1];
 
-    Box::new(Expression::StringLiteral(String::from(token_value)))
+    Box::new(Expression::StringLiteral {
+        value: String::from(token_value),
+    })
 }

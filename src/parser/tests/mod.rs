@@ -1,4 +1,7 @@
 #[cfg(test)]
+mod test_yaml_variable_declaration;
+
+#[cfg(test)]
 mod test_expression_parse_assignment;
 #[cfg(test)]
 mod test_expression_parse_binary;
