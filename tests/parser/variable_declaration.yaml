@@ -1,0 +1,197 @@
+---
+description: Variable declaration with initialization
+source: |
+  let x: number = 42;
+expected_ast:
+  type: Program
+  body:
+    - type: VariableDeclaration
+      variables:
+        - type: Variable
+          identifier:
+            type: Identifier
+            name: x
+          type_annotation:
+            type: Primitive
+            value: Number
+          initializer:
+            type: NumericLiteral
+            value: 42
+
+---
+description: Variable declaration without initialization
+source: |
+  let x: string;
+expected_ast:
+  type: Program
+  body:
+    - type: VariableDeclaration
+      variables:
+        - type: Variable
+          identifier:
+            type: Identifier
+            name: x
+          type_annotation:
+            type: Primitive
+            value: String
+
+---
+description: Multiple variable declaration without initialization
+source: |
+  let x: number = 5, y: number = 10;
+expected_ast:
+  type: Program
+  body:
+    - type: VariableDeclaration
+      variables:
+        - type: Variable
+          identifier:
+            type: Identifier
+            name: x
+          type_annotation:
+            type: Primitive
+            value: Number
+          initializer:
+            type: NumericLiteral
+            value: 5
+        - type: Variable
+          identifier:
+            type: Identifier
+            name: y
+          type_annotation:
+            type: Primitive
+            value: Number
+          initializer:
+            type: NumericLiteral
+            value: 10
+
+---
+description: Mixed variable declarations
+source: |
+  let x: number = 5, y: number;
+expected_ast:
+  type: Program
+  body:
+    - type: VariableDeclaration
+      variables:
+        - type: Variable
+          identifier:
+            type: Identifier
+            name: x
+          type_annotation:
+            type: Primitive
+            value: Number
+          initializer:
+            type: NumericLiteral
+            value: 5
+        - type: Variable
+          identifier:
+            type: Identifier
+            name: y
+          type_annotation:
+            type: Primitive
+            value: Number
+
+---
+description: Multiple variable declaration with different types and with initialization
+source: |
+  let count: number = 42, name: string = "John";
+expected_ast:
+  type: Program
+  body:
+    - type: VariableDeclaration
+      variables:
+        - type: Variable
+          identifier:
+            type: Identifier
+            name: count
+          type_annotation:
+            type: Primitive
+            value: Number
+          initializer:
+            type: NumericLiteral
+            value: 42
+        - type: Variable
+          identifier:
+            type: Identifier
+            name: name
+          type_annotation:
+            type: Primitive
+            value: String
+          initializer:
+            type: StringLiteral
+            value: John
+
+---
+description: Variable initialization with expression
+source: |
+  let x: number = (2 + 3) * 4;
+expected_ast:
+  type: Program
+  body:
+    - type: VariableDeclaration
+      variables:
+        - type: Variable
+          identifier:
+            type: Identifier
+            name: x
+          type_annotation:
+            type: Primitive
+            value: Number
+          initializer:
+            type: Binary
+            operator: Multiply
+            left:
+              type: Binary
+              operator: Add
+              left:
+                type: NumericLiteral
+                value: 2
+              right:
+                type: NumericLiteral
+                value: 3
+            right:
+              type: NumericLiteral
+              value: 4
+
+---
+description: Multiple variable initialization with expression
+source: |
+  let x: number = 2 + 3, y: number = x * 4;
+expected_ast:
+  type: Program
+  body:
+    - type: VariableDeclaration
+      variables:
+        - type: Variable
+          identifier:
+            type: Identifier
+            name: x
+          type_annotation:
+            type: Primitive
+            value: Number
+          initializer:
+            type: Binary
+            operator: Add
+            left:
+              type: NumericLiteral
+              value: 2
+            right:
+              type: NumericLiteral
+              value: 3
+        - type: Variable
+          identifier:
+            type: Identifier
+            name: y
+          type_annotation:
+            type: Primitive
+            value: Number
+          initializer:
+            type: Binary
+            operator: Multiply
+            left:
+              type: Identifier
+              name: x
+            right:
+              type: NumericLiteral
+              value: 4

@@ -32,8 +32,6 @@ pub(super) struct YamlTestCase {
 }
 
 pub(super) fn execute_yaml_test(test_case: &YamlTestCase) {
-    println!("Testing: {}", test_case.description);
-
     let mut parser = Parser::new(&test_case.source);
     let actual_ast = parse_root_statement(&mut parser);
 
@@ -43,34 +41,47 @@ pub(super) fn execute_yaml_test(test_case: &YamlTestCase) {
     assert_eq!(actual_statement, test_case.expected_ast);
 }
 
-pub(super) fn load_yaml_test(path: &str) -> YamlTestCase {
-    let result = fs::read_to_string(path);
-    let content = match result {
+pub(super) fn load_yaml_test_cases(path: &str) -> Vec<YamlTestCase> {
+    let content = match fs::read_to_string(path) {
         Ok(content) => content,
         Err(error) => {
             eprintln!("Failed to read the test yaml file: {}", error);
             eprintln!("Path: {}", path);
-
             panic!("Could not read test file: {}", error);
         }
     };
 
-    let result: serde_yaml::Result<YamlTestCase> = serde_yaml::from_str(&content);
-    let test_case: YamlTestCase = match result {
-        Ok(test_case) => test_case,
-        Err(error) => {
-            eprintln!("Failed to parse the test yaml file: {}", error);
-            eprintln!("Path: {}", path);
-            eprintln!("Content:\n{}", content);
+    // Parse multiple documents
+    let mut test_cases = Vec::new();
 
-            panic!("Could not parse YAML content: {}", error);
+    // Use the serde_yaml::from_reader function with a stream
+    for document in serde_yaml::Deserializer::from_str(&content) {
+        match YamlTestCase::deserialize(document) {
+            Ok(test_case) => test_cases.push(test_case),
+            Err(e) => {
+                eprintln!("Failed to parse a YAML document: {}", e);
+                eprintln!("Path: {}", path);
+                panic!("Could not parse YAML content: {}", e);
+            }
         }
-    };
+    }
 
-    test_case
+    // Verify that we found some test cases
+    if test_cases.is_empty() {
+        eprintln!("No test cases found in file: {}", path);
+        panic!("File contained no valid test cases");
+    }
+
+    test_cases
 }
 
-pub(super) fn execute_yaml_test_file(path: &str) {
-    let test_case = load_yaml_test(path);
-    execute_yaml_test(&test_case);
+pub(super) fn execute_yaml_test_cases(path: &str) {
+    let test_cases = load_yaml_test_cases(path);
+
+    for (index, test_case) in test_cases.iter().enumerate() {
+        println!("Testing case #{}:\n{}\n", index + 1, test_case.description);
+        execute_yaml_test(test_case);
+    }
+
+    println!("All {} test cases passed!", test_cases.len());
 }

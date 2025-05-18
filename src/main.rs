@@ -24,7 +24,7 @@ fn main() {
 
     let mut parser = Parser::new(
         r#"
-        let x: number = 42;
+        let x: number = 2 + 3, y: number = x * 4;
         "#,
     );
     let ast = parse_root_statement(&mut parser);
