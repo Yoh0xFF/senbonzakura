@@ -3,6 +3,7 @@ use std::fmt;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "PascalCase")]
 pub enum AssignmentOperator {
     Assign,
     AssignAdd,
@@ -24,6 +25,7 @@ impl fmt::Display for AssignmentOperator {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "PascalCase")]
 pub enum BinaryOperator {
     Add,
     Subtract,
@@ -55,6 +57,7 @@ impl fmt::Display for BinaryOperator {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "PascalCase")]
 pub enum UnaryOperator {
     Plus,
     Minus,
@@ -72,6 +75,7 @@ impl fmt::Display for UnaryOperator {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "PascalCase")]
 pub enum LogicalOperator {
     And,
     Or,
