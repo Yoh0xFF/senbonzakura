@@ -4,30 +4,27 @@ use serde::{Deserialize, Serialize};
 
 #[allow(dead_code)]
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-#[serde(tag = "type", content = "value")]
+#[serde(tag = "type", content = "value", rename_all = "PascalCase")]
 pub enum Type {
-    #[serde(rename = "Primitive")]
     Primitive(PrimitiveType),
 
-    #[serde(rename = "Array")]
     Array(Box<Type>),
 
-    #[serde(rename = "Function")]
     Function {
         params: Vec<Type>,
         return_type: Box<Type>,
     },
 
-    #[serde(rename = "Class")]
     Class {
         name: String,
         super_class: Option<String>,
     },
 
-    #[serde(rename = "Generic")]
-    Generic { base: String, type_args: Vec<Type> },
+    Generic {
+        base: String,
+        type_args: Vec<Type>,
+    },
 
-    #[serde(rename = "Void")]
     Void,
 }
 

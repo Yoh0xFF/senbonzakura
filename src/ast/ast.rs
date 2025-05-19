@@ -12,43 +12,42 @@ pub type ExpressionList = Vec<Expression>;
 pub type ParameterList = Vec<(Expression, Type)>;
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-#[serde(tag = "type")]
+#[serde(tag = "type", rename_all = "PascalCase")]
 pub enum Statement {
-    #[serde(rename = "Program")]
-    Program { body: StatementList },
+    Program {
+        body: StatementList,
+    },
 
-    #[serde(rename = "Block")]
-    Block { body: StatementList },
+    Block {
+        body: StatementList,
+    },
 
-    #[serde(rename = "Empty")]
     Empty,
 
-    #[serde(rename = "Expression")]
-    Expression { expression: ExpressionRef },
+    Expression {
+        expression: ExpressionRef,
+    },
 
-    #[serde(rename = "VariableDeclaration")]
-    VariableDeclaration { variables: ExpressionList },
+    VariableDeclaration {
+        variables: ExpressionList,
+    },
 
-    #[serde(rename = "If")]
     If {
         condition: ExpressionRef,
         consequent: StatementRef,
         alternative: Option<StatementRef>,
     },
 
-    #[serde(rename = "While")]
     While {
         condition: ExpressionRef,
         body: StatementRef,
     },
 
-    #[serde(rename = "DoWhile")]
     DoWhile {
         body: StatementRef,
         condition: ExpressionRef,
     },
 
-    #[serde(rename = "For")]
     For {
         initializer: Option<StatementRef>,
         condition: Option<ExpressionRef>,
@@ -56,7 +55,6 @@ pub enum Statement {
         body: StatementRef,
     },
 
-    #[serde(rename = "FunctionDeclaration")]
     FunctionDeclaration {
         name: ExpressionRef,
         parameters: ParameterList,
@@ -64,10 +62,10 @@ pub enum Statement {
         body: StatementRef,
     },
 
-    #[serde(rename = "Return")]
-    Return { argument: Option<ExpressionRef> },
+    Return {
+        argument: Option<ExpressionRef>,
+    },
 
-    #[serde(rename = "ClassDeclaration")]
     ClassDeclaration {
         name: ExpressionRef,
         super_class: Option<ExpressionRef>,
@@ -76,77 +74,70 @@ pub enum Statement {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-#[serde(tag = "type")]
+#[serde(tag = "type", rename_all = "PascalCase")]
 pub enum Expression {
-    #[serde(rename = "Variable")]
     Variable {
         identifier: ExpressionRef,
         type_annotation: Type,
         initializer: Option<ExpressionRef>,
     },
 
-    #[serde(rename = "Assignment")]
     Assignment {
         operator: AssignmentOperator,
         left: ExpressionRef,
         right: ExpressionRef,
     },
 
-    #[serde(rename = "Binary")]
     Binary {
         operator: BinaryOperator,
         left: ExpressionRef,
         right: ExpressionRef,
     },
 
-    #[serde(rename = "Unary")]
     Unary {
         operator: UnaryOperator,
         right: ExpressionRef,
     },
 
-    #[serde(rename = "Logical")]
     Logical {
         operator: LogicalOperator,
         left: ExpressionRef,
         right: ExpressionRef,
     },
 
-    #[serde(rename = "BooleanLiteral")]
-    BooleanLiteral { value: bool },
+    BooleanLiteral {
+        value: bool,
+    },
 
-    #[serde(rename = "NilLiteral")]
     NilLiteral,
 
-    #[serde(rename = "StringLiteral")]
-    StringLiteral { value: String },
+    StringLiteral {
+        value: String,
+    },
 
-    #[serde(rename = "NumericLiteral")]
-    NumericLiteral { value: i32 },
+    NumericLiteral {
+        value: i32,
+    },
 
-    #[serde(rename = "Identifier")]
-    Identifier { name: String },
+    Identifier {
+        name: String,
+    },
 
-    #[serde(rename = "Member")]
     Member {
         computed: bool,
         object: ExpressionRef,
         property: ExpressionRef,
     },
 
-    #[serde(rename = "Call")]
     Call {
         callee: ExpressionRef,
         arguments: ExpressionList,
     },
 
-    #[serde(rename = "This")]
     This {},
 
-    #[serde(rename = "Super")]
     Super {},
 
-    #[serde(rename = "New")]
     New {
         callee: ExpressionRef,
         arguments: ExpressionList,
