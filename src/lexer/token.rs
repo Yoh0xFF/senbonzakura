@@ -6,6 +6,7 @@ pub enum TokenType {
     Whitespace,
     SingleLineComment,
     MultiLineComment,
+
     // Symbols
     StatementEnd,
     OpeningBrace,
@@ -17,6 +18,7 @@ pub enum TokenType {
     Comma,
     Dot,
     Colon,
+
     // Keywords,
     LetKeyword,
     IfKeyword,
@@ -36,27 +38,35 @@ pub enum TokenType {
     StringTypeKeyword,
     BooleanTypeKeyword,
     VoidTypeKeyword,
+
     // Identifier
     Identifier,
+
     // Equality operators
     EqualityOperator,
+
     // Assignment operators
     SimpleAssignmentOperator,
     ComplexAssignmentOperator,
+
     // Math operators
     AdditiveOperator,
     FactorOperator,
+
     // Relational operators
     RelationalOperator,
+
     // Logical operators
     LogicalAndOperator,
     LogicalOrOperator,
     LogicalNotOperator,
+
     // Literals
     Boolean,
     Nil,
     Number,
     String,
+
     // End
     End,
 }
