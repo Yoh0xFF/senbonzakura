@@ -1,0 +1,71 @@
+---
+description: Parse simple while loop
+source: |
+  while (i < 10) {
+    i = i + 1;
+  }
+expected_ast:
+  type: Program
+  body:
+    - type: While
+      condition:
+        type: Binary
+        operator: LessThan
+        left:
+          type: Identifier
+          name: i
+        right:
+          type: NumericLiteral
+          value: 10
+      body:
+        type: Block
+        body:
+          - type: Expression
+            expression:
+              type: Assignment
+              operator: Assign
+              left:
+                type: Identifier
+                name: i
+              right:
+                type: Binary
+                operator: Add
+                left:
+                  type: Identifier
+                  name: i
+                right:
+                  type: NumericLiteral
+                  value: 1
+
+---
+description: Parse simple while loop with boolean condition
+source: |
+  while (true) {
+    i = i + 1;
+  }
+expected_ast:
+  type: Program
+  body:
+    - type: While
+      condition:
+        type: BooleanLiteral
+        value: true
+      body:
+        type: Block
+        body:
+          - type: Expression
+            expression:
+              type: Assignment
+              operator: Assign
+              left:
+                type: Identifier
+                name: i
+              right:
+                type: Binary
+                operator: Add
+                left:
+                  type: Identifier
+                  name: i
+                right:
+                  type: NumericLiteral
+                  value: 1

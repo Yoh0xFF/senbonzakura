@@ -16,6 +16,11 @@ fn test_expression_parse_literals() {
 }
 
 #[test]
+fn test_statement_parse_loop() {
+    execute_yaml_test_cases("tests/parser/test_statement_parse_loop.yaml");
+}
+
+#[test]
 fn test_statement_parse_variable_declaration() {
     execute_yaml_test_cases("tests/parser/test_statement_parse_variable_declaration.yaml");
 }
