@@ -1,6 +1,5 @@
 use crate::ast::{Expression, ExpressionRef};
 use crate::lexer::TokenType;
-use crate::parser::parsers::internal_util::eat_token;
 use crate::parser::Parser;
 
 ///
@@ -27,7 +26,7 @@ pub(super) fn parse_literal_expression(parser: &mut Parser) -> ExpressionRef {
 ///  ;
 ///
 pub(super) fn parse_boolean_literal_expression(parser: &mut Parser) -> ExpressionRef {
-    let token = eat_token(parser, TokenType::Boolean);
+    let token = parser.eat_token(TokenType::Boolean);
     let token_value = &parser.source[token.i..token.j];
     let bool_value = token_value == "true";
 
@@ -40,7 +39,7 @@ pub(super) fn parse_boolean_literal_expression(parser: &mut Parser) -> Expressio
 ///  ;
 ///
 pub(super) fn parse_nil_literal_expression(parser: &mut Parser) -> ExpressionRef {
-    eat_token(parser, TokenType::Nil);
+    parser.eat_token(TokenType::Nil);
 
     Box::new(Expression::NilLiteral)
 }
@@ -51,7 +50,7 @@ pub(super) fn parse_nil_literal_expression(parser: &mut Parser) -> ExpressionRef
 ///  ;
 ///
 pub(super) fn parse_numeric_literal_expression(parser: &mut Parser) -> ExpressionRef {
-    let token = eat_token(parser, TokenType::Number);
+    let token = parser.eat_token(TokenType::Number);
     let token_value = &parser.source[token.i..token.j];
     let token_value = token_value.trim().parse().unwrap();
 
@@ -64,7 +63,7 @@ pub(super) fn parse_numeric_literal_expression(parser: &mut Parser) -> Expressio
 ///  ;
 ///
 pub(super) fn parse_string_literal_expression(parser: &mut Parser) -> ExpressionRef {
-    let token = eat_token(parser, TokenType::String);
+    let token = parser.eat_token(TokenType::String);
     let token_value = &parser.source[token.i + 1..token.j - 1];
 
     Box::new(Expression::StringLiteral {

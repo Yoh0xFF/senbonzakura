@@ -4,47 +4,45 @@ use crate::{
     Parser,
 };
 
-use super::internal_util::{eat_token, is_next_token_of_type};
-
 pub(super) fn parse_type(parser: &mut Parser) -> Type {
     match parser.lookahead.token_type {
         TokenType::NumberTypeKeyword => {
-            eat_token(parser, TokenType::NumberTypeKeyword);
+            parser.eat_token(TokenType::NumberTypeKeyword);
             Type::Primitive(PrimitiveType::Number)
         }
         TokenType::StringTypeKeyword => {
-            eat_token(parser, TokenType::StringTypeKeyword);
+            parser.eat_token(TokenType::StringTypeKeyword);
             Type::Primitive(PrimitiveType::String)
         }
         TokenType::BooleanTypeKeyword => {
-            eat_token(parser, TokenType::BooleanTypeKeyword);
+            parser.eat_token(TokenType::BooleanTypeKeyword);
             Type::Primitive(PrimitiveType::Boolean)
         }
         TokenType::VoidTypeKeyword => {
-            eat_token(parser, TokenType::VoidTypeKeyword);
+            parser.eat_token(TokenType::VoidTypeKeyword);
             Type::Void
         }
         TokenType::Identifier => {
             // Handle class types or custom types
-            let identifier_token = eat_token(parser, TokenType::Identifier);
+            let identifier_token = parser.eat_token(TokenType::Identifier);
             let type_name = &parser.source[identifier_token.i..identifier_token.j];
 
             // Check for generic type parameters
-            if is_next_token_of_type(parser, TokenType::OpeningBracket) {
-                eat_token(parser, TokenType::OpeningBracket);
+            if parser.is_next_token_of_type(TokenType::OpeningBracket) {
+                parser.eat_token(TokenType::OpeningBracket);
                 let mut type_args = vec![];
 
                 loop {
                     type_args.push(parse_type(parser));
 
-                    if !is_next_token_of_type(parser, TokenType::Comma) {
+                    if !parser.is_next_token_of_type(TokenType::Comma) {
                         break;
                     }
 
-                    eat_token(parser, TokenType::Comma);
+                    parser.eat_token(TokenType::Comma);
                 }
 
-                eat_token(parser, TokenType::ClosingBracket);
+                parser.eat_token(TokenType::ClosingBracket);
 
                 Type::Generic {
                     base: String::from(type_name),
@@ -59,9 +57,9 @@ pub(super) fn parse_type(parser: &mut Parser) -> Type {
         }
         TokenType::OpeningBracket => {
             // Handle array types
-            eat_token(parser, TokenType::OpeningBracket);
+            parser.eat_token(TokenType::OpeningBracket);
             let element_type = parse_type(parser);
-            eat_token(parser, TokenType::ClosingBracket);
+            parser.eat_token(TokenType::ClosingBracket);
 
             Type::Array(Box::new(element_type))
         }

@@ -1,103 +1,6 @@
 use crate::ast::{BinaryOperator, Expression, ExpressionRef, LogicalOperator};
-use crate::lexer::{Token, TokenType};
+use crate::lexer::TokenType;
 use crate::parser::Parser;
-
-///
-/// Expects a token of a given type
-///
-pub(super) fn eat_token(parser: &mut Parser, token_type: TokenType) -> Token {
-    if parser.lookahead.token_type != token_type {
-        panic!(
-            "Unexpected token: {}, expected token: '{}'",
-            parser.lookahead.token_type, token_type
-        );
-    }
-
-    let pre_token = parser.lookahead;
-    parser.lookahead = parser.lexer.next_token();
-    pre_token
-}
-
-///
-/// Expects a token of a given types
-///
-pub(super) fn eat_any_of_token(parser: &mut Parser, token_types: &[TokenType]) -> Token {
-    for token_type in token_types {
-        if parser.lookahead.token_type == *token_type {
-            let pre_token = parser.lookahead;
-            parser.lookahead = parser.lexer.next_token();
-            return pre_token;
-        }
-    }
-
-    panic!(
-        "Unexpected token: {}, expected tokens: '{:?}'",
-        parser.lookahead.token_type, token_types
-    );
-}
-
-///
-/// Check the current token type
-///
-#[allow(dead_code)]
-pub(super) fn is_next_token_of_type(parser: &mut Parser, token_type: TokenType) -> bool {
-    parser.lookahead.token_type == token_type
-}
-
-///
-/// Check the current token type
-///
-#[allow(dead_code)]
-pub(super) fn is_next_token_any_of_type(parser: &mut Parser, token_types: &[TokenType]) -> bool {
-    for token_type in token_types {
-        if parser.lookahead.token_type == *token_type {
-            return true;
-        }
-    }
-
-    false
-}
-
-///
-/// Check if the expression is valid assignment target
-///
-#[allow(dead_code)]
-pub(super) fn is_expression_valid_assignment_target(expression: &ExpressionRef) -> bool {
-    matches!(
-        expression.as_ref(),
-        Expression::Identifier { .. } | Expression::Member { .. }
-    )
-}
-
-///
-/// Check if the current token is literal
-///
-#[allow(dead_code)]
-pub(super) fn is_next_token_literal(parser: &mut Parser) -> bool {
-    is_next_token_any_of_type(
-        parser,
-        &[
-            TokenType::Boolean,
-            TokenType::Nil,
-            TokenType::Number,
-            TokenType::String,
-        ],
-    )
-}
-
-///
-/// Check if the current token is assignment operator
-///
-#[allow(dead_code)]
-pub(super) fn is_next_token_assignment_operator(parser: &mut Parser) -> bool {
-    is_next_token_any_of_type(
-        parser,
-        &[
-            TokenType::SimpleAssignmentOperator,
-            TokenType::ComplexAssignmentOperator,
-        ],
-    )
-}
 
 ///
 /// Parse generic binary expression
@@ -115,7 +18,7 @@ where
     let mut left = operand_parser(parser);
 
     while parser.lookahead.token_type == token_type {
-        let operator_token = eat_token(parser, token_type);
+        let operator_token = parser.eat_token(token_type);
         let operator_value = &parser.source[operator_token.i..operator_token.j];
         let operator = operator_mapper(operator_value);
 
@@ -147,7 +50,7 @@ where
     let mut left = operand_parser(parser);
 
     while parser.lookahead.token_type == token_type {
-        let operator_token = eat_token(parser, token_type);
+        let operator_token = parser.eat_token(token_type);
         let operator_value = &parser.source[operator_token.i..operator_token.j];
         let operator = operator_mapper(operator_value);
 

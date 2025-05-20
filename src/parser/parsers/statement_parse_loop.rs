@@ -4,7 +4,6 @@ use crate::parser::parsers::parse_root_expression;
 use crate::parser::parsers::statement_parse_block::parse_statement;
 use crate::parser::parsers::statement_parse_empty_and_expression::parse_expression_statement;
 use crate::parser::parsers::statement_parse_variable_declaration::parse_variable_declaration_statement;
-use crate::parser::parsers::internal_util::{eat_token, is_next_token_of_type};
 use crate::parser::Parser;
 
 ///
@@ -13,11 +12,11 @@ use crate::parser::Parser;
 ///  ;
 ///
 pub(super) fn parse_while_statement(parser: &mut Parser) -> StatementRef {
-    eat_token(parser, TokenType::WhileKeyword);
+    parser.eat_token(TokenType::WhileKeyword);
 
-    eat_token(parser, TokenType::OpeningParenthesis);
+    parser.eat_token(TokenType::OpeningParenthesis);
     let condition = parse_root_expression(parser);
-    eat_token(parser, TokenType::ClosingParenthesis);
+    parser.eat_token(TokenType::ClosingParenthesis);
 
     let body = parse_statement(parser);
 
@@ -30,17 +29,17 @@ pub(super) fn parse_while_statement(parser: &mut Parser) -> StatementRef {
 ///  ;
 ///
 pub(super) fn parse_do_while_statement(parser: &mut Parser) -> StatementRef {
-    eat_token(parser, TokenType::DoKeyword);
+    parser.eat_token(TokenType::DoKeyword);
 
     let body = parse_statement(parser);
 
-    eat_token(parser, TokenType::WhileKeyword);
+    parser.eat_token(TokenType::WhileKeyword);
 
-    eat_token(parser, TokenType::OpeningParenthesis);
+    parser.eat_token(TokenType::OpeningParenthesis);
     let condition = parse_root_expression(parser);
-    eat_token(parser, TokenType::ClosingParenthesis);
+    parser.eat_token(TokenType::ClosingParenthesis);
 
-    eat_token(parser, TokenType::StatementEnd);
+    parser.eat_token(TokenType::StatementEnd);
 
     Box::new(Statement::DoWhile { body, condition })
 }
@@ -51,29 +50,29 @@ pub(super) fn parse_do_while_statement(parser: &mut Parser) -> StatementRef {
 ///  ;
 ///
 pub(super) fn parse_for_statement(parser: &mut Parser) -> StatementRef {
-    eat_token(parser, TokenType::ForKeyword);
-    eat_token(parser, TokenType::OpeningParenthesis);
+    parser.eat_token(TokenType::ForKeyword);
+    parser.eat_token(TokenType::OpeningParenthesis);
 
-    let initializer = if is_next_token_of_type(parser, TokenType::StatementEnd) {
+    let initializer = if parser.is_next_token_of_type(TokenType::StatementEnd) {
         None
     } else {
         Some(parse_for_statement_init_statement(parser))
     };
-    eat_token(parser, TokenType::StatementEnd);
+    parser.eat_token(TokenType::StatementEnd);
 
-    let condition = if is_next_token_of_type(parser, TokenType::StatementEnd) {
+    let condition = if parser.is_next_token_of_type(TokenType::StatementEnd) {
         None
     } else {
         Some(parse_root_expression(parser))
     };
-    eat_token(parser, TokenType::StatementEnd);
+    parser.eat_token(TokenType::StatementEnd);
 
-    let increment = if is_next_token_of_type(parser, TokenType::ClosingParenthesis) {
+    let increment = if parser.is_next_token_of_type(TokenType::ClosingParenthesis) {
         None
     } else {
         Some(parse_root_expression(parser))
     };
-    eat_token(parser, TokenType::ClosingParenthesis);
+    parser.eat_token(TokenType::ClosingParenthesis);
 
     let body = parse_statement(parser);
 
@@ -92,7 +91,7 @@ pub(super) fn parse_for_statement(parser: &mut Parser) -> StatementRef {
 ///  ;
 ///
 pub(super) fn parse_for_statement_init_statement(parser: &mut Parser) -> StatementRef {
-    if is_next_token_of_type(parser, TokenType::LetKeyword) {
+    if parser.is_next_token_of_type(TokenType::LetKeyword) {
         return parse_variable_declaration_statement(parser, false);
     }
     parse_expression_statement(parser, false)

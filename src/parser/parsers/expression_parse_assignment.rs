@@ -1,9 +1,6 @@
 use crate::ast::{AssignmentOperator, Expression, ExpressionRef};
 use crate::lexer::TokenType;
 use crate::parser::parsers::expression_parse_relational_and_logical::parse_logical_or_expression;
-use crate::parser::parsers::internal_util::{
-    eat_any_of_token, is_expression_valid_assignment_target, is_next_token_assignment_operator,
-};
 use crate::parser::Parser;
 
 ///
@@ -15,17 +12,14 @@ use crate::parser::Parser;
 pub(super) fn parse_assignment_expression(parser: &mut Parser) -> ExpressionRef {
     let left = parse_logical_or_expression(parser);
 
-    if !is_next_token_assignment_operator(parser) {
+    if !parser.is_next_token_assignment_operator() {
         return left;
     }
 
-    let assignment_operator_token = eat_any_of_token(
-        parser,
-        &[
-            TokenType::SimpleAssignmentOperator,
-            TokenType::ComplexAssignmentOperator,
-        ],
-    );
+    let assignment_operator_token = parser.eat_any_of_token(&[
+        TokenType::SimpleAssignmentOperator,
+        TokenType::ComplexAssignmentOperator,
+    ]);
     let assignment_operator_value =
         &parser.source[assignment_operator_token.i..assignment_operator_token.j];
     let assignment_operator = match assignment_operator_value {
@@ -37,7 +31,7 @@ pub(super) fn parse_assignment_expression(parser: &mut Parser) -> ExpressionRef 
         _ => panic!("Unknown assignment operator {}", assignment_operator_value),
     };
 
-    if !is_expression_valid_assignment_target(&left) {
+    if !parser.is_expression_valid_assignment_target(&left) {
         panic!("Invalid left-hand side in the assignment expression");
     }
 

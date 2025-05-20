@@ -1,7 +1,6 @@
 use crate::ast::{Statement, StatementRef};
 use crate::lexer::TokenType;
 use crate::parser::parsers::parse_root_expression;
-use crate::parser::parsers::internal_util::eat_token;
 use crate::parser::Parser;
 
 ///
@@ -10,7 +9,7 @@ use crate::parser::Parser;
 ///  ;
 ///
 pub(super) fn parse_empty_statement(parser: &mut Parser) -> StatementRef {
-    eat_token(parser, TokenType::StatementEnd);
+    parser.eat_token(TokenType::StatementEnd);
 
     Box::new(Statement::Empty)
 }
@@ -27,7 +26,7 @@ pub(super) fn parse_expression_statement(
     let expression = parse_root_expression(parser);
 
     if consume_statement_end {
-        eat_token(parser, TokenType::StatementEnd);
+        parser.eat_token(TokenType::StatementEnd);
     }
 
     Box::new(Statement::Expression { expression })
