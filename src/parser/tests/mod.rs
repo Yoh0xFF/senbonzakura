@@ -1,6 +1,4 @@
 #[cfg(test)]
-mod test_expression_parse_assignment;
-#[cfg(test)]
 mod test_expression_parse_binary;
 #[cfg(test)]
 mod test_expression_parse_left_hand_side;

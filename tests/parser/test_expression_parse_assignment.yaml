@@ -1,0 +1,83 @@
+---
+description: Parse simple assignment
+source: |
+  x = 5;
+expected_ast:
+  type: Program
+  body:
+    - type: Expression
+      expression:
+        type: Assignment
+        operator: Assign
+        left:
+          type: Identifier
+          name: x
+        right:
+          type: NumericLiteral
+          value: 5
+
+---
+description: Parse complex assignment
+source: |
+  x += 10;
+expected_ast:
+  type: Program
+  body:
+    - type: Expression
+      expression:
+        type: Assignment
+        operator: AssignAdd
+        left:
+          type: Identifier
+          name: x
+        right:
+          type: NumericLiteral
+          value: 10
+
+---
+description: Parse assignment with binary expression
+source: |
+  x = 5 + 12;
+expected_ast:
+  type: Program
+  body:
+    - type: Expression
+      expression:
+        type: Assignment
+        operator: Assign
+        left:
+          type: Identifier
+          name: x
+        right:
+          type: Binary
+          operator: Add
+          left:
+            type: NumericLiteral
+            value: 5
+          right:
+            type: NumericLiteral
+            value: 12
+
+---
+description: Parse chained assignment
+source: |
+  x = y = 5;
+expected_ast:
+  type: Program
+  body:
+    - type: Expression
+      expression:
+        type: Assignment
+        operator: Assign
+        left:
+          type: Identifier
+          name: x
+        right:
+          type: Assignment
+          operator: Assign
+          left:
+            type: Identifier
+            name: y
+          right:
+            type: NumericLiteral
+            value: 5

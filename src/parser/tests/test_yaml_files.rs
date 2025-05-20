@@ -1,6 +1,11 @@
 use super::utils::execute_yaml_test_cases;
 
 #[test]
+fn test_expression_parse_assignment() {
+    execute_yaml_test_cases("tests/parser/test_expression_parse_assignment.yaml");
+}
+
+#[test]
 fn test_expression_parse_literals() {
     execute_yaml_test_cases("tests/parser/test_expression_parse_literals.yaml");
 }
