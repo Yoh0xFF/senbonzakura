@@ -64,7 +64,7 @@ impl<'a> Parser<'a> {
     /// Check the current token type
     ///
     #[allow(dead_code)]
-    pub(super) fn is_next_token_of_type(&mut self, token_type: TokenType) -> bool {
+    pub(super) fn is_next_token_of_type(&self, token_type: TokenType) -> bool {
         self.lookahead.token_type == token_type
     }
 
@@ -72,7 +72,7 @@ impl<'a> Parser<'a> {
     /// Check the current token type
     ///
     #[allow(dead_code)]
-    pub(super) fn is_next_token_any_of_type(&mut self, token_types: &[TokenType]) -> bool {
+    pub(super) fn is_next_token_any_of_type(&self, token_types: &[TokenType]) -> bool {
         for token_type in token_types {
             if self.lookahead.token_type == *token_type {
                 return true;
@@ -87,7 +87,7 @@ impl<'a> Parser<'a> {
     ///
     #[allow(dead_code)]
     pub(super) fn is_expression_valid_assignment_target(
-        &mut self,
+        &self,
         expression: &ExpressionRef,
     ) -> bool {
         matches!(
@@ -100,7 +100,7 @@ impl<'a> Parser<'a> {
     /// Check if the current token is literal
     ///
     #[allow(dead_code)]
-    pub(super) fn is_next_token_literal(&mut self) -> bool {
+    pub(super) fn is_next_token_literal(&self) -> bool {
         self.is_next_token_any_of_type(&[
             TokenType::Boolean,
             TokenType::Nil,
@@ -113,7 +113,7 @@ impl<'a> Parser<'a> {
     /// Check if the current token is assignment operator
     ///
     #[allow(dead_code)]
-    pub(super) fn is_next_token_assignment_operator(&mut self) -> bool {
+    pub(super) fn is_next_token_assignment_operator(&self) -> bool {
         self.is_next_token_any_of_type(&[
             TokenType::SimpleAssignmentOperator,
             TokenType::ComplexAssignmentOperator,
