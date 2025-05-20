@@ -1,0 +1,108 @@
+---
+description: Parse boolean true literal
+source: |
+  true;
+expected_ast:
+  type: Program
+  body:
+    - type: Expression
+      expression:
+        type: BooleanLiteral
+        value: true
+
+---
+description: Parse boolean false literal
+source: |
+  false;
+expected_ast:
+  type: Program
+  body:
+    - type: Expression
+      expression:
+        type: BooleanLiteral
+        value: false
+
+---
+description: Parse nil literal
+source: |
+  nil;
+expected_ast:
+  type: Program
+  body:
+    - type: Expression
+      expression:
+        type: NilLiteral
+
+---
+description: Parse double quote string literal
+source: |
+  "Hello";
+expected_ast:
+  type: Program
+  body:
+    - type: Expression
+      expression:
+        type: StringLiteral
+        value: Hello
+
+---
+description: Parse single quote string literal
+source: |
+  'Hello';
+expected_ast:
+  type: Program
+  body:
+    - type: Expression
+      expression:
+        type: StringLiteral
+        value: Hello
+
+---
+description: Parse multiple string literal
+source: |
+  'Hello'; "World";
+expected_ast:
+  type: Program
+  body:
+    - type: Expression
+      expression:
+        type: StringLiteral
+        value: Hello
+    - type: Expression
+      expression:
+        type: StringLiteral
+        value: World
+
+---
+description: Parse numeric literal
+source: |
+  17;
+expected_ast:
+  type: Program
+  body:
+    - type: Expression
+      expression:
+        type: NumericLiteral
+        value: 17
+
+---
+description: Parsed mixed literals
+source: |
+  'Hello';
+  "World";
+  17;
+expected_ast:
+  type: Program
+  body:
+    - type: Expression
+      expression:
+        type: StringLiteral
+        value: Hello
+    - type: Expression
+      expression:
+        type: StringLiteral
+        value: World
+    - type: Expression
+      expression:
+        type: NumericLiteral
+        value: 17

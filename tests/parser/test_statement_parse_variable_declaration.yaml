@@ -1,5 +1,5 @@
 ---
-description: Variable declaration with initialization
+description: Parse variable declaration with initialization
 source: |
   let x: number = 42;
 expected_ast:
@@ -19,7 +19,7 @@ expected_ast:
             value: 42
 
 ---
-description: Variable declaration without initialization
+description: Parse variable declaration without initialization
 source: |
   let x: string;
 expected_ast:
@@ -36,7 +36,7 @@ expected_ast:
             value: String
 
 ---
-description: Multiple variable declaration without initialization
+description: Parse multiple variable declaration without initialization
 source: |
   let x: number = 5, y: number = 10;
 expected_ast:
@@ -66,7 +66,7 @@ expected_ast:
             value: 10
 
 ---
-description: Mixed variable declarations
+description: Parse mixed variable declarations
 source: |
   let x: number = 5, y: number;
 expected_ast:
@@ -93,7 +93,7 @@ expected_ast:
             value: Number
 
 ---
-description: Multiple variable declaration with different types and with initialization
+description: Parse multiple variable declaration with different types and with initialization
 source: |
   let count: number = 42, name: string = "John";
 expected_ast:
@@ -123,7 +123,7 @@ expected_ast:
             value: John
 
 ---
-description: Variable initialization with expression
+description: Parse variable initialization with expression
 source: |
   let x: number = (2 + 3) * 4;
 expected_ast:
@@ -155,7 +155,7 @@ expected_ast:
               value: 4
 
 ---
-description: Multiple variable initialization with expression
+description: Parse multiple variable initialization with expression
 source: |
   let x: number = 2 + 3, y: number = x * 4;
 expected_ast:
