@@ -4,8 +4,8 @@ use super::expression_parse_left_hand_side::{
 use crate::ast::{Expression, ExpressionRef};
 use crate::lexer::TokenType;
 use crate::parser::parsers::expression_parse_literals::parse_literal_expression;
+use crate::parser::parsers::internal_util::{eat_token, is_next_token_literal};
 use crate::parser::parsers::root::parse_root_expression;
-use crate::parser::parsers::internal_util::{eat, is_literal_token};
 use crate::parser::Parser;
 
 ///
@@ -17,7 +17,7 @@ use crate::parser::Parser;
 ///  ;
 ///
 pub(super) fn parse_primary_expression(parser: &mut Parser) -> ExpressionRef {
-    if is_literal_token(parser) {
+    if is_next_token_literal(parser) {
         return parse_literal_expression(parser);
     }
 
@@ -37,9 +37,9 @@ pub(super) fn parse_primary_expression(parser: &mut Parser) -> ExpressionRef {
 ///  ;
 ///
 pub(super) fn parse_group_expression(parser: &mut Parser) -> ExpressionRef {
-    eat(parser, TokenType::OpeningParenthesis);
+    eat_token(parser, TokenType::OpeningParenthesis);
     let expression_ref = parse_root_expression(parser);
-    eat(parser, TokenType::ClosingParenthesis);
+    eat_token(parser, TokenType::ClosingParenthesis);
 
     expression_ref
 }
@@ -50,7 +50,7 @@ pub(super) fn parse_group_expression(parser: &mut Parser) -> ExpressionRef {
 ///  ;
 ///
 pub(super) fn parse_identifier_expression(parser: &mut Parser) -> ExpressionRef {
-    let identifier_token = eat(parser, TokenType::Identifier);
+    let identifier_token = eat_token(parser, TokenType::Identifier);
     let identifier_value = &parser.source[identifier_token.i..identifier_token.j];
 
     Box::new(Expression::Identifier {
@@ -64,7 +64,7 @@ pub(super) fn parse_identifier_expression(parser: &mut Parser) -> ExpressionRef 
 ///  ;
 ///
 pub(super) fn parse_this_expression(parser: &mut Parser) -> ExpressionRef {
-    eat(parser, TokenType::ThisKeyword);
+    eat_token(parser, TokenType::ThisKeyword);
     Box::new(Expression::This {})
 }
 
@@ -74,7 +74,7 @@ pub(super) fn parse_this_expression(parser: &mut Parser) -> ExpressionRef {
 ///  ;
 ///
 pub(super) fn parse_super_expression(parser: &mut Parser) -> ExpressionRef {
-    eat(parser, TokenType::SuperKeyword);
+    eat_token(parser, TokenType::SuperKeyword);
     Box::new(Expression::Super {})
 }
 
@@ -84,7 +84,7 @@ pub(super) fn parse_super_expression(parser: &mut Parser) -> ExpressionRef {
 ///  ;
 ///
 pub(super) fn parse_new_expression(parser: &mut Parser) -> ExpressionRef {
-    eat(parser, TokenType::NewKeyword);
+    eat_token(parser, TokenType::NewKeyword);
 
     let callee = parse_member_expression(parser);
 

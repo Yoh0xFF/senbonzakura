@@ -1,6 +1,6 @@
 use crate::ast::{Statement, StatementList, StatementRef};
 use crate::lexer::TokenType;
-use crate::parser::parsers::internal_util::eat;
+use crate::parser::parsers::internal_util::eat_token;
 use crate::parser::parsers::statement_parse_conditional::parse_if_statement;
 use crate::parser::parsers::statement_parse_empty_and_expression::{
     parse_empty_statement, parse_expression_statement,
@@ -14,7 +14,7 @@ use crate::parser::parsers::statement_parse_loop::{
 use crate::parser::parsers::statement_parse_variable_declaration::parse_variable_declaration_statement;
 use crate::parser::Parser;
 
-use super::internal_util::is_token;
+use super::internal_util::is_next_token_of_type;
 use super::statement_parse_class_declaration::parse_class_declaration;
 
 ///
@@ -36,15 +36,15 @@ pub(super) fn parse_program_statement(parser: &mut Parser) -> StatementRef {
 ///  ;
 ///
 pub(super) fn parse_block_statement(parser: &mut Parser) -> StatementRef {
-    eat(parser, TokenType::OpeningBrace);
+    eat_token(parser, TokenType::OpeningBrace);
 
-    let block = if !is_token(parser, TokenType::ClosingBrace) {
+    let block = if !is_next_token_of_type(parser, TokenType::ClosingBrace) {
         parse_statement_list(parser, Some(TokenType::ClosingBrace))
     } else {
         vec![]
     };
 
-    eat(parser, TokenType::ClosingBrace);
+    eat_token(parser, TokenType::ClosingBrace);
 
     Box::new(Statement::Block { body: block })
 }
@@ -61,8 +61,8 @@ pub(super) fn parse_statement_list(
 ) -> StatementList {
     let mut statement_list: Vec<Statement> = vec![];
 
-    while !is_token(parser, TokenType::End)
-        && !is_token(parser, stop_token_type.unwrap_or(TokenType::End))
+    while !is_next_token_of_type(parser, TokenType::End)
+        && !is_next_token_of_type(parser, stop_token_type.unwrap_or(TokenType::End))
     {
         let statement = parse_statement(parser);
         statement_list.push(*statement);

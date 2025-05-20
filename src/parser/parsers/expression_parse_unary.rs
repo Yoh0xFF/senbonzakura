@@ -1,6 +1,6 @@
 use crate::ast::{Expression, ExpressionRef, UnaryOperator};
 use crate::lexer::TokenType;
-use crate::parser::parsers::internal_util::{eat_any_of, is_any_of_token};
+use crate::parser::parsers::internal_util::{eat_any_of_token, is_next_token_any_of_type};
 use crate::parser::Parser;
 
 use super::expression_parse_left_hand_side::parse_left_hand_side_expression;
@@ -15,11 +15,11 @@ use super::expression_parse_left_hand_side::parse_left_hand_side_expression;
 pub(super) fn parse_unary_expression(parser: &mut Parser) -> ExpressionRef {
     let mut operator: Option<UnaryOperator> = None;
 
-    if is_any_of_token(
+    if is_next_token_any_of_type(
         parser,
         &[TokenType::AdditiveOperator, TokenType::LogicalNotOperator],
     ) {
-        let token = eat_any_of(
+        let token = eat_any_of_token(
             parser,
             &[TokenType::AdditiveOperator, TokenType::LogicalNotOperator],
         );

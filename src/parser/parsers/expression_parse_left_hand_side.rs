@@ -7,8 +7,8 @@ use crate::{
 use super::{
     expression_parse_assignment::parse_assignment_expression,
     expression_parse_primary::{parse_identifier_expression, parse_primary_expression},
+    internal_util::{eat_token, is_next_token_any_of_type, is_next_token_of_type},
     parse_root_expression,
-    internal_util::{eat, is_any_of_token, is_token},
 };
 
 ///
@@ -31,7 +31,7 @@ pub(super) fn parse_call_member_expression(parser: &mut Parser) -> ExpressionRef
     let member = parse_member_expression(parser);
 
     // See if we have a call expression
-    if is_token(parser, TokenType::OpeningParenthesis) {
+    if is_next_token_of_type(parser, TokenType::OpeningParenthesis) {
         return parse_call_expression(parser, member);
     }
 
@@ -57,7 +57,7 @@ pub(super) fn parse_call_expression(parser: &mut Parser, callee: ExpressionRef) 
         arguments: parse_arguments(parser),
     });
 
-    if is_token(parser, TokenType::OpeningParenthesis) {
+    if is_next_token_of_type(parser, TokenType::OpeningParenthesis) {
         call_expression = parse_call_expression(parser, call_expression);
     }
 
@@ -70,13 +70,13 @@ pub(super) fn parse_call_expression(parser: &mut Parser, callee: ExpressionRef) 
 /// ;
 ///
 pub(super) fn parse_arguments(parser: &mut Parser) -> ExpressionList {
-    eat(parser, TokenType::OpeningParenthesis);
-    let arguments = if is_token(parser, TokenType::ClosingParenthesis) {
+    eat_token(parser, TokenType::OpeningParenthesis);
+    let arguments = if is_next_token_of_type(parser, TokenType::ClosingParenthesis) {
         vec![]
     } else {
         parse_arguments_list(parser)
     };
-    eat(parser, TokenType::ClosingParenthesis);
+    eat_token(parser, TokenType::ClosingParenthesis);
 
     arguments
 }
@@ -93,8 +93,8 @@ pub(super) fn parse_arguments_list(parser: &mut Parser) -> ExpressionList {
     loop {
         arguments.push(*parse_assignment_expression(parser));
 
-        if is_token(parser, TokenType::Comma) {
-            eat(parser, TokenType::Comma);
+        if is_next_token_of_type(parser, TokenType::Comma) {
+            eat_token(parser, TokenType::Comma);
         } else {
             break;
         }
@@ -113,9 +113,9 @@ pub(super) fn parse_arguments_list(parser: &mut Parser) -> ExpressionList {
 pub(super) fn parse_member_expression(parser: &mut Parser) -> ExpressionRef {
     let mut object = parse_primary_expression(parser);
 
-    while is_any_of_token(parser, &[TokenType::Dot, TokenType::OpeningBracket]) {
-        if is_token(parser, TokenType::Dot) {
-            eat(parser, TokenType::Dot);
+    while is_next_token_any_of_type(parser, &[TokenType::Dot, TokenType::OpeningBracket]) {
+        if is_next_token_of_type(parser, TokenType::Dot) {
+            eat_token(parser, TokenType::Dot);
             let property = parse_identifier_expression(parser);
 
             object = Box::new(Expression::Member {
@@ -125,10 +125,10 @@ pub(super) fn parse_member_expression(parser: &mut Parser) -> ExpressionRef {
             });
         }
 
-        if is_token(parser, TokenType::OpeningBracket) {
-            eat(parser, TokenType::OpeningBracket);
+        if is_next_token_of_type(parser, TokenType::OpeningBracket) {
+            eat_token(parser, TokenType::OpeningBracket);
             let property = parse_root_expression(parser);
-            eat(parser, TokenType::ClosingBracket);
+            eat_token(parser, TokenType::ClosingBracket);
 
             object = Box::new(Expression::Member {
                 computed: true,
