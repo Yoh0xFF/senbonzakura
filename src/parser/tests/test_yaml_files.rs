@@ -6,6 +6,11 @@ fn test_expression_parse_assignment() {
 }
 
 #[test]
+fn test_expression_parse_binary() {
+    execute_yaml_test_cases("tests/parser/test_expression_parse_binary.yaml");
+}
+
+#[test]
 fn test_expression_parse_literals() {
     execute_yaml_test_cases("tests/parser/test_expression_parse_literals.yaml");
 }

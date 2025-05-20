@@ -1,0 +1,155 @@
+---
+description: Parse binary expression with additive operator
+source: |
+  2 + 5;
+expected_ast:
+  type: Program
+  body:
+    - type: Expression
+      expression:
+        type: Binary
+        operator: Add
+        left:
+          type: NumericLiteral
+          value: 2
+        right:
+          type: NumericLiteral
+          value: 5
+
+---
+description: Parse binary expression with factor operator
+source: |
+  2 * 5;
+expected_ast:
+  type: Program
+  body:
+    - type: Expression
+      expression:
+        type: Binary
+        operator: Multiply
+        left:
+          type: NumericLiteral
+          value: 2
+        right:
+          type: NumericLiteral
+          value: 5
+
+---
+description: Parse binary expression with multiple additive operators
+source: |
+  1 + 8 - 2;
+expected_ast:
+  type: Program
+  body:
+    - type: Expression
+      expression:
+        type: Binary
+        operator: Subtract
+        left:
+          type: Binary
+          operator: Add
+          left:
+            type: NumericLiteral
+            value: 1
+          right:
+            type: NumericLiteral
+            value: 8
+        right:
+          type: NumericLiteral
+          value: 2
+
+---
+description: Parse binary expression with multiple factor operators
+source: |
+  2 * 9 / 3;
+expected_ast:
+  type: Program
+  body:
+    - type: Expression
+      expression:
+        type: Binary
+        operator: Divide
+        left:
+          type: Binary
+          operator: Multiply
+          left:
+            type: NumericLiteral
+            value: 2
+          right:
+            type: NumericLiteral
+            value: 9
+        right:
+          type: NumericLiteral
+          value: 3
+
+---
+description: Parse binary expression with parentheses
+source: |
+  1 + (8 - 2);
+expected_ast:
+  type: Program
+  body:
+    - type: Expression
+      expression:
+        type: Binary
+        operator: Add
+        left:
+          type: NumericLiteral
+          value: 1
+        right:
+          type: Binary
+          operator: Subtract
+          left:
+            type: NumericLiteral
+            value: 8
+          right:
+            type: NumericLiteral
+            value: 2
+
+---
+description: Parse binary expression with additive and factor operators
+source: |
+  1 + 4 * 5;
+expected_ast:
+  type: Program
+  body:
+    - type: Expression
+      expression:
+        type: Binary
+        operator: Add
+        left:
+          type: NumericLiteral
+          value: 1
+        right:
+          type: Binary
+          operator: Multiply
+          left:
+            type: NumericLiteral
+            value: 4
+          right:
+            type: NumericLiteral
+            value: 5
+
+---
+description: Parse binary expression with additive, factor operators and parentheses
+source: |
+  (1 + 4) * 5;
+expected_ast:
+  type: Program
+  body:
+    - type: Expression
+      expression:
+        type: Binary
+        operator: Multiply
+        left:
+          type: Binary
+          operator: Add
+          left:
+            type: NumericLiteral
+            value: 1
+          right:
+            type: NumericLiteral
+            value: 4
+        right:
+          type: NumericLiteral
+          value: 5
