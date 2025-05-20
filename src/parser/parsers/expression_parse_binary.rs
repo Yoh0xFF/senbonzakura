@@ -1,7 +1,7 @@
 use crate::ast::{BinaryOperator, ExpressionRef};
 use crate::lexer::TokenType;
 use crate::parser::parsers::expression_parse_unary::parse_unary_expression;
-use crate::parser::parsers::utils::parse_binary_expression;
+use crate::parser::parsers::internal_util::parse_binary_expression;
 use crate::parser::Parser;
 
 ///

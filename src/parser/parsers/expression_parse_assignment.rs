@@ -1,7 +1,7 @@
 use crate::ast::{AssignmentOperator, Expression, ExpressionRef};
 use crate::lexer::TokenType;
 use crate::parser::parsers::expression_parse_relational_and_logical::parse_logical_or_expression;
-use crate::parser::parsers::utils::{
+use crate::parser::parsers::internal_util::{
     eat_any_of, is_assignment_operator_token, is_valid_assignment_target,
 };
 use crate::parser::Parser;

@@ -4,7 +4,7 @@ use crate::{
     parser::parsers::{
         expression_parse_primary::parse_identifier_expression,
         statement_parse_block::parse_block_statement,
-        utils::{eat, is_token},
+        internal_util::{eat, is_token},
     },
     Parser,
 };

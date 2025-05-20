@@ -8,7 +8,7 @@ use super::{
     expression_parse_assignment::parse_assignment_expression,
     expression_parse_primary::{parse_identifier_expression, parse_primary_expression},
     parse_root_expression,
-    utils::{eat, is_any_of_token, is_token},
+    internal_util::{eat, is_any_of_token, is_token},
 };
 
 ///

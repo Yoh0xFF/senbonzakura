@@ -2,7 +2,7 @@ use crate::ast::{Statement, StatementRef};
 use crate::lexer::TokenType;
 use crate::parser::parsers::parse_root_expression;
 use crate::parser::parsers::statement_parse_block::parse_statement;
-use crate::parser::parsers::utils::{eat, is_token};
+use crate::parser::parsers::internal_util::{eat, is_token};
 use crate::parser::Parser;
 
 ///

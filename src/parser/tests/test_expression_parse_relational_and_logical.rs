@@ -1,4 +1,4 @@
-use super::utils::execute;
+use super::internal_util::execute;
 
 #[test]
 fn test_equality_operator_equal() {

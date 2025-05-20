@@ -3,7 +3,7 @@ use crate::lexer::TokenType;
 use crate::parser::parsers::expression_parse_primary::parse_identifier_expression;
 use crate::parser::parsers::parse_root_expression;
 use crate::parser::parsers::statement_parse_block::parse_block_statement;
-use crate::parser::parsers::utils::{eat, is_token};
+use crate::parser::parsers::internal_util::{eat, is_token};
 use crate::parser::Parser;
 
 use super::type_parse_annotations::parse_type;

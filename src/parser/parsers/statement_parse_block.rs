@@ -1,5 +1,6 @@
 use crate::ast::{Statement, StatementList, StatementRef};
 use crate::lexer::TokenType;
+use crate::parser::parsers::internal_util::eat;
 use crate::parser::parsers::statement_parse_conditional::parse_if_statement;
 use crate::parser::parsers::statement_parse_empty_and_expression::{
     parse_empty_statement, parse_expression_statement,
@@ -11,11 +12,10 @@ use crate::parser::parsers::statement_parse_loop::{
     parse_do_while_statement, parse_for_statement, parse_while_statement,
 };
 use crate::parser::parsers::statement_parse_variable_declaration::parse_variable_declaration_statement;
-use crate::parser::parsers::utils::eat;
 use crate::parser::Parser;
 
+use super::internal_util::is_token;
 use super::statement_parse_class_declaration::parse_class_declaration;
-use super::utils::is_token;
 
 ///
 /// Main entry point

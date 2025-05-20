@@ -4,7 +4,7 @@ use crate::parser::parsers::parse_root_expression;
 use crate::parser::parsers::statement_parse_block::parse_statement;
 use crate::parser::parsers::statement_parse_empty_and_expression::parse_expression_statement;
 use crate::parser::parsers::statement_parse_variable_declaration::parse_variable_declaration_statement;
-use crate::parser::parsers::utils::{eat, is_token};
+use crate::parser::parsers::internal_util::{eat, is_token};
 use crate::parser::Parser;
 
 ///

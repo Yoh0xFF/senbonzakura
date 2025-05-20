@@ -4,7 +4,7 @@ use crate::{
     Parser,
 };
 
-use super::utils::{eat, is_token};
+use super::internal_util::{eat, is_token};
 
 pub(super) fn parse_type(parser: &mut Parser) -> Type {
     match parser.lookahead.token_type {

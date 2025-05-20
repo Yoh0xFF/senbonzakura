@@ -1,4 +1,6 @@
 #[cfg(test)]
+mod internal_util;
+#[cfg(test)]
 mod test_expression_parse_binary;
 #[cfg(test)]
 mod test_expression_parse_left_hand_side;
@@ -20,5 +22,3 @@ mod test_statement_parse_function_declaration;
 mod test_statement_parse_loop;
 #[cfg(test)]
 mod test_yaml_files;
-#[cfg(test)]
-mod utils;

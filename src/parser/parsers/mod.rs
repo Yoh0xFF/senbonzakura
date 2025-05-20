@@ -14,6 +14,6 @@ mod statement_parse_function_declaration;
 mod statement_parse_loop;
 mod statement_parse_variable_declaration;
 mod type_parse_annotations;
-mod utils;
+mod internal_util;
 
 pub(crate) use root::{parse_root_expression, parse_root_statement};

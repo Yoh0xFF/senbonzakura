@@ -1,6 +1,6 @@
 use crate::ast::{Expression, ExpressionRef, UnaryOperator};
 use crate::lexer::TokenType;
-use crate::parser::parsers::utils::{eat_any_of, is_any_of_token};
+use crate::parser::parsers::internal_util::{eat_any_of, is_any_of_token};
 use crate::parser::Parser;
 
 use super::expression_parse_left_hand_side::parse_left_hand_side_expression;

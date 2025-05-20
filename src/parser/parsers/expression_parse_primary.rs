@@ -5,7 +5,7 @@ use crate::ast::{Expression, ExpressionRef};
 use crate::lexer::TokenType;
 use crate::parser::parsers::expression_parse_literals::parse_literal_expression;
 use crate::parser::parsers::root::parse_root_expression;
-use crate::parser::parsers::utils::{eat, is_literal_token};
+use crate::parser::parsers::internal_util::{eat, is_literal_token};
 use crate::parser::Parser;
 
 ///

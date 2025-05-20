@@ -1,12 +1,12 @@
 use crate::ast::{Expression, ExpressionRef, Statement, StatementRef};
 use crate::lexer::TokenType;
-use crate::parser::parsers::utils::{eat, is_token};
+use crate::parser::parsers::internal_util::{eat, is_token};
 use crate::parser::Parser;
 
 use super::expression_parse_assignment::parse_assignment_expression;
 use super::expression_parse_primary::parse_identifier_expression;
+use super::internal_util::is_any_of_token;
 use super::type_parse_annotations::parse_type;
-use super::utils::is_any_of_token;
 
 ///
 /// VariableDeclarationStatement

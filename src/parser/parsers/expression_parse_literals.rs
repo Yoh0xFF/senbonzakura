@@ -1,6 +1,6 @@
 use crate::ast::{Expression, ExpressionRef};
 use crate::lexer::TokenType;
-use crate::parser::parsers::utils::eat;
+use crate::parser::parsers::internal_util::eat;
 use crate::parser::Parser;
 
 ///
