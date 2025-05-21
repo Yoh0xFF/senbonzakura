@@ -24,9 +24,9 @@ fn main() {
 
     let mut parser = Parser::new(
         r#"
-        while (!done) {
+        do {
             x = x + 1;
-        }
+        } while (true);
         "#,
     );
     let ast = parse_root_statement(&mut parser);

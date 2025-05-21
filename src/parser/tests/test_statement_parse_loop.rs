@@ -1,42 +1,6 @@
 use super::internal_util::execute;
 
 #[test]
-fn test_simple_do_while_loop() {
-    execute(
-        r#"
-        do {
-            i = i + 1;
-        } while (i < 10);
-        "#,
-        r#"
-        (program
-            (do-while
-                (block
-                    (expr (assign "=" (id i) (binary "+" (id i) (number 1)))))
-                (binary "<" (id i) (number 10))))
-        "#,
-    )
-}
-
-#[test]
-fn test_do_while_loop_with_boolean_condition() {
-    execute(
-        r#"
-        do {
-            x = x + 1;
-        } while (true);
-        "#,
-        r#"
-        (program
-            (do-while
-                (block
-                    (expr (assign "=" (id x) (binary "+" (id x) (number 1)))))
-                (boolean true)))
-        "#,
-    )
-}
-
-#[test]
 fn test_do_while_loop_with_complex_condition() {
     execute(
         r#"
