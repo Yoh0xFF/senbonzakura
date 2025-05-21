@@ -1,0 +1,263 @@
+---
+description: Parse simple while loop
+source: |
+  while (i < 10) {
+    i = i + 1;
+  }
+expected_ast:
+  type: Program
+  body:
+    - type: While
+      condition:
+        type: Binary
+        operator: LessThan
+        left:
+          type: Identifier
+          name: i
+        right:
+          type: NumericLiteral
+          value: 10
+      body:
+        type: Block
+        body:
+          - type: Expression
+            expression:
+              type: Assignment
+              operator: Assign
+              left:
+                type: Identifier
+                name: i
+              right:
+                type: Binary
+                operator: Add
+                left:
+                  type: Identifier
+                  name: i
+                right:
+                  type: NumericLiteral
+                  value: 1
+
+---
+description: Parse simple while loop with boolean condition
+source: |
+  while (true) {
+    i = i + 1;
+  }
+expected_ast:
+  type: Program
+  body:
+    - type: While
+      condition:
+        type: BooleanLiteral
+        value: true
+      body:
+        type: Block
+        body:
+          - type: Expression
+            expression:
+              type: Assignment
+              operator: Assign
+              left:
+                type: Identifier
+                name: i
+              right:
+                type: Binary
+                operator: Add
+                left:
+                  type: Identifier
+                  name: i
+                right:
+                  type: NumericLiteral
+                  value: 1
+
+---
+description: Parse while loop with complex condition
+source: |
+  while (x > 5 && y < 20) {
+    x = x - 1;
+    y = y + 1;
+  }
+expected_ast:
+  type: Program
+  body:
+    - type: While
+      condition:
+        type: Logical
+        operator: And
+        left:
+          type: Binary
+          operator: GreaterThan
+          left:
+            type: Identifier
+            name: x
+          right:
+            type: NumericLiteral
+            value: 5
+        right:
+          type: Binary
+          operator: LessThan
+          left:
+            type: Identifier
+            name: y
+          right:
+            type: NumericLiteral
+            value: 20
+      body:
+        type: Block
+        body:
+          - type: Expression
+            expression:
+              type: Assignment
+              operator: Assign
+              left:
+                type: Identifier
+                name: x
+              right:
+                type: Binary
+                operator: Subtract
+                left:
+                  type: Identifier
+                  name: x
+                right:
+                  type: NumericLiteral
+                  value: 1
+          - type: Expression
+            expression:
+              type: Assignment
+              operator: Assign
+              left:
+                type: Identifier
+                name: y
+              right:
+                type: Binary
+                operator: Add
+                left:
+                  type: Identifier
+                  name: y
+                right:
+                  type: NumericLiteral
+                  value: 1
+
+---
+description: Parse empty while loop
+source: |
+  while (condition) {
+  }
+expected_ast:
+  type: Program
+  body:
+    - type: While
+      condition:
+        type: Identifier
+        name: condition
+      body:
+        type: Block
+        body: []
+
+---
+description: Parse nested while loops
+source: |
+  while (outer > 0) {
+    outer = outer - 1;
+
+    while (inner < 5) {
+        inner = inner + 1;
+    }
+  }
+expected_ast:
+  type: Program
+  body:
+    - type: While
+      condition:
+        type: Binary
+        operator: GreaterThan
+        left:
+          type: Identifier
+          name: outer
+        right:
+          type: NumericLiteral
+          value: 0
+      body:
+        type: Block
+        body:
+          - type: Expression
+            expression:
+              type: Assignment
+              operator: Assign
+              left:
+                type: Identifier
+                name: outer
+              right:
+                type: Binary
+                operator: Subtract
+                left:
+                  type: Identifier
+                  name: outer
+                right:
+                  type: NumericLiteral
+                  value: 1
+          - type: While
+            condition:
+              type: Binary
+              operator: LessThan
+              left:
+                type: Identifier
+                name: inner
+              right:
+                type: NumericLiteral
+                value: 5
+            body:
+              type: Block
+              body:
+                - type: Expression
+                  expression:
+                    type: Assignment
+                    operator: Assign
+                    left:
+                      type: Identifier
+                      name: inner
+                    right:
+                      type: Binary
+                      operator: Add
+                      left:
+                        type: Identifier
+                        name: inner
+                      right:
+                        type: NumericLiteral
+                        value: 1
+
+---
+description: Parse while loop with unary condition
+source: |
+  while (!done) {
+    x = x + 1;
+  }
+expected_ast:
+  type: Program
+  body:
+    - type: While
+      condition:
+        type: Unary
+        operator: Not
+        right:
+          type: Identifier
+          name: done
+      body:
+        type: Block
+        body:
+          - type: Expression
+            expression:
+              type: Assignment
+              operator: Assign
+              left:
+                type: Identifier
+                name: x
+              right:
+                type: Binary
+                operator: Add
+                left:
+                  type: Identifier
+                  name: x
+                right:
+                  type: NumericLiteral
+                  value: 1
