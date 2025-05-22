@@ -26,7 +26,7 @@ fn main() {
         r#"
         do {
             x = x + 1;
-        } while (true);
+        } while (!done);
         "#,
     );
     let ast = parse_root_statement(&mut parser);

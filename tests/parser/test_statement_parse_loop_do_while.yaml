@@ -69,3 +69,194 @@ expected_ast:
       condition:
         type: BooleanLiteral
         value: true
+
+---
+description: Parse do while loop with complex condition
+source: |
+  do {
+    x = x - 1;
+    y = y + 1;
+  } while (x > 5 && y < 20);
+expected_ast:
+  type: Program
+  body:
+    - type: DoWhile
+      body:
+        type: Block
+        body:
+          - type: Expression
+            expression:
+              type: Assignment
+              operator: Assign
+              left:
+                type: Identifier
+                name: x
+              right:
+                type: Binary
+                operator: Subtract
+                left:
+                  type: Identifier
+                  name: x
+                right:
+                  type: NumericLiteral
+                  value: 1
+          - type: Expression
+            expression:
+              type: Assignment
+              operator: Assign
+              left:
+                type: Identifier
+                name: y
+              right:
+                type: Binary
+                operator: Add
+                left:
+                  type: Identifier
+                  name: y
+                right:
+                  type: NumericLiteral
+                  value: 1
+      condition:
+        type: Logical
+        operator: And
+        left:
+          type: Binary
+          operator: GreaterThan
+          left:
+            type: Identifier
+            name: x
+          right:
+            type: NumericLiteral
+            value: 5
+        right:
+          type: Binary
+          operator: LessThan
+          left:
+            type: Identifier
+            name: y
+          right:
+            type: NumericLiteral
+            value: 20
+
+---
+description: Parse do while loop with empty body
+source: |
+  do {
+  } while (condition);
+expected_ast:
+  type: Program
+  body:
+    - type: DoWhile
+      body:
+        type: Block
+        body: []
+      condition:
+        type: Identifier
+        name: condition
+
+---
+description: Parse nested do while loops
+source: |
+  do {
+    outer = outer - 1;
+    do {
+        inner = inner + 1;
+    } while (inner < 3);
+  } while (outer > 0);
+expected_ast:
+  type: Program
+  body:
+    - type: DoWhile
+      body:
+        type: Block
+        body:
+          - type: Expression
+            expression:
+              type: Assignment
+              operator: Assign
+              left:
+                type: Identifier
+                name: outer
+              right:
+                type: Binary
+                operator: Subtract
+                left:
+                  type: Identifier
+                  name: outer
+                right:
+                  type: NumericLiteral
+                  value: 1
+          - type: DoWhile
+            body:
+              type: Block
+              body:
+                - type: Expression
+                  expression:
+                    type: Assignment
+                    operator: Assign
+                    left:
+                      type: Identifier
+                      name: inner
+                    right:
+                      type: Binary
+                      operator: Add
+                      left:
+                        type: Identifier
+                        name: inner
+                      right:
+                        type: NumericLiteral
+                        value: 1
+            condition:
+              type: Binary
+              operator: LessThan
+              left:
+                type: Identifier
+                name: inner
+              right:
+                type: NumericLiteral
+                value: 3
+      condition:
+        type: Binary
+        operator: GreaterThan
+        left:
+          type: Identifier
+          name: outer
+        right:
+          type: NumericLiteral
+          value: 0
+
+---
+description: Parse do while loop with unary condition
+source: |
+  do {
+    x = x + 1;
+  } while (!done);
+expected_ast:
+  type: Program
+  body:
+    - type: DoWhile
+      body:
+        type: Block
+        body:
+          - type: Expression
+            expression:
+              type: Assignment
+              operator: Assign
+              left:
+                type: Identifier
+                name: x
+              right:
+                type: Binary
+                operator: Add
+                left:
+                  type: Identifier
+                  name: x
+                right:
+                  type: NumericLiteral
+                  value: 1
+      condition:
+        type: Unary
+        operator: Not
+        right:
+          type: Identifier
+          name: done
