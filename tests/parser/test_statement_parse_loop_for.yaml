@@ -1,0 +1,654 @@
+---
+description: Parse simple for loop
+source: |
+  for (let i: number = 0; i < 10; i = i + 1) {
+    sum = sum + i;
+  }
+expected_ast:
+  type: Program
+  body:
+    - type: For
+      initializer:
+        type: VariableDeclaration
+        variables:
+          - type: Variable
+            identifier:
+              type: Identifier
+              name: i
+            type_annotation:
+              type: Primitive
+              value: Number
+            initializer:
+              type: NumericLiteral
+              value: 0
+      condition:
+        type: Binary
+        operator: LessThan
+        left:
+          type: Identifier
+          name: i
+        right:
+          type: NumericLiteral
+          value: 10
+      increment:
+        type: Assignment
+        operator: Assign
+        left:
+          type: Identifier
+          name: i
+        right:
+          type: Binary
+          operator: Add
+          left:
+            type: Identifier
+            name: i
+          right:
+            type: NumericLiteral
+            value: 1
+      body:
+        type: Block
+        body:
+          - type: Expression
+            expression:
+              type: Assignment
+              operator: Assign
+              left:
+                type: Identifier
+                name: sum
+              right:
+                type: Binary
+                operator: Add
+                left:
+                  type: Identifier
+                  name: sum
+                right:
+                  type: Identifier
+                  name: i
+
+---
+description: Parse for loop with initializer expression
+source: |
+  for (i = 0; i < 10; i = i + 1) {
+    sum = sum + i;
+  }
+expected_ast:
+  type: Program
+  body:
+    - type: For
+      initializer:
+        type: Expression
+        expression:
+          type: Assignment
+          operator: Assign
+          left:
+            type: Identifier
+            name: i
+          right:
+            type: NumericLiteral
+            value: 0
+      condition:
+        type: Binary
+        operator: LessThan
+        left:
+          type: Identifier
+          name: i
+        right:
+          type: NumericLiteral
+          value: 10
+      increment:
+        type: Assignment
+        operator: Assign
+        left:
+          type: Identifier
+          name: i
+        right:
+          type: Binary
+          operator: Add
+          left:
+            type: Identifier
+            name: i
+          right:
+            type: NumericLiteral
+            value: 1
+      body:
+        type: Block
+        body:
+          - type: Expression
+            expression:
+              type: Assignment
+              operator: Assign
+              left:
+                type: Identifier
+                name: sum
+              right:
+                type: Binary
+                operator: Add
+                left:
+                  type: Identifier
+                  name: sum
+                right:
+                  type: Identifier
+                  name: i
+
+---
+description: Parse for loop with multiple initializations
+source: |
+  for (let i: number = 0, j: number = 10; i < j; i = i + 1) {
+    sum = sum + i;
+  }
+expected_ast:
+  type: Program
+  body:
+    - type: For
+      initializer:
+        type: VariableDeclaration
+        variables:
+          - type: Variable
+            identifier:
+              type: Identifier
+              name: i
+            type_annotation:
+              type: Primitive
+              value: Number
+            initializer:
+              type: NumericLiteral
+              value: 0
+          - type: Variable
+            identifier:
+              type: Identifier
+              name: j
+            type_annotation:
+              type: Primitive
+              value: Number
+            initializer:
+              type: NumericLiteral
+              value: 10
+      condition:
+        type: Binary
+        operator: LessThan
+        left:
+          type: Identifier
+          name: i
+        right:
+          type: Identifier
+          name: j
+      increment:
+        type: Assignment
+        operator: Assign
+        left:
+          type: Identifier
+          name: i
+        right:
+          type: Binary
+          operator: Add
+          left:
+            type: Identifier
+            name: i
+          right:
+            type: NumericLiteral
+            value: 1
+      body:
+        type: Block
+        body:
+          - type: Expression
+            expression:
+              type: Assignment
+              operator: Assign
+              left:
+                type: Identifier
+                name: sum
+              right:
+                type: Binary
+                operator: Add
+                left:
+                  type: Identifier
+                  name: sum
+                right:
+                  type: Identifier
+                  name: i
+
+---
+description: Parse for loop without initialization
+source: |
+  for (; i < 10; i = i + 1) {
+    sum = sum + i;
+  }
+expected_ast:
+  type: Program
+  body:
+    - type: For
+      initializer: null
+      condition:
+        type: Binary
+        operator: LessThan
+        left:
+          type: Identifier
+          name: i
+        right:
+          type: NumericLiteral
+          value: 10
+      increment:
+        type: Assignment
+        operator: Assign
+        left:
+          type: Identifier
+          name: i
+        right:
+          type: Binary
+          operator: Add
+          left:
+            type: Identifier
+            name: i
+          right:
+            type: NumericLiteral
+            value: 1
+      body:
+        type: Block
+        body:
+          - type: Expression
+            expression:
+              type: Assignment
+              operator: Assign
+              left:
+                type: Identifier
+                name: sum
+              right:
+                type: Binary
+                operator: Add
+                left:
+                  type: Identifier
+                  name: sum
+                right:
+                  type: Identifier
+                  name: i
+
+---
+description: Parse for loop without condition
+source: |
+  for (let i: number = 0; ; i = i + 1) {
+    if (i >= 10) {
+      i = 0;
+    }
+    sum = sum + i;
+  }
+expected_ast:
+  type: Program
+  body:
+    - type: For
+      initializer:
+        type: VariableDeclaration
+        variables:
+          - type: Variable
+            identifier:
+              type: Identifier
+              name: i
+            type_annotation:
+              type: Primitive
+              value: Number
+            initializer:
+              type: NumericLiteral
+              value: 0
+      condition: null
+      increment:
+        type: Assignment
+        operator: Assign
+        left:
+          type: Identifier
+          name: i
+        right:
+          type: Binary
+          operator: Add
+          left:
+            type: Identifier
+            name: i
+          right:
+            type: NumericLiteral
+            value: 1
+      body:
+        type: Block
+        body:
+          - type: If
+            condition:
+              type: Binary
+              operator: GreaterThanOrEqualTo
+              left:
+                type: Identifier
+                name: i
+              right:
+                type: NumericLiteral
+                value: 10
+            consequent:
+              type: Block
+              body:
+                - type: Expression
+                  expression:
+                    type: Assignment
+                    operator: Assign
+                    left:
+                      type: Identifier
+                      name: i
+                    right:
+                      type: NumericLiteral
+                      value: 0
+            alternative: null
+          - type: Expression
+            expression:
+              type: Assignment
+              operator: Assign
+              left:
+                type: Identifier
+                name: sum
+              right:
+                type: Binary
+                operator: Add
+                left:
+                  type: Identifier
+                  name: sum
+                right:
+                  type: Identifier
+                  name: i
+
+---
+description: Parse for loop without increment
+source: |
+  for (let i: number = 0; i < 10;) {
+    sum = sum + i;
+    i = i + 1;
+  }
+expected_ast:
+  type: Program
+  body:
+    - type: For
+      initializer:
+        type: VariableDeclaration
+        variables:
+          - type: Variable
+            identifier:
+              type: Identifier
+              name: i
+            type_annotation:
+              type: Primitive
+              value: Number
+            initializer:
+              type: NumericLiteral
+              value: 0
+      condition:
+        type: Binary
+        operator: LessThan
+        left:
+          type: Identifier
+          name: i
+        right:
+          type: NumericLiteral
+          value: 10
+      increment: null
+      body:
+        type: Block
+        body:
+          - type: Expression
+            expression:
+              type: Assignment
+              operator: Assign
+              left:
+                type: Identifier
+                name: sum
+              right:
+                type: Binary
+                operator: Add
+                left:
+                  type: Identifier
+                  name: sum
+                right:
+                  type: Identifier
+                  name: i
+          - type: Expression
+            expression:
+              type: Assignment
+              operator: Assign
+              left:
+                type: Identifier
+                name: i
+              right:
+                type: Binary
+                operator: Add
+                left:
+                  type: Identifier
+                  name: i
+                right:
+                  type: NumericLiteral
+                  value: 1
+
+---
+description: Parse empty for loop
+source: |
+  for (;;) {
+    if (condition) {
+      done = true;
+    }
+  }
+expected_ast:
+  type: Program
+  body:
+    - type: For
+      initializer: null
+      condition: null
+      increment: null
+      body:
+        type: Block
+        body:
+          - type: If
+            condition:
+              type: Identifier
+              name: condition
+            consequent:
+              type: Block
+              body:
+                - type: Expression
+                  expression:
+                    type: Assignment
+                    operator: Assign
+                    left:
+                      type: Identifier
+                      name: done
+                    right:
+                      type: BooleanLiteral
+                      value: true
+            alternative: null
+
+---
+description: Parse nested for loops
+source: |
+  for (let i: number = 0; i < 3; i = i + 1) {
+    for (let j: number = 0; j < 3; j = j + 1) {
+      result = i * j;
+    }
+  }
+expected_ast:
+  type: Program
+  body:
+    - type: For
+      initializer:
+        type: VariableDeclaration
+        variables:
+          - type: Variable
+            identifier:
+              type: Identifier
+              name: i
+            type_annotation:
+              type: Primitive
+              value: Number
+            initializer:
+              type: NumericLiteral
+              value: 0
+      condition:
+        type: Binary
+        operator: LessThan
+        left:
+          type: Identifier
+          name: i
+        right:
+          type: NumericLiteral
+          value: 3
+      increment:
+        type: Assignment
+        operator: Assign
+        left:
+          type: Identifier
+          name: i
+        right:
+          type: Binary
+          operator: Add
+          left:
+            type: Identifier
+            name: i
+          right:
+            type: NumericLiteral
+            value: 1
+      body:
+        type: Block
+        body:
+          - type: For
+            initializer:
+              type: VariableDeclaration
+              variables:
+                - type: Variable
+                  identifier:
+                    type: Identifier
+                    name: j
+                  type_annotation:
+                    type: Primitive
+                    value: Number
+                  initializer:
+                    type: NumericLiteral
+                    value: 0
+            condition:
+              type: Binary
+              operator: LessThan
+              left:
+                type: Identifier
+                name: j
+              right:
+                type: NumericLiteral
+                value: 3
+            increment:
+              type: Assignment
+              operator: Assign
+              left:
+                type: Identifier
+                name: j
+              right:
+                type: Binary
+                operator: Add
+                left:
+                  type: Identifier
+                  name: j
+                right:
+                  type: NumericLiteral
+                  value: 1
+            body:
+              type: Block
+              body:
+                - type: Expression
+                  expression:
+                    type: Assignment
+                    operator: Assign
+                    left:
+                      type: Identifier
+                      name: result
+                    right:
+                      type: Binary
+                      operator: Multiply
+                      left:
+                        type: Identifier
+                        name: i
+                      right:
+                        type: Identifier
+                        name: j
+
+---
+description: Parse for loop with complex expression
+source: |
+  for (let i: number = a * b + c; i < max && !done; i = i + 1) {
+    sum = sum + i;
+  }
+expected_ast:
+  type: Program
+  body:
+    - type: For
+      initializer:
+        type: VariableDeclaration
+        variables:
+          - type: Variable
+            identifier:
+              type: Identifier
+              name: i
+            type_annotation:
+              type: Primitive
+              value: Number
+            initializer:
+              type: Binary
+              operator: Add
+              left:
+                type: Binary
+                operator: Multiply
+                left:
+                  type: Identifier
+                  name: a
+                right:
+                  type: Identifier
+                  name: b
+              right:
+                type: Identifier
+                name: c
+      condition:
+        type: Logical
+        operator: And
+        left:
+          type: Binary
+          operator: LessThan
+          left:
+            type: Identifier
+            name: i
+          right:
+            type: Identifier
+            name: max
+        right:
+          type: Unary
+          operator: Not
+          right:
+            type: Identifier
+            name: done
+      increment:
+        type: Assignment
+        operator: Assign
+        left:
+          type: Identifier
+          name: i
+        right:
+          type: Binary
+          operator: Add
+          left:
+            type: Identifier
+            name: i
+          right:
+            type: NumericLiteral
+            value: 1
+      body:
+        type: Block
+        body:
+          - type: Expression
+            expression:
+              type: Assignment
+              operator: Assign
+              left:
+                type: Identifier
+                name: sum
+              right:
+                type: Binary
+                operator: Add
+                left:
+                  type: Identifier
+                  name: sum
+                right:
+                  type: Identifier
+                  name: i

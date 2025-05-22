@@ -16,7 +16,4 @@ mod test_statement_parse_class_declaration;
 mod test_statement_parse_conditional;
 #[cfg(test)]
 mod test_statement_parse_function_declaration;
-#[cfg(test)]
-mod test_statement_parse_loop;
-#[cfg(test)]
 mod test_yaml_files;

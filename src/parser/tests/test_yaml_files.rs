@@ -21,6 +21,11 @@ fn test_statement_parse_loop_do_while() {
 }
 
 #[test]
+fn test_statement_parse_loop_for() {
+    execute_yaml_test_cases("tests/parser/test_statement_parse_loop_for.yaml");
+}
+
+#[test]
 fn test_statement_parse_loop_while() {
     execute_yaml_test_cases("tests/parser/test_statement_parse_loop_while.yaml");
 }
