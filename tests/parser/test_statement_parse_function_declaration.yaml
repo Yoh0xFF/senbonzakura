@@ -1,0 +1,520 @@
+---
+description: Parse simple function declaration
+source: |
+  def myFunction() {
+    x = 10;
+  }
+expected_ast:
+  type: Program
+  body:
+    - type: FunctionDeclaration
+      name:
+        type: Identifier
+        name: myFunction
+      parameters: []
+      return_type:
+        type: Void
+      body:
+        type: Block
+        body:
+          - type: Expression
+            expression:
+              type: Assignment
+              operator: Assign
+              left:
+                type: Identifier
+                name: x
+              right:
+                type: NumericLiteral
+                value: 10
+
+---
+description: Parse function declaration with single parameter
+source: |
+  def add(x: number): number {
+    return x + 1;
+  }
+expected_ast:
+  type: Program
+  body:
+    - type: FunctionDeclaration
+      name:
+        type: Identifier
+        name: add
+      parameters:
+        - - type: Identifier
+            name: x
+          - type: Primitive
+            value: Number
+      return_type:
+        type: Primitive
+        value: Number
+      body:
+        type: Block
+        body:
+          - type: Return
+            argument:
+              type: Binary
+              operator: Add
+              left:
+                type: Identifier
+                name: x
+              right:
+                type: NumericLiteral
+                value: 1
+
+---
+description: Parse function declaration with multiple parameters
+source: |
+  def add(x: number, y: number, z: number): number {
+    return x + y + z;
+  }
+expected_ast:
+  type: Program
+  body:
+    - type: FunctionDeclaration
+      name:
+        type: Identifier
+        name: add
+      parameters:
+        - - type: Identifier
+            name: x
+          - type: Primitive
+            value: Number
+        - - type: Identifier
+            name: y
+          - type: Primitive
+            value: Number
+        - - type: Identifier
+            name: z
+          - type: Primitive
+            value: Number
+      return_type:
+        type: Primitive
+        value: Number
+      body:
+        type: Block
+        body:
+          - type: Return
+            argument:
+              type: Binary
+              operator: Add
+              left:
+                type: Binary
+                operator: Add
+                left:
+                  type: Identifier
+                  name: x
+                right:
+                  type: Identifier
+                  name: y
+              right:
+                type: Identifier
+                name: z
+
+---
+description: Parse function declaration with empty body
+source: |
+  def emptyFunction() {
+  }
+expected_ast:
+  type: Program
+  body:
+    - type: FunctionDeclaration
+      name:
+        type: Identifier
+        name: emptyFunction
+      parameters: []
+      return_type:
+        type: Void
+      body:
+        type: Block
+        body: []
+
+---
+description: Parse function declaration with variable declaration
+source: |
+  def initFunction(): number {
+    let x: number = 10;
+    let y: number = 20;
+    return x + y;
+  }
+expected_ast:
+  type: Program
+  body:
+    - type: FunctionDeclaration
+      name:
+        type: Identifier
+        name: initFunction
+      parameters: []
+      return_type:
+        type: Primitive
+        value: Number
+      body:
+        type: Block
+        body:
+          - type: VariableDeclaration
+            variables:
+              - type: Variable
+                identifier:
+                  type: Identifier
+                  name: x
+                type_annotation:
+                  type: Primitive
+                  value: Number
+                initializer:
+                  type: NumericLiteral
+                  value: 10
+          - type: VariableDeclaration
+            variables:
+              - type: Variable
+                identifier:
+                  type: Identifier
+                  name: y
+                type_annotation:
+                  type: Primitive
+                  value: Number
+                initializer:
+                  type: NumericLiteral
+                  value: 20
+          - type: Return
+            argument:
+              type: Binary
+              operator: Add
+              left:
+                type: Identifier
+                name: x
+              right:
+                type: Identifier
+                name: y
+
+---
+description: Parse function declaration with if statement
+source: |
+  def max(a: number, b: number): number {
+    if (a > b) {
+      return a;
+    } else {
+      return b;
+    }
+  }
+expected_ast:
+  type: Program
+  body:
+    - type: FunctionDeclaration
+      name:
+        type: Identifier
+        name: max
+      parameters:
+        - - type: Identifier
+            name: a
+          - type: Primitive
+            value: Number
+        - - type: Identifier
+            name: b
+          - type: Primitive
+            value: Number
+      return_type:
+        type: Primitive
+        value: Number
+      body:
+        type: Block
+        body:
+          - type: If
+            condition:
+              type: Binary
+              operator: GreaterThan
+              left:
+                type: Identifier
+                name: a
+              right:
+                type: Identifier
+                name: b
+            consequent:
+              type: Block
+              body:
+                - type: Return
+                  argument:
+                    type: Identifier
+                    name: a
+            alternative:
+              type: Block
+              body:
+                - type: Return
+                  argument:
+                    type: Identifier
+                    name: b
+
+---
+description: Parse function declaration with while loop
+source: |
+  def factorial(n: number): number {
+    let result: number = 1;
+    while (n > 1) {
+      result = result * n;
+      n = n - 1;
+    }
+    return result;
+  }
+expected_ast:
+  type: Program
+  body:
+    - type: FunctionDeclaration
+      name:
+        type: Identifier
+        name: factorial
+      parameters:
+        - - type: Identifier
+            name: n
+          - type: Primitive
+            value: Number
+      return_type:
+        type: Primitive
+        value: Number
+      body:
+        type: Block
+        body:
+          - type: VariableDeclaration
+            variables:
+              - type: Variable
+                identifier:
+                  type: Identifier
+                  name: result
+                type_annotation:
+                  type: Primitive
+                  value: Number
+                initializer:
+                  type: NumericLiteral
+                  value: 1
+          - type: While
+            condition:
+              type: Binary
+              operator: GreaterThan
+              left:
+                type: Identifier
+                name: n
+              right:
+                type: NumericLiteral
+                value: 1
+            body:
+              type: Block
+              body:
+                - type: Expression
+                  expression:
+                    type: Assignment
+                    operator: Assign
+                    left:
+                      type: Identifier
+                      name: result
+                    right:
+                      type: Binary
+                      operator: Multiply
+                      left:
+                        type: Identifier
+                        name: result
+                      right:
+                        type: Identifier
+                        name: n
+                - type: Expression
+                  expression:
+                    type: Assignment
+                    operator: Assign
+                    left:
+                      type: Identifier
+                      name: n
+                    right:
+                      type: Binary
+                      operator: Subtract
+                      left:
+                        type: Identifier
+                        name: n
+                      right:
+                        type: NumericLiteral
+                        value: 1
+          - type: Return
+            argument:
+              type: Identifier
+              name: result
+
+---
+description: Parse function declaration with return type
+source: |
+  def earlyReturn(x: number): number {
+    if (x <= 0) {
+      return 0;
+    }
+    return x;
+  }
+expected_ast:
+  type: Program
+  body:
+    - type: FunctionDeclaration
+      name:
+        type: Identifier
+        name: earlyReturn
+      parameters:
+        - - type: Identifier
+            name: x
+          - type: Primitive
+            value: Number
+      return_type:
+        type: Primitive
+        value: Number
+      body:
+        type: Block
+        body:
+          - type: If
+            condition:
+              type: Binary
+              operator: LessThanOrEqualTo
+              left:
+                type: Identifier
+                name: x
+              right:
+                type: NumericLiteral
+                value: 0
+            consequent:
+              type: Block
+              body:
+                - type: Return
+                  argument:
+                    type: NumericLiteral
+                    value: 0
+            alternative: null
+          - type: Return
+            argument:
+              type: Identifier
+              name: x
+
+---
+description: Parse function declaration with complex expression
+source: |
+  def evaluate(a: number, b: number, c: number): number {
+    return a * b + c * (a + b);
+  }
+expected_ast:
+  type: Program
+  body:
+    - type: FunctionDeclaration
+      name:
+        type: Identifier
+        name: evaluate
+      parameters:
+        - - type: Identifier
+            name: a
+          - type: Primitive
+            value: Number
+        - - type: Identifier
+            name: b
+          - type: Primitive
+            value: Number
+        - - type: Identifier
+            name: c
+          - type: Primitive
+            value: Number
+      return_type:
+        type: Primitive
+        value: Number
+      body:
+        type: Block
+        body:
+          - type: Return
+            argument:
+              type: Binary
+              operator: Add
+              left:
+                type: Binary
+                operator: Multiply
+                left:
+                  type: Identifier
+                  name: a
+                right:
+                  type: Identifier
+                  name: b
+              right:
+                type: Binary
+                operator: Multiply
+                left:
+                  type: Identifier
+                  name: c
+                right:
+                  type: Binary
+                  operator: Add
+                  left:
+                    type: Identifier
+                    name: a
+                  right:
+                    type: Identifier
+                    name: b
+
+---
+description: Parse multiple function declarations
+source: |
+  def add(a: number, b: number): number {
+    return a + b;
+  }
+
+  def subtract(a: number, b: number): number {
+    return a - b;
+  }
+expected_ast:
+  type: Program
+  body:
+    - type: FunctionDeclaration
+      name:
+        type: Identifier
+        name: add
+      parameters:
+        - - type: Identifier
+            name: a
+          - type: Primitive
+            value: Number
+        - - type: Identifier
+            name: b
+          - type: Primitive
+            value: Number
+      return_type:
+        type: Primitive
+        value: Number
+      body:
+        type: Block
+        body:
+          - type: Return
+            argument:
+              type: Binary
+              operator: Add
+              left:
+                type: Identifier
+                name: a
+              right:
+                type: Identifier
+                name: b
+    - type: FunctionDeclaration
+      name:
+        type: Identifier
+        name: subtract
+      parameters:
+        - - type: Identifier
+            name: a
+          - type: Primitive
+            value: Number
+        - - type: Identifier
+            name: b
+          - type: Primitive
+            value: Number
+      return_type:
+        type: Primitive
+        value: Number
+      body:
+        type: Block
+        body:
+          - type: Return
+            argument:
+              type: Binary
+              operator: Subtract
+              left:
+                type: Identifier
+                name: a
+              right:
+                type: Identifier
+                name: b

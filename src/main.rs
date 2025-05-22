@@ -24,9 +24,13 @@ fn main() {
 
     let mut parser = Parser::new(
         r#"
-for (let i: number = a * b + c; i < max && !done; i = i + 1) {
-    sum = sum + i;
-  }
+        def add(a: number, b: number): number {
+            return a + b;
+        }
+
+        def subtract(a: number, b: number): number {
+            return a - b;
+        }
         "#,
     );
     let ast = parse_root_statement(&mut parser);
