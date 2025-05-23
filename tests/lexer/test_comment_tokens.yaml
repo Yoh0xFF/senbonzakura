@@ -1,0 +1,35 @@
+---
+description: Parse single line comment
+source: |
+  // This is single line comment
+  17
+expected_tokens:
+  - token_type: Number
+    i: 31
+    j: 33
+
+---
+description: Parse multi line comment
+source: |
+  /*
+  This is multi line comment,
+  and we should skip it
+  */
+  1719
+expected_tokens:
+  - token_type: Number
+    i: 56
+    j: 60
+
+---
+description: Parse formatted multi line comment
+source: |
+  /**
+  * This is multi line comment,
+  * and we should skip it
+  */
+  1719
+expected_tokens:
+  - token_type: Number
+    i: 61
+    j: 65

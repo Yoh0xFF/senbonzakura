@@ -1,6 +1,9 @@
 use core::fmt;
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+use serde::{Deserialize, Serialize};
+
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "PascalCase")]
 pub enum TokenType {
     // Whitespace and comments
     Whitespace,
@@ -77,7 +80,7 @@ impl fmt::Display for TokenType {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Token {
     pub token_type: TokenType,
     pub i: usize,
