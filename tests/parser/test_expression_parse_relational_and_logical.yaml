@@ -1,0 +1,756 @@
+---
+description: Parse equality operator equal
+source: 'x == y;'
+expected_ast:
+  type: 'Program'
+  body:
+    - type: 'Expression'
+      expression:
+        type: 'Binary'
+        operator: 'Equal'
+        left:
+          type: 'Identifier'
+          name: 'x'
+        right:
+          type: 'Identifier'
+          name: 'y'
+
+---
+description: Parse equality operator not equal
+source: 'x != y;'
+expected_ast:
+  type: 'Program'
+  body:
+    - type: 'Expression'
+      expression:
+        type: 'Binary'
+        operator: 'NotEqual'
+        left:
+          type: 'Identifier'
+          name: 'x'
+        right:
+          type: 'Identifier'
+          name: 'y'
+
+---
+description: Parse equality operator with literals
+source: '42 == 42;'
+expected_ast:
+  type: 'Program'
+  body:
+    - type: 'Expression'
+      expression:
+        type: 'Binary'
+        operator: 'Equal'
+        left:
+          type: 'NumericLiteral'
+          value: 42
+        right:
+          type: 'NumericLiteral'
+          value: 42
+
+---
+description: Parse equality operator with boolean literals
+source: 'true == false;'
+expected_ast:
+  type: 'Program'
+  body:
+    - type: 'Expression'
+      expression:
+        type: 'Binary'
+        operator: 'Equal'
+        left:
+          type: 'BooleanLiteral'
+          value: true
+        right:
+          type: 'BooleanLiteral'
+          value: false
+
+---
+description: Parse equality operator with nil
+source: 'x == nil;'
+expected_ast:
+  type: 'Program'
+  body:
+    - type: 'Expression'
+      expression:
+        type: 'Binary'
+        operator: 'Equal'
+        left:
+          type: 'Identifier'
+          name: 'x'
+        right:
+          type: 'NilLiteral'
+
+---
+description: Parse complex equality expression
+source: 'x + 5 == y * 2;'
+expected_ast:
+  type: 'Program'
+  body:
+    - type: 'Expression'
+      expression:
+        type: 'Binary'
+        operator: 'Equal'
+        left:
+          type: 'Binary'
+          operator: 'Add'
+          left:
+            type: 'Identifier'
+            name: 'x'
+          right:
+            type: 'NumericLiteral'
+            value: 5
+        right:
+          type: 'Binary'
+          operator: 'Multiply'
+          left:
+            type: 'Identifier'
+            name: 'y'
+          right:
+            type: 'NumericLiteral'
+            value: 2
+
+---
+description: Parse chained equality expressions
+source: 'x == y == true;'
+expected_ast:
+  type: 'Program'
+  body:
+    - type: 'Expression'
+      expression:
+        type: 'Binary'
+        operator: 'Equal'
+        left:
+          type: 'Binary'
+          operator: 'Equal'
+          left:
+            type: 'Identifier'
+            name: 'x'
+          right:
+            type: 'Identifier'
+            name: 'y'
+        right:
+          type: 'BooleanLiteral'
+          value: true
+
+---
+description: Parse equality with assignment
+source: 'result = x == y;'
+expected_ast:
+  type: 'Program'
+  body:
+    - type: 'Expression'
+      expression:
+        type: 'Assignment'
+        operator: 'Assign'
+        left:
+          type: 'Identifier'
+          name: 'result'
+        right:
+          type: 'Binary'
+          operator: 'Equal'
+          left:
+            type: 'Identifier'
+            name: 'x'
+          right:
+            type: 'Identifier'
+            name: 'y'
+
+---
+description: Parse complex boolean expressions
+source: 'isValid = (count > 0) == true;'
+expected_ast:
+  type: 'Program'
+  body:
+    - type: 'Expression'
+      expression:
+        type: 'Assignment'
+        operator: 'Assign'
+        left:
+          type: 'Identifier'
+          name: 'isValid'
+        right:
+          type: 'Binary'
+          operator: 'Equal'
+          left:
+            type: 'Binary'
+            operator: 'GreaterThan'
+            left:
+              type: 'Identifier'
+              name: 'count'
+            right:
+              type: 'NumericLiteral'
+              value: 0
+          right:
+            type: 'BooleanLiteral'
+            value: true
+
+---
+description: Parse greater than operator
+source: 'x > 5;'
+expected_ast:
+  type: 'Program'
+  body:
+    - type: 'Expression'
+      expression:
+        type: 'Binary'
+        operator: 'GreaterThan'
+        left:
+          type: 'Identifier'
+          name: 'x'
+        right:
+          type: 'NumericLiteral'
+          value: 5
+
+---
+description: Parse greater than or equal to operator
+source: 'x >= 10;'
+expected_ast:
+  type: 'Program'
+  body:
+    - type: 'Expression'
+      expression:
+        type: 'Binary'
+        operator: 'GreaterThanOrEqualTo'
+        left:
+          type: 'Identifier'
+          name: 'x'
+        right:
+          type: 'NumericLiteral'
+          value: 10
+
+---
+description: Parse less than operator
+source: 'y < 20;'
+expected_ast:
+  type: 'Program'
+  body:
+    - type: 'Expression'
+      expression:
+        type: 'Binary'
+        operator: 'LessThan'
+        left:
+          type: 'Identifier'
+          name: 'y'
+        right:
+          type: 'NumericLiteral'
+          value: 20
+
+---
+description: Parse less than or equal to operator
+source: 'y <= 30;'
+expected_ast:
+  type: 'Program'
+  body:
+    - type: 'Expression'
+      expression:
+        type: 'Binary'
+        operator: 'LessThanOrEqualTo'
+        left:
+          type: 'Identifier'
+          name: 'y'
+        right:
+          type: 'NumericLiteral'
+          value: 30
+
+---
+description: Parse relational operators with variables
+source: 'x > y;'
+expected_ast:
+  type: 'Program'
+  body:
+    - type: 'Expression'
+      expression:
+        type: 'Binary'
+        operator: 'GreaterThan'
+        left:
+          type: 'Identifier'
+          name: 'x'
+        right:
+          type: 'Identifier'
+          name: 'y'
+
+---
+description: Parse relational operators with expressions
+source: 'x + 5 > y * 2;'
+expected_ast:
+  type: 'Program'
+  body:
+    - type: 'Expression'
+      expression:
+        type: 'Binary'
+        operator: 'GreaterThan'
+        left:
+          type: 'Binary'
+          operator: 'Add'
+          left:
+            type: 'Identifier'
+            name: 'x'
+          right:
+            type: 'NumericLiteral'
+            value: 5
+        right:
+          type: 'Binary'
+          operator: 'Multiply'
+          left:
+            type: 'Identifier'
+            name: 'y'
+          right:
+            type: 'NumericLiteral'
+            value: 2
+
+---
+description: Parse chained relational expressions
+source: 'x > 5 > y;'
+expected_ast:
+  type: 'Program'
+  body:
+    - type: 'Expression'
+      expression:
+        type: 'Binary'
+        operator: 'GreaterThan'
+        left:
+          type: 'Binary'
+          operator: 'GreaterThan'
+          left:
+            type: 'Identifier'
+            name: 'x'
+          right:
+            type: 'NumericLiteral'
+            value: 5
+        right:
+          type: 'Identifier'
+          name: 'y'
+
+---
+description: Parse relational operators with parenthesized expressions
+source: '(x + 10) > (y - 5);'
+expected_ast:
+  type: 'Program'
+  body:
+    - type: 'Expression'
+      expression:
+        type: 'Binary'
+        operator: 'GreaterThan'
+        left:
+          type: 'Binary'
+          operator: 'Add'
+          left:
+            type: 'Identifier'
+            name: 'x'
+          right:
+            type: 'NumericLiteral'
+            value: 10
+        right:
+          type: 'Binary'
+          operator: 'Subtract'
+          left:
+            type: 'Identifier'
+            name: 'y'
+          right:
+            type: 'NumericLiteral'
+            value: 5
+
+---
+description: Parse relational operators precedence with assignment
+source: 'result = x > y;'
+expected_ast:
+  type: 'Program'
+  body:
+    - type: 'Expression'
+      expression:
+        type: 'Assignment'
+        operator: 'Assign'
+        left:
+          type: 'Identifier'
+          name: 'result'
+        right:
+          type: 'Binary'
+          operator: 'GreaterThan'
+          left:
+            type: 'Identifier'
+            name: 'x'
+          right:
+            type: 'Identifier'
+            name: 'y'
+
+---
+description: Parse logical and operator
+source: 'x && y;'
+expected_ast:
+  type: 'Program'
+  body:
+    - type: 'Expression'
+      expression:
+        type: 'Logical'
+        operator: 'And'
+        left:
+          type: 'Identifier'
+          name: 'x'
+        right:
+          type: 'Identifier'
+          name: 'y'
+
+---
+description: Parse logical or operator
+source: 'x || y;'
+expected_ast:
+  type: 'Program'
+  body:
+    - type: 'Expression'
+      expression:
+        type: 'Logical'
+        operator: 'Or'
+        left:
+          type: 'Identifier'
+          name: 'x'
+        right:
+          type: 'Identifier'
+          name: 'y'
+
+---
+description: Parse chained logical and operators
+source: 'a && b && c;'
+expected_ast:
+  type: 'Program'
+  body:
+    - type: 'Expression'
+      expression:
+        type: 'Logical'
+        operator: 'And'
+        left:
+          type: 'Logical'
+          operator: 'And'
+          left:
+            type: 'Identifier'
+            name: 'a'
+          right:
+            type: 'Identifier'
+            name: 'b'
+        right:
+          type: 'Identifier'
+          name: 'c'
+
+---
+description: Parse chained logical or operators
+source: 'a || b || c;'
+expected_ast:
+  type: 'Program'
+  body:
+    - type: 'Expression'
+      expression:
+        type: 'Logical'
+        operator: 'Or'
+        left:
+          type: 'Logical'
+          operator: 'Or'
+          left:
+            type: 'Identifier'
+            name: 'a'
+          right:
+            type: 'Identifier'
+            name: 'b'
+        right:
+          type: 'Identifier'
+          name: 'c'
+
+---
+description: Parse mixed logical operators
+source: 'a && b || c;'
+expected_ast:
+  type: 'Program'
+  body:
+    - type: 'Expression'
+      expression:
+        type: 'Logical'
+        operator: 'Or'
+        left:
+          type: 'Logical'
+          operator: 'And'
+          left:
+            type: 'Identifier'
+            name: 'a'
+          right:
+            type: 'Identifier'
+            name: 'b'
+        right:
+          type: 'Identifier'
+          name: 'c'
+
+---
+description: Parse logical operators with parentheses
+source: 'a && (b || c);'
+expected_ast:
+  type: 'Program'
+  body:
+    - type: 'Expression'
+      expression:
+        type: 'Logical'
+        operator: 'And'
+        left:
+          type: 'Identifier'
+          name: 'a'
+        right:
+          type: 'Logical'
+          operator: 'Or'
+          left:
+            type: 'Identifier'
+            name: 'b'
+          right:
+            type: 'Identifier'
+            name: 'c'
+
+---
+description: Parse logical operators with boolean literals
+source: 'true && false;'
+expected_ast:
+  type: 'Program'
+  body:
+    - type: 'Expression'
+      expression:
+        type: 'Logical'
+        operator: 'And'
+        left:
+          type: 'BooleanLiteral'
+          value: true
+        right:
+          type: 'BooleanLiteral'
+          value: false
+
+---
+description: Parse logical operators with comparison expressions
+source: 'x > 5 && y < 10;'
+expected_ast:
+  type: 'Program'
+  body:
+    - type: 'Expression'
+      expression:
+        type: 'Logical'
+        operator: 'And'
+        left:
+          type: 'Binary'
+          operator: 'GreaterThan'
+          left:
+            type: 'Identifier'
+            name: 'x'
+          right:
+            type: 'NumericLiteral'
+            value: 5
+        right:
+          type: 'Binary'
+          operator: 'LessThan'
+          left:
+            type: 'Identifier'
+            name: 'y'
+          right:
+            type: 'NumericLiteral'
+            value: 10
+
+---
+description: Parse logical operators with equality expressions
+source: 'x == 5 || y != 10;'
+expected_ast:
+  type: 'Program'
+  body:
+    - type: 'Expression'
+      expression:
+        type: 'Logical'
+        operator: 'Or'
+        left:
+          type: 'Binary'
+          operator: 'Equal'
+          left:
+            type: 'Identifier'
+            name: 'x'
+          right:
+            type: 'NumericLiteral'
+            value: 5
+        right:
+          type: 'Binary'
+          operator: 'NotEqual'
+          left:
+            type: 'Identifier'
+            name: 'y'
+          right:
+            type: 'NumericLiteral'
+            value: 10
+
+---
+description: Parse complex logical expression
+source: '(a > b && c < d) || (e == f && g != h);'
+expected_ast:
+  type: 'Program'
+  body:
+    - type: 'Expression'
+      expression:
+        type: 'Logical'
+        operator: 'Or'
+        left:
+          type: 'Logical'
+          operator: 'And'
+          left:
+            type: 'Binary'
+            operator: 'GreaterThan'
+            left:
+              type: 'Identifier'
+              name: 'a'
+            right:
+              type: 'Identifier'
+              name: 'b'
+          right:
+            type: 'Binary'
+            operator: 'LessThan'
+            left:
+              type: 'Identifier'
+              name: 'c'
+            right:
+              type: 'Identifier'
+              name: 'd'
+        right:
+          type: 'Logical'
+          operator: 'And'
+          left:
+            type: 'Binary'
+            operator: 'Equal'
+            left:
+              type: 'Identifier'
+              name: 'e'
+            right:
+              type: 'Identifier'
+              name: 'f'
+          right:
+            type: 'Binary'
+            operator: 'NotEqual'
+            left:
+              type: 'Identifier'
+              name: 'g'
+            right:
+              type: 'Identifier'
+              name: 'h'
+
+---
+description: Parse assignment with logical expression
+source: 'result = a && b || c;'
+expected_ast:
+  type: 'Program'
+  body:
+    - type: 'Expression'
+      expression:
+        type: 'Assignment'
+        operator: 'Assign'
+        left:
+          type: 'Identifier'
+          name: 'result'
+        right:
+          type: 'Logical'
+          operator: 'Or'
+          left:
+            type: 'Logical'
+            operator: 'And'
+            left:
+              type: 'Identifier'
+              name: 'a'
+            right:
+              type: 'Identifier'
+              name: 'b'
+          right:
+            type: 'Identifier'
+            name: 'c'
+
+---
+description: Parse variable initialization with logical expression
+source: 'let isValid: boolean = x > 0 && x < 100;'
+expected_ast:
+  type: 'Program'
+  body:
+    - type: 'VariableDeclaration'
+      variables:
+        - type: 'Variable'
+          identifier:
+            type: 'Identifier'
+            name: 'isValid'
+          type_annotation:
+            type: 'Primitive'
+            value: 'Boolean'
+          initializer:
+            type: 'Logical'
+            operator: 'And'
+            left:
+              type: 'Binary'
+              operator: 'GreaterThan'
+              left:
+                type: 'Identifier'
+                name: 'x'
+              right:
+                type: 'NumericLiteral'
+                value: 0
+            right:
+              type: 'Binary'
+              operator: 'LessThan'
+              left:
+                type: 'Identifier'
+                name: 'x'
+              right:
+                type: 'NumericLiteral'
+                value: 100
+
+---
+description: Parse logical expression in if condition
+source: |
+  if (x > 0 && x < 100) {
+      y = 1;
+  } else {
+      y = 0;
+  }
+expected_ast:
+  type: 'Program'
+  body:
+    - type: 'If'
+      condition:
+        type: 'Logical'
+        operator: 'And'
+        left:
+          type: 'Binary'
+          operator: 'GreaterThan'
+          left:
+            type: 'Identifier'
+            name: 'x'
+          right:
+            type: 'NumericLiteral'
+            value: 0
+        right:
+          type: 'Binary'
+          operator: 'LessThan'
+          left:
+            type: 'Identifier'
+            name: 'x'
+          right:
+            type: 'NumericLiteral'
+            value: 100
+      consequent:
+        type: 'Block'
+        body:
+          - type: 'Expression'
+            expression:
+              type: 'Assignment'
+              operator: 'Assign'
+              left:
+                type: 'Identifier'
+                name: 'y'
+              right:
+                type: 'NumericLiteral'
+                value: 1
+      alternative:
+        type: 'Block'
+        body:
+          - type: 'Expression'
+            expression:
+              type: 'Assignment'
+              operator: 'Assign'
+              left:
+                type: 'Identifier'
+                name: 'y'
+              right:
+                type: 'NumericLiteral'
+                value: 0

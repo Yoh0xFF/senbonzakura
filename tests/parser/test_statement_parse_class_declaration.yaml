@@ -2,7 +2,7 @@
 description: Parse simple class declaration
 source: |
   class Person {
-      // Empty class
+    // Empty class
   }
 expected_ast:
   type: Program
@@ -20,13 +20,13 @@ expected_ast:
 description: Parse class with methods
 source: |
   class Person {
-      def getName() {
-          return "John";
-      }
+    def getName() {
+      return "John";
+    }
 
-      def getAge() {
-          return 30;
-      }
+    def getAge() {
+      return 30;
+    }
   }
 expected_ast:
   type: Program
@@ -72,9 +72,9 @@ expected_ast:
 description: Parse class with inheritance
 source: |
   class Student extends Person {
-      def getGrade() {
-          return "A";
-      }
+    def getGrade() {
+      return "A";
+    }
   }
 expected_ast:
   type: Program
@@ -108,18 +108,18 @@ expected_ast:
 description: Parse class with constructor-like method
 source: |
   class Person {
-      def constructor(name: string, age: number) {
-          this.name = name;
-          this.age = age;
-      }
+    def constructor(name: string, age: number) {
+      this.name = name;
+      this.age = age;
+    }
 
-      def getName() {
-          return this.name;
-      }
+    def getName() {
+      return this.name;
+    }
 
-      def getAge() {
-          return this.age;
-      }
+    def getAge() {
+      return this.age;
+    }
   }
 expected_ast:
   type: Program
@@ -223,14 +223,14 @@ expected_ast:
 description: Parse class with instance variables
 source: |
   class Rectangle {
-      def constructor(width: number, height: number) {
-          this.width = width;
-          this.height = height;
-      }
+    def constructor(width: number, height: number) {
+      this.width = width;
+      this.height = height;
+    }
 
-      def getArea(): number {
-          return this.width * this.height;
-      }
+    def getArea(): number {
+      return this.width * this.height;
+    }
   }
 expected_ast:
   type: Program
@@ -327,14 +327,14 @@ expected_ast:
 description: Parse class with super calls
 source: |
   class Child extends Parent {
-      def constructor(name: string, age: number) {
-          super(name);
-          this.age = age;
-      }
+    def constructor(name: string, age: number) {
+      super(name);
+      this.age = age;
+    }
 
-      def describe(): string {
-          return super.getName() + " is " + this.age + " years old";
-      }
+    def describe(): string {
+      return super.getName() + " is " + this.age + " years old";
+    }
   }
 expected_ast:
   type: Program
@@ -441,15 +441,15 @@ expected_ast:
 description: Parse multiple classes
 source: |
   class Animal {
-      def makeSound(): string {
-          return "Generic animal sound";
-      }
+    def makeSound(): string {
+      return "Generic animal sound";
+    }
   }
 
   class Dog extends Animal {
-      def makeSound(): string {
-          return "Woof";
-      }
+    def makeSound(): string {
+      return "Woof";
+    }
   }
 expected_ast:
   type: Program
@@ -507,13 +507,13 @@ expected_ast:
 description: Parse class with method using if statement
 source: |
   class Calculator {
-      def max(a: number, b: number): number {
-          if (a > b) {
-              return a;
-          } else {
-              return b;
-          }
+    def max(a: number, b: number): number {
+      if (a > b) {
+        return a;
+      } else {
+        return b;
       }
+    }
   }
 expected_ast:
   type: Program
@@ -574,13 +574,13 @@ expected_ast:
 description: Parse class with method using loops
 source: |
   class Summation {
-      def sum(n: number): number {
-          let result: number = 0;
-          for (let i: number = 1; i <= n; i = i + 1) {
-              result = result + i;
-          }
-          return result;
+    def sum(n: number): number {
+      let result: number = 0;
+      for (let i: number = 1; i <= n; i = i + 1) {
+        result = result + i;
       }
+      return result;
+    }
   }
 expected_ast:
   type: Program
@@ -686,12 +686,12 @@ expected_ast:
 description: Parse class with method using function calls
 source: |
   class MathUtils {
-      def factorial(n: number): number {
-          if (n <= 1) {
-              return 1;
-          }
-          return n * this.factorial(n - 1);
+    def factorial(n: number): number {
+      if (n <= 1) {
+        return 1;
       }
+      return n * this.factorial(n - 1);
+    }
   }
 expected_ast:
   type: Program
@@ -768,10 +768,10 @@ expected_ast:
 description: Parse class instantiation
 source: |
   class Point {
-      def constructor(x: number, y: number) {
-          this.x = x;
-          this.y = y;
-      }
+    def constructor(x: number, y: number) {
+      this.x = x;
+      this.y = y;
+    }
   }
 
   let p: Point = new Point(10, 20);

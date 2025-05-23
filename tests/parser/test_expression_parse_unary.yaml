@@ -1,0 +1,373 @@
+---
+description: Parse unary plus operator
+source: '+42;'
+expected_ast:
+  type: 'Program'
+  body:
+    - type: 'Expression'
+      expression:
+        type: 'Unary'
+        operator: 'Plus'
+        right:
+          type: 'NumericLiteral'
+          value: 42
+
+---
+description: Parse unary minus operator
+source: '-42;'
+expected_ast:
+  type: 'Program'
+  body:
+    - type: 'Expression'
+      expression:
+        type: 'Unary'
+        operator: 'Minus'
+        right:
+          type: 'NumericLiteral'
+          value: 42
+
+---
+description: Parse unary not operator
+source: '!true;'
+expected_ast:
+  type: 'Program'
+  body:
+    - type: 'Expression'
+      expression:
+        type: 'Unary'
+        operator: 'Not'
+        right:
+          type: 'BooleanLiteral'
+          value: true
+
+---
+description: Parse unary not with identifier
+source: '!isValid;'
+expected_ast:
+  type: 'Program'
+  body:
+    - type: 'Expression'
+      expression:
+        type: 'Unary'
+        operator: 'Not'
+        right:
+          type: 'Identifier'
+          name: 'isValid'
+
+---
+description: Parse chained unary operators
+source: '+-42;'
+expected_ast:
+  type: 'Program'
+  body:
+    - type: 'Expression'
+      expression:
+        type: 'Unary'
+        operator: 'Plus'
+        right:
+          type: 'Unary'
+          operator: 'Minus'
+          right:
+            type: 'NumericLiteral'
+            value: 42
+
+---
+description: Parse multiple chained unary operators
+source: '+-!x;'
+expected_ast:
+  type: 'Program'
+  body:
+    - type: 'Expression'
+      expression:
+        type: 'Unary'
+        operator: 'Plus'
+        right:
+          type: 'Unary'
+          operator: 'Minus'
+          right:
+            type: 'Unary'
+            operator: 'Not'
+            right:
+              type: 'Identifier'
+              name: 'x'
+
+---
+description: Parse unary operator with parentheses
+source: '-(x + y);'
+expected_ast:
+  type: 'Program'
+  body:
+    - type: 'Expression'
+      expression:
+        type: 'Unary'
+        operator: 'Minus'
+        right:
+          type: 'Binary'
+          operator: 'Add'
+          left:
+            type: 'Identifier'
+            name: 'x'
+          right:
+            type: 'Identifier'
+            name: 'y'
+
+---
+description: Parse unary operators precedence with binary operators
+source: '-x + y;'
+expected_ast:
+  type: 'Program'
+  body:
+    - type: 'Expression'
+      expression:
+        type: 'Binary'
+        operator: 'Add'
+        left:
+          type: 'Unary'
+          operator: 'Minus'
+          right:
+            type: 'Identifier'
+            name: 'x'
+        right:
+          type: 'Identifier'
+          name: 'y'
+
+---
+description: Parse unary operators with assignment
+source: 'result = -x;'
+expected_ast:
+  type: 'Program'
+  body:
+    - type: 'Expression'
+      expression:
+        type: 'Assignment'
+        operator: 'Assign'
+        left:
+          type: 'Identifier'
+          name: 'result'
+        right:
+          type: 'Unary'
+          operator: 'Minus'
+          right:
+            type: 'Identifier'
+            name: 'x'
+
+---
+description: Parse unary minus with numeric literal in variable declaration
+source: 'let x: number = -5;'
+expected_ast:
+  type: 'Program'
+  body:
+    - type: 'VariableDeclaration'
+      variables:
+        - type: 'Variable'
+          identifier:
+            type: 'Identifier'
+            name: 'x'
+          type_annotation:
+            type: 'Primitive'
+            value: 'Number'
+          initializer:
+            type: 'Unary'
+            operator: 'Minus'
+            right:
+              type: 'NumericLiteral'
+              value: 5
+
+---
+description: Parse unary operators in binary expressions
+source: 'x * -y;'
+expected_ast:
+  type: 'Program'
+  body:
+    - type: 'Expression'
+      expression:
+        type: 'Binary'
+        operator: 'Multiply'
+        left:
+          type: 'Identifier'
+          name: 'x'
+        right:
+          type: 'Unary'
+          operator: 'Minus'
+          right:
+            type: 'Identifier'
+            name: 'y'
+
+---
+description: Parse unary not with equality expressions
+source: '!(x == y);'
+expected_ast:
+  type: 'Program'
+  body:
+    - type: 'Expression'
+      expression:
+        type: 'Unary'
+        operator: 'Not'
+        right:
+          type: 'Binary'
+          operator: 'Equal'
+          left:
+            type: 'Identifier'
+            name: 'x'
+          right:
+            type: 'Identifier'
+            name: 'y'
+
+---
+description: Parse unary operators with multiple expressions
+source: '-x + -y;'
+expected_ast:
+  type: 'Program'
+  body:
+    - type: 'Expression'
+      expression:
+        type: 'Binary'
+        operator: 'Add'
+        left:
+          type: 'Unary'
+          operator: 'Minus'
+          right:
+            type: 'Identifier'
+            name: 'x'
+        right:
+          type: 'Unary'
+          operator: 'Minus'
+          right:
+            type: 'Identifier'
+            name: 'y'
+
+---
+description: Parse unary operators in conditional expressions
+source: |
+  if (!condition) {
+      x = -y;
+  }
+expected_ast:
+  type: 'Program'
+  body:
+    - type: 'If'
+      condition:
+        type: 'Unary'
+        operator: 'Not'
+        right:
+          type: 'Identifier'
+          name: 'condition'
+      consequent:
+        type: 'Block'
+        body:
+          - type: 'Expression'
+            expression:
+              type: 'Assignment'
+              operator: 'Assign'
+              left:
+                type: 'Identifier'
+                name: 'x'
+              right:
+                type: 'Unary'
+                operator: 'Minus'
+                right:
+                  type: 'Identifier'
+                  name: 'y'
+
+---
+description: Parse unary not with logical expressions
+source: '!(x && y);'
+expected_ast:
+  type: 'Program'
+  body:
+    - type: 'Expression'
+      expression:
+        type: 'Unary'
+        operator: 'Not'
+        right:
+          type: 'Logical'
+          operator: 'And'
+          left:
+            type: 'Identifier'
+            name: 'x'
+          right:
+            type: 'Identifier'
+            name: 'y'
+
+---
+description: Parse unary operators precedence with multiplication
+source: '-x * y;'
+expected_ast:
+  type: 'Program'
+  body:
+    - type: 'Expression'
+      expression:
+        type: 'Binary'
+        operator: 'Multiply'
+        left:
+          type: 'Unary'
+          operator: 'Minus'
+          right:
+            type: 'Identifier'
+            name: 'x'
+        right:
+          type: 'Identifier'
+          name: 'y'
+
+---
+description: Parse unary not with variable declaration
+source: 'let isNotValid: boolean = !isValid;'
+expected_ast:
+  type: 'Program'
+  body:
+    - type: 'VariableDeclaration'
+      variables:
+        - type: 'Variable'
+          identifier:
+            type: 'Identifier'
+            name: 'isNotValid'
+          type_annotation:
+            type: 'Primitive'
+            value: 'Boolean'
+          initializer:
+            type: 'Unary'
+            operator: 'Not'
+            right:
+              type: 'Identifier'
+              name: 'isValid'
+
+---
+description: Parse complex expression with unary operators
+source: 'result = -x * y + !z && w;'
+expected_ast:
+  type: 'Program'
+  body:
+    - type: 'Expression'
+      expression:
+        type: 'Assignment'
+        operator: 'Assign'
+        left:
+          type: 'Identifier'
+          name: 'result'
+        right:
+          type: 'Logical'
+          operator: 'And'
+          left:
+            type: 'Binary'
+            operator: 'Add'
+            left:
+              type: 'Binary'
+              operator: 'Multiply'
+              left:
+                type: 'Unary'
+                operator: 'Minus'
+                right:
+                  type: 'Identifier'
+                  name: 'x'
+              right:
+                type: 'Identifier'
+                name: 'y'
+            right:
+              type: 'Unary'
+              operator: 'Not'
+              right:
+                type: 'Identifier'
+                name: 'z'
+          right:
+            type: 'Identifier'
+            name: 'w'

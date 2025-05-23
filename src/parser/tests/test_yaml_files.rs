@@ -16,6 +16,16 @@ fn test_expression_parse_literals() {
 }
 
 #[test]
+fn test_expression_parse_relational_and_logical() {
+    execute_yaml_test_cases("tests/parser/test_expression_parse_relational_and_logical.yaml");
+}
+
+#[test]
+fn test_expression_parse_unary() {
+    execute_yaml_test_cases("tests/parser/test_expression_parse_unary.yaml");
+}
+
+#[test]
 fn test_statement_parse_block() {
     execute_yaml_test_cases("tests/parser/test_statement_parse_block.yaml");
 }

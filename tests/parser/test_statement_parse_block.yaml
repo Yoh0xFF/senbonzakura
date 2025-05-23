@@ -2,8 +2,8 @@
 description: Parse test block statement with string and number expressions
 source: |
   {
-      "Hello";
-      17;
+    "Hello";
+    17;
   }
 expected_ast:
   type: Program
@@ -34,10 +34,10 @@ expected_ast:
 description: Parse test nested block statement
 source: |
   {
-      "Hello";
-      {
-          17;
-      }
+    "Hello";
+    {
+      17;
+    }
   }
 expected_ast:
   type: Program
@@ -59,7 +59,7 @@ expected_ast:
 description: Parse test empty statement in block
 source: |
   {
-      ;
+    ;
   }
 expected_ast:
   type: Program

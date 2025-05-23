@@ -2,7 +2,7 @@
 description: Parse simple if statement with relational condition
 source: |
   if (x > 5) {
-      y = 10;
+    y = 10;
   }
 expected_ast:
   type: Program
@@ -35,9 +35,9 @@ expected_ast:
 description: Parse if-else statement with relational condition
 source: |
   if (x > 5) {
-      y = 10;
+    y = 10;
   } else {
-      y = 0;
+    y = 0;
   }
 expected_ast:
   type: Program
@@ -83,7 +83,7 @@ expected_ast:
 description: Parse if statement with greater-than-or-equal condition
 source: |
   if (x >= 10) {
-      y = 20;
+    y = 20;
   }
 expected_ast:
   type: Program
@@ -116,7 +116,7 @@ expected_ast:
 description: Parse if statement with boolean literal condition
 source: |
   if (true) {
-      x = 10;
+    x = 10;
   }
 expected_ast:
   type: Program
