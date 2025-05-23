@@ -1,0 +1,614 @@
+---
+description: Parse identifier expression
+source: 'variableName;'
+expected_ast:
+  type: 'Program'
+  body:
+    - type: 'Expression'
+      expression:
+        type: 'Identifier'
+        name: 'variableName'
+
+---
+description: Parse multiple identifiers
+source: |
+  first;
+  second;
+expected_ast:
+  type: 'Program'
+  body:
+    - type: 'Expression'
+      expression:
+        type: 'Identifier'
+        name: 'first'
+    - type: 'Expression'
+      expression:
+        type: 'Identifier'
+        name: 'second'
+
+---
+description: Parse identifier starting with keyword
+source: 'letVariable;'
+expected_ast:
+  type: 'Program'
+  body:
+    - type: 'Expression'
+      expression:
+        type: 'Identifier'
+        name: 'letVariable'
+
+---
+description: Parse identifier with numbers
+source: 'user123;'
+expected_ast:
+  type: 'Program'
+  body:
+    - type: 'Expression'
+      expression:
+        type: 'Identifier'
+        name: 'user123'
+
+---
+description: Parse identifier with underscore
+source: 'user_name;'
+expected_ast:
+  type: 'Program'
+  body:
+    - type: 'Expression'
+      expression:
+        type: 'Identifier'
+        name: 'user_name'
+
+---
+description: Parse parenthesized expression
+source: '(42);'
+expected_ast:
+  type: 'Program'
+  body:
+    - type: 'Expression'
+      expression:
+        type: 'NumericLiteral'
+        value: 42
+
+---
+description: Parse nested parenthesized expression
+source: '((42));'
+expected_ast:
+  type: 'Program'
+  body:
+    - type: 'Expression'
+      expression:
+        type: 'NumericLiteral'
+        value: 42
+
+---
+description: Parse parenthesized identifier
+source: '(x);'
+expected_ast:
+  type: 'Program'
+  body:
+    - type: 'Expression'
+      expression:
+        type: 'Identifier'
+        name: 'x'
+
+---
+description: Parse parenthesized binary expression
+source: '(x + y);'
+expected_ast:
+  type: 'Program'
+  body:
+    - type: 'Expression'
+      expression:
+        type: 'Binary'
+        operator: 'Add'
+        left:
+          type: 'Identifier'
+          name: 'x'
+        right:
+          type: 'Identifier'
+          name: 'y'
+
+---
+description: Parse parenthesized complex expression
+source: '(a * b + c / d);'
+expected_ast:
+  type: 'Program'
+  body:
+    - type: 'Expression'
+      expression:
+        type: 'Binary'
+        operator: 'Add'
+        left:
+          type: 'Binary'
+          operator: 'Multiply'
+          left:
+            type: 'Identifier'
+            name: 'a'
+          right:
+            type: 'Identifier'
+            name: 'b'
+        right:
+          type: 'Binary'
+          operator: 'Divide'
+          left:
+            type: 'Identifier'
+            name: 'c'
+          right:
+            type: 'Identifier'
+            name: 'd'
+
+---
+description: Parse this expression
+source: 'this;'
+expected_ast:
+  type: 'Program'
+  body:
+    - type: 'Expression'
+      expression:
+        type: 'This'
+
+---
+description: Parse this with member access
+source: 'this.property;'
+expected_ast:
+  type: 'Program'
+  body:
+    - type: 'Expression'
+      expression:
+        type: 'Member'
+        computed: false
+        object:
+          type: 'This'
+        property:
+          type: 'Identifier'
+          name: 'property'
+
+---
+description: Parse this with computed member access
+source: 'this[property];'
+expected_ast:
+  type: 'Program'
+  body:
+    - type: 'Expression'
+      expression:
+        type: 'Member'
+        computed: true
+        object:
+          type: 'This'
+        property:
+          type: 'Identifier'
+          name: 'property'
+
+---
+description: Parse this with method call
+source: 'this.method();'
+expected_ast:
+  type: 'Program'
+  body:
+    - type: 'Expression'
+      expression:
+        type: 'Call'
+        callee:
+          type: 'Member'
+          computed: false
+          object:
+            type: 'This'
+          property:
+            type: 'Identifier'
+            name: 'method'
+        arguments: []
+
+---
+description: Parse super expression
+source: 'super;'
+expected_ast:
+  type: 'Program'
+  body:
+    - type: 'Expression'
+      expression:
+        type: 'Super'
+
+---
+description: Parse super with member access
+source: 'super.property;'
+expected_ast:
+  type: 'Program'
+  body:
+    - type: 'Expression'
+      expression:
+        type: 'Member'
+        computed: false
+        object:
+          type: 'Super'
+        property:
+          type: 'Identifier'
+          name: 'property'
+
+---
+description: Parse super with method call
+source: 'super.method();'
+expected_ast:
+  type: 'Program'
+  body:
+    - type: 'Expression'
+      expression:
+        type: 'Call'
+        callee:
+          type: 'Member'
+          computed: false
+          object:
+            type: 'Super'
+          property:
+            type: 'Identifier'
+            name: 'method'
+        arguments: []
+
+---
+description: Parse super with arguments
+source: 'super(arg1, arg2);'
+expected_ast:
+  type: 'Program'
+  body:
+    - type: 'Expression'
+      expression:
+        type: 'Call'
+        callee:
+          type: 'Super'
+        arguments:
+          - type: 'Identifier'
+            name: 'arg1'
+          - type: 'Identifier'
+            name: 'arg2'
+
+---
+description: Parse new expression no arguments
+source: 'new Object();'
+expected_ast:
+  type: 'Program'
+  body:
+    - type: 'Expression'
+      expression:
+        type: 'New'
+        callee:
+          type: 'Identifier'
+          name: 'Object'
+        arguments: []
+
+---
+description: Parse new expression with arguments
+source: 'new Point(10, 20);'
+expected_ast:
+  type: 'Program'
+  body:
+    - type: 'Expression'
+      expression:
+        type: 'New'
+        callee:
+          type: 'Identifier'
+          name: 'Point'
+        arguments:
+          - type: 'NumericLiteral'
+            value: 10
+          - type: 'NumericLiteral'
+            value: 20
+
+---
+description: Parse new expression with member access
+source: 'new namespace.Class();'
+expected_ast:
+  type: 'Program'
+  body:
+    - type: 'Expression'
+      expression:
+        type: 'New'
+        callee:
+          type: 'Member'
+          computed: false
+          object:
+            type: 'Identifier'
+            name: 'namespace'
+          property:
+            type: 'Identifier'
+            name: 'Class'
+        arguments: []
+
+---
+description: Parse new expression with computed member access
+source: 'new objects[member]();'
+expected_ast:
+  type: 'Program'
+  body:
+    - type: 'Expression'
+      expression:
+        type: 'New'
+        callee:
+          type: 'Member'
+          computed: true
+          object:
+            type: 'Identifier'
+            name: 'objects'
+          property:
+            type: 'Identifier'
+            name: 'member'
+        arguments: []
+
+---
+description: Parse new expression with complex arguments
+source: 'new Constructor(x + y, obj.method(), 42);'
+expected_ast:
+  type: 'Program'
+  body:
+    - type: 'Expression'
+      expression:
+        type: 'New'
+        callee:
+          type: 'Identifier'
+          name: 'Constructor'
+        arguments:
+          - type: 'Binary'
+            operator: 'Add'
+            left:
+              type: 'Identifier'
+              name: 'x'
+            right:
+              type: 'Identifier'
+              name: 'y'
+          - type: 'Call'
+            callee:
+              type: 'Member'
+              computed: false
+              object:
+                type: 'Identifier'
+                name: 'obj'
+              property:
+                type: 'Identifier'
+                name: 'method'
+            arguments: []
+          - type: 'NumericLiteral'
+            value: 42
+
+---
+description: Parse primary expression in binary context
+source: '42 + (x * y);'
+expected_ast:
+  type: 'Program'
+  body:
+    - type: 'Expression'
+      expression:
+        type: 'Binary'
+        operator: 'Add'
+        left:
+          type: 'NumericLiteral'
+          value: 42
+        right:
+          type: 'Binary'
+          operator: 'Multiply'
+          left:
+            type: 'Identifier'
+            name: 'x'
+          right:
+            type: 'Identifier'
+            name: 'y'
+
+---
+description: Parse primary expression in logical context
+source: '(a > b) && this.isValid();'
+expected_ast:
+  type: 'Program'
+  body:
+    - type: 'Expression'
+      expression:
+        type: 'Logical'
+        operator: 'And'
+        left:
+          type: 'Binary'
+          operator: 'GreaterThan'
+          left:
+            type: 'Identifier'
+            name: 'a'
+          right:
+            type: 'Identifier'
+            name: 'b'
+        right:
+          type: 'Call'
+          callee:
+            type: 'Member'
+            computed: false
+            object:
+              type: 'This'
+            property:
+              type: 'Identifier'
+              name: 'isValid'
+          arguments: []
+
+---
+description: Parse primary expression in assignment
+source: 'result = (a + b) * c;'
+expected_ast:
+  type: 'Program'
+  body:
+    - type: 'Expression'
+      expression:
+        type: 'Assignment'
+        operator: 'Assign'
+        left:
+          type: 'Identifier'
+          name: 'result'
+        right:
+          type: 'Binary'
+          operator: 'Multiply'
+          left:
+            type: 'Binary'
+            operator: 'Add'
+            left:
+              type: 'Identifier'
+              name: 'a'
+            right:
+              type: 'Identifier'
+              name: 'b'
+          right:
+            type: 'Identifier'
+            name: 'c'
+
+---
+description: Parse primary expression in initialization
+source: 'let value: Vector = new Vector(1, 2, 3);'
+expected_ast:
+  type: 'Program'
+  body:
+    - type: 'VariableDeclaration'
+      variables:
+        - type: 'Variable'
+          identifier:
+            type: 'Identifier'
+            name: 'value'
+          type_annotation:
+            type: 'Class'
+            value:
+              name: 'Vector'
+              super_class: null
+          initializer:
+            type: 'New'
+            callee:
+              type: 'Identifier'
+              name: 'Vector'
+            arguments:
+              - type: 'NumericLiteral'
+                value: 1
+              - type: 'NumericLiteral'
+                value: 2
+              - type: 'NumericLiteral'
+                value: 3
+
+---
+description: Parse primary expression in conditional
+source: |
+  if (this.isAdmin()) {
+      return true;
+  }
+expected_ast:
+  type: 'Program'
+  body:
+    - type: 'If'
+      condition:
+        type: 'Call'
+        callee:
+          type: 'Member'
+          computed: false
+          object:
+            type: 'This'
+          property:
+            type: 'Identifier'
+            name: 'isAdmin'
+        arguments: []
+      consequent:
+        type: 'Block'
+        body:
+          - type: 'Return'
+            argument:
+              type: 'BooleanLiteral'
+              value: true
+      alternative: null
+
+---
+description: Parse primary expression in loop
+source: |
+  while (this.hasNext()) {
+      this.process();
+  }
+expected_ast:
+  type: 'Program'
+  body:
+    - type: 'While'
+      condition:
+        type: 'Call'
+        callee:
+          type: 'Member'
+          computed: false
+          object:
+            type: 'This'
+          property:
+            type: 'Identifier'
+            name: 'hasNext'
+        arguments: []
+      body:
+        type: 'Block'
+        body:
+          - type: 'Expression'
+            expression:
+              type: 'Call'
+              callee:
+                type: 'Member'
+                computed: false
+                object:
+                  type: 'This'
+                property:
+                  type: 'Identifier'
+                  name: 'process'
+              arguments: []
+
+---
+description: Parse mixed primary expressions
+source: 'let result: number = (this.calculate(x, y) + super.getValue()) * new Factor(42).apply();'
+expected_ast:
+  type: 'Program'
+  body:
+    - type: 'VariableDeclaration'
+      variables:
+        - type: 'Variable'
+          identifier:
+            type: 'Identifier'
+            name: 'result'
+          type_annotation:
+            type: 'Primitive'
+            value: 'Number'
+          initializer:
+            type: 'Binary'
+            operator: 'Multiply'
+            left:
+              type: 'Binary'
+              operator: 'Add'
+              left:
+                type: 'Call'
+                callee:
+                  type: 'Member'
+                  computed: false
+                  object:
+                    type: 'This'
+                  property:
+                    type: 'Identifier'
+                    name: 'calculate'
+                arguments:
+                  - type: 'Identifier'
+                    name: 'x'
+                  - type: 'Identifier'
+                    name: 'y'
+              right:
+                type: 'Call'
+                callee:
+                  type: 'Member'
+                  computed: false
+                  object:
+                    type: 'Super'
+                  property:
+                    type: 'Identifier'
+                    name: 'getValue'
+                arguments: []
+            right:
+              type: 'Call'
+              callee:
+                type: 'Member'
+                computed: false
+                object:
+                  type: 'New'
+                  callee:
+                    type: 'Identifier'
+                    name: 'Factor'
+                  arguments:
+                    - type: 'NumericLiteral'
+                      value: 42
+                property:
+                  type: 'Identifier'
+                  name: 'apply'
+              arguments: []

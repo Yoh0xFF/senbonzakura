@@ -11,8 +11,18 @@ fn test_expression_parse_binary() {
 }
 
 #[test]
+fn test_expression_parse_left_hand_side() {
+    execute_yaml_test_cases("tests/parser/test_expression_parse_left_hand_side.yaml");
+}
+
+#[test]
 fn test_expression_parse_literals() {
     execute_yaml_test_cases("tests/parser/test_expression_parse_literals.yaml");
+}
+
+#[test]
+fn test_expression_parse_primary() {
+    execute_yaml_test_cases("tests/parser/test_expression_parse_primary.yaml");
 }
 
 #[test]

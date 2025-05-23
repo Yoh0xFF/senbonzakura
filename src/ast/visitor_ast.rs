@@ -29,6 +29,7 @@ pub trait StatementDispatcher {
     ///
     /// Apply a visitor to this statement
     ///
+    #[allow(dead_code)]
     fn accept<V: AstVisitor>(&self, visitor: &mut V) -> Result<V::Output>;
 }
 
@@ -39,6 +40,7 @@ pub trait ExpressionDispatcher {
     ///
     /// Apply a visitor to this expression
     ///
+    #[allow(dead_code)]
     fn accept<V: AstVisitor>(&self, visitor: &mut V) -> Result<V::Output>;
 }
 

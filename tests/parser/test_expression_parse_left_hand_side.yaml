@@ -1,0 +1,841 @@
+---
+description: Parse simple member access with dot notation
+source: 'obj.property;'
+expected_ast:
+  type: 'Program'
+  body:
+    - type: 'Expression'
+      expression:
+        type: 'Member'
+        computed: false
+        object:
+          type: 'Identifier'
+          name: 'obj'
+        property:
+          type: 'Identifier'
+          name: 'property'
+
+---
+description: Parse computed member access with bracket notation
+source: 'obj[property];'
+expected_ast:
+  type: 'Program'
+  body:
+    - type: 'Expression'
+      expression:
+        type: 'Member'
+        computed: true
+        object:
+          type: 'Identifier'
+          name: 'obj'
+        property:
+          type: 'Identifier'
+          name: 'property'
+
+---
+description: Parse computed member access with numeric literal
+source: 'obj[42];'
+expected_ast:
+  type: 'Program'
+  body:
+    - type: 'Expression'
+      expression:
+        type: 'Member'
+        computed: true
+        object:
+          type: 'Identifier'
+          name: 'obj'
+        property:
+          type: 'NumericLiteral'
+          value: 42
+
+---
+description: Parse computed member access with string literal
+source: 'obj["property"];'
+expected_ast:
+  type: 'Program'
+  body:
+    - type: 'Expression'
+      expression:
+        type: 'Member'
+        computed: true
+        object:
+          type: 'Identifier'
+          name: 'obj'
+        property:
+          type: 'StringLiteral'
+          value: 'property'
+
+---
+description: Parse computed member access with binary expression
+source: 'obj[x + y];'
+expected_ast:
+  type: 'Program'
+  body:
+    - type: 'Expression'
+      expression:
+        type: 'Member'
+        computed: true
+        object:
+          type: 'Identifier'
+          name: 'obj'
+        property:
+          type: 'Binary'
+          operator: 'Add'
+          left:
+            type: 'Identifier'
+            name: 'x'
+          right:
+            type: 'Identifier'
+            name: 'y'
+
+---
+description: Parse chained member access with dot notation
+source: 'obj.inner.property;'
+expected_ast:
+  type: 'Program'
+  body:
+    - type: 'Expression'
+      expression:
+        type: 'Member'
+        computed: false
+        object:
+          type: 'Member'
+          computed: false
+          object:
+            type: 'Identifier'
+            name: 'obj'
+          property:
+            type: 'Identifier'
+            name: 'inner'
+        property:
+          type: 'Identifier'
+          name: 'property'
+
+---
+description: Parse chained computed member access
+source: 'obj[x][y];'
+expected_ast:
+  type: 'Program'
+  body:
+    - type: 'Expression'
+      expression:
+        type: 'Member'
+        computed: true
+        object:
+          type: 'Member'
+          computed: true
+          object:
+            type: 'Identifier'
+            name: 'obj'
+          property:
+            type: 'Identifier'
+            name: 'x'
+        property:
+          type: 'Identifier'
+          name: 'y'
+
+---
+description: Parse mixed member access (dot and bracket notation)
+source: 'obj.inner[index].property;'
+expected_ast:
+  type: 'Program'
+  body:
+    - type: 'Expression'
+      expression:
+        type: 'Member'
+        computed: false
+        object:
+          type: 'Member'
+          computed: true
+          object:
+            type: 'Member'
+            computed: false
+            object:
+              type: 'Identifier'
+              name: 'obj'
+            property:
+              type: 'Identifier'
+              name: 'inner'
+          property:
+            type: 'Identifier'
+            name: 'index'
+        property:
+          type: 'Identifier'
+          name: 'property'
+
+---
+description: Parse member access with simple assignment
+source: 'obj.property = 42;'
+expected_ast:
+  type: 'Program'
+  body:
+    - type: 'Expression'
+      expression:
+        type: 'Assignment'
+        operator: 'Assign'
+        left:
+          type: 'Member'
+          computed: false
+          object:
+            type: 'Identifier'
+            name: 'obj'
+          property:
+            type: 'Identifier'
+            name: 'property'
+        right:
+          type: 'NumericLiteral'
+          value: 42
+
+---
+description: Parse computed member access with assignment
+source: 'obj[property] = 42;'
+expected_ast:
+  type: 'Program'
+  body:
+    - type: 'Expression'
+      expression:
+        type: 'Assignment'
+        operator: 'Assign'
+        left:
+          type: 'Member'
+          computed: true
+          object:
+            type: 'Identifier'
+            name: 'obj'
+          property:
+            type: 'Identifier'
+            name: 'property'
+        right:
+          type: 'NumericLiteral'
+          value: 42
+
+---
+description: Parse member access with complex assignment operator
+source: 'obj.property += 42;'
+expected_ast:
+  type: 'Program'
+  body:
+    - type: 'Expression'
+      expression:
+        type: 'Assignment'
+        operator: 'AssignAdd'
+        left:
+          type: 'Member'
+          computed: false
+          object:
+            type: 'Identifier'
+            name: 'obj'
+          property:
+            type: 'Identifier'
+            name: 'property'
+        right:
+          type: 'NumericLiteral'
+          value: 42
+
+---
+description: Parse deep nested member access
+source: 'obj.a.b.c.d.property;'
+expected_ast:
+  type: 'Program'
+  body:
+    - type: 'Expression'
+      expression:
+        type: 'Member'
+        computed: false
+        object:
+          type: 'Member'
+          computed: false
+          object:
+            type: 'Member'
+            computed: false
+            object:
+              type: 'Member'
+              computed: false
+              object:
+                type: 'Member'
+                computed: false
+                object:
+                  type: 'Identifier'
+                  name: 'obj'
+                property:
+                  type: 'Identifier'
+                  name: 'a'
+              property:
+                type: 'Identifier'
+                name: 'b'
+            property:
+              type: 'Identifier'
+              name: 'c'
+          property:
+            type: 'Identifier'
+            name: 'd'
+        property:
+          type: 'Identifier'
+          name: 'property'
+
+---
+description: Parse member access in binary expression
+source: 'obj.value + 10;'
+expected_ast:
+  type: 'Program'
+  body:
+    - type: 'Expression'
+      expression:
+        type: 'Binary'
+        operator: 'Add'
+        left:
+          type: 'Member'
+          computed: false
+          object:
+            type: 'Identifier'
+            name: 'obj'
+          property:
+            type: 'Identifier'
+            name: 'value'
+        right:
+          type: 'NumericLiteral'
+          value: 10
+
+---
+description: Parse member access in logical expression
+source: 'obj.valid && hasPermission;'
+expected_ast:
+  type: 'Program'
+  body:
+    - type: 'Expression'
+      expression:
+        type: 'Logical'
+        operator: 'And'
+        left:
+          type: 'Member'
+          computed: false
+          object:
+            type: 'Identifier'
+            name: 'obj'
+          property:
+            type: 'Identifier'
+            name: 'valid'
+        right:
+          type: 'Identifier'
+          name: 'hasPermission'
+
+---
+description: Parse variable declaration with member access
+source: 'let value: string = obj.property;'
+expected_ast:
+  type: 'Program'
+  body:
+    - type: 'VariableDeclaration'
+      variables:
+        - type: 'Variable'
+          identifier:
+            type: 'Identifier'
+            name: 'value'
+          type_annotation:
+            type: 'Primitive'
+            value: 'String'
+          initializer:
+            type: 'Member'
+            computed: false
+            object:
+              type: 'Identifier'
+              name: 'obj'
+            property:
+              type: 'Identifier'
+              name: 'property'
+
+---
+description: Parse if statement with member access condition
+source: |
+  if (user.isAdmin) {
+    permission.granted = true;
+  }
+expected_ast:
+  type: 'Program'
+  body:
+    - type: 'If'
+      condition:
+        type: 'Member'
+        computed: false
+        object:
+          type: 'Identifier'
+          name: 'user'
+        property:
+          type: 'Identifier'
+          name: 'isAdmin'
+      consequent:
+        type: 'Block'
+        body:
+          - type: 'Expression'
+            expression:
+              type: 'Assignment'
+              operator: 'Assign'
+              left:
+                type: 'Member'
+                computed: false
+                object:
+                  type: 'Identifier'
+                  name: 'permission'
+                property:
+                  type: 'Identifier'
+                  name: 'granted'
+              right:
+                type: 'BooleanLiteral'
+                value: true
+
+---
+description: Parse if statement with computed member access
+source: |
+  if (permissions[role]) {
+    access[level] = true;
+  }
+expected_ast:
+  type: 'Program'
+  body:
+    - type: 'If'
+      condition:
+        type: 'Member'
+        computed: true
+        object:
+          type: 'Identifier'
+          name: 'permissions'
+        property:
+          type: 'Identifier'
+          name: 'role'
+      consequent:
+        type: 'Block'
+        body:
+          - type: 'Expression'
+            expression:
+              type: 'Assignment'
+              operator: 'Assign'
+              left:
+                type: 'Member'
+                computed: true
+                object:
+                  type: 'Identifier'
+                  name: 'access'
+                property:
+                  type: 'Identifier'
+                  name: 'level'
+              right:
+                type: 'BooleanLiteral'
+                value: true
+
+---
+description: Parse complex computed member access with arithmetic
+source: 'matrix[i * 10 + j];'
+expected_ast:
+  type: 'Program'
+  body:
+    - type: 'Expression'
+      expression:
+        type: 'Member'
+        computed: true
+        object:
+          type: 'Identifier'
+          name: 'matrix'
+        property:
+          type: 'Binary'
+          operator: 'Add'
+          left:
+            type: 'Binary'
+            operator: 'Multiply'
+            left:
+              type: 'Identifier'
+              name: 'i'
+            right:
+              type: 'NumericLiteral'
+              value: 10
+          right:
+            type: 'Identifier'
+            name: 'j'
+
+---
+description: Parse member access with unary NOT operation
+source: '!obj.enabled;'
+expected_ast:
+  type: 'Program'
+  body:
+    - type: 'Expression'
+      expression:
+        type: 'Unary'
+        operator: 'Not'
+        right:
+          type: 'Member'
+          computed: false
+          object:
+            type: 'Identifier'
+            name: 'obj'
+          property:
+            type: 'Identifier'
+            name: 'enabled'
+
+---
+description: Parse simple function call with no arguments
+source: 'foo();'
+expected_ast:
+  type: 'Program'
+  body:
+    - type: 'Expression'
+      expression:
+        type: 'Call'
+        callee:
+          type: 'Identifier'
+          name: 'foo'
+        arguments: []
+
+---
+description: Parse function call with single argument
+source: 'foo(42);'
+expected_ast:
+  type: 'Program'
+  body:
+    - type: 'Expression'
+      expression:
+        type: 'Call'
+        callee:
+          type: 'Identifier'
+          name: 'foo'
+        arguments:
+          - type: 'NumericLiteral'
+            value: 42
+
+---
+description: Parse function call with multiple arguments
+source: 'foo(x, y, 42);'
+expected_ast:
+  type: 'Program'
+  body:
+    - type: 'Expression'
+      expression:
+        type: 'Call'
+        callee:
+          type: 'Identifier'
+          name: 'foo'
+        arguments:
+          - type: 'Identifier'
+            name: 'x'
+          - type: 'Identifier'
+            name: 'y'
+          - type: 'NumericLiteral'
+            value: 42
+
+---
+description: Parse function call with expression argument
+source: 'foo(x + y);'
+expected_ast:
+  type: 'Program'
+  body:
+    - type: 'Expression'
+      expression:
+        type: 'Call'
+        callee:
+          type: 'Identifier'
+          name: 'foo'
+        arguments:
+          - type: 'Binary'
+            operator: 'Add'
+            left:
+              type: 'Identifier'
+              name: 'x'
+            right:
+              type: 'Identifier'
+              name: 'y'
+
+---
+description: Parse chained function calls
+source: 'foo()();'
+expected_ast:
+  type: 'Program'
+  body:
+    - type: 'Expression'
+      expression:
+        type: 'Call'
+        callee:
+          type: 'Call'
+          callee:
+            type: 'Identifier'
+            name: 'foo'
+          arguments: []
+        arguments: []
+
+---
+description: Parse method call on object
+source: 'obj.method();'
+expected_ast:
+  type: 'Program'
+  body:
+    - type: 'Expression'
+      expression:
+        type: 'Call'
+        callee:
+          type: 'Member'
+          computed: false
+          object:
+            type: 'Identifier'
+            name: 'obj'
+          property:
+            type: 'Identifier'
+            name: 'method'
+        arguments: []
+
+---
+description: Parse method call using computed member access
+source: "obj['method']();"
+expected_ast:
+  type: 'Program'
+  body:
+    - type: 'Expression'
+      expression:
+        type: 'Call'
+        callee:
+          type: 'Member'
+          computed: true
+          object:
+            type: 'Identifier'
+            name: 'obj'
+          property:
+            type: 'StringLiteral'
+            value: 'method'
+        arguments: []
+
+---
+description: Parse complex nested function calls
+source: 'foo(bar(), baz(42));'
+expected_ast:
+  type: 'Program'
+  body:
+    - type: 'Expression'
+      expression:
+        type: 'Call'
+        callee:
+          type: 'Identifier'
+          name: 'foo'
+        arguments:
+          - type: 'Call'
+            callee:
+              type: 'Identifier'
+              name: 'bar'
+            arguments: []
+          - type: 'Call'
+            callee:
+              type: 'Identifier'
+              name: 'baz'
+            arguments:
+              - type: 'NumericLiteral'
+                value: 42
+
+---
+description: Parse function calls in binary expression
+source: 'foo() + bar();'
+expected_ast:
+  type: 'Program'
+  body:
+    - type: 'Expression'
+      expression:
+        type: 'Binary'
+        operator: 'Add'
+        left:
+          type: 'Call'
+          callee:
+            type: 'Identifier'
+            name: 'foo'
+          arguments: []
+        right:
+          type: 'Call'
+          callee:
+            type: 'Identifier'
+            name: 'bar'
+          arguments: []
+
+---
+description: Parse function calls in logical expression
+source: 'isValid() && hasPermission();'
+expected_ast:
+  type: 'Program'
+  body:
+    - type: 'Expression'
+      expression:
+        type: 'Logical'
+        operator: 'And'
+        left:
+          type: 'Call'
+          callee:
+            type: 'Identifier'
+            name: 'isValid'
+          arguments: []
+        right:
+          type: 'Call'
+          callee:
+            type: 'Identifier'
+            name: 'hasPermission'
+          arguments: []
+
+---
+description: Parse function call in assignment
+source: 'result = getValue();'
+expected_ast:
+  type: 'Program'
+  body:
+    - type: 'Expression'
+      expression:
+        type: 'Assignment'
+        operator: 'Assign'
+        left:
+          type: 'Identifier'
+          name: 'result'
+        right:
+          type: 'Call'
+          callee:
+            type: 'Identifier'
+            name: 'getValue'
+          arguments: []
+
+---
+description: Parse function call with complex nested expressions as arguments
+source: 'calculate(x + y, z * 2, obj.property);'
+expected_ast:
+  type: 'Program'
+  body:
+    - type: 'Expression'
+      expression:
+        type: 'Call'
+        callee:
+          type: 'Identifier'
+          name: 'calculate'
+        arguments:
+          - type: 'Binary'
+            operator: 'Add'
+            left:
+              type: 'Identifier'
+              name: 'x'
+            right:
+              type: 'Identifier'
+              name: 'y'
+          - type: 'Binary'
+            operator: 'Multiply'
+            left:
+              type: 'Identifier'
+              name: 'z'
+            right:
+              type: 'NumericLiteral'
+              value: 2
+          - type: 'Member'
+            computed: false
+            object:
+              type: 'Identifier'
+              name: 'obj'
+            property:
+              type: 'Identifier'
+              name: 'property'
+
+---
+description: Parse variable declaration with function call
+source: 'let result: string = getValue();'
+expected_ast:
+  type: 'Program'
+  body:
+    - type: 'VariableDeclaration'
+      variables:
+        - type: 'Variable'
+          identifier:
+            type: 'Identifier'
+            name: 'result'
+          type_annotation:
+            type: 'Primitive'
+            value: 'String'
+          initializer:
+            type: 'Call'
+            callee:
+              type: 'Identifier'
+              name: 'getValue'
+            arguments: []
+
+---
+description: Parse if statement with function call condition
+source: |
+  if (isAdmin()) {
+      grantAccess();
+  }
+expected_ast:
+  type: 'Program'
+  body:
+    - type: 'If'
+      condition:
+        type: 'Call'
+        callee:
+          type: 'Identifier'
+          name: 'isAdmin'
+        arguments: []
+      consequent:
+        type: 'Block'
+        body:
+          - type: 'Expression'
+            expression:
+              type: 'Call'
+              callee:
+                type: 'Identifier'
+                name: 'grantAccess'
+              arguments: []
+
+---
+description: Parse function call with boolean argument
+source: 'setEnabled(true);'
+expected_ast:
+  type: 'Program'
+  body:
+    - type: 'Expression'
+      expression:
+        type: 'Call'
+        callee:
+          type: 'Identifier'
+          name: 'setEnabled'
+        arguments:
+          - type: 'BooleanLiteral'
+            value: true
+
+---
+description: Parse function call with string argument
+source: 'log("Hello, world!");'
+expected_ast:
+  type: 'Program'
+  body:
+    - type: 'Expression'
+      expression:
+        type: 'Call'
+        callee:
+          type: 'Identifier'
+          name: 'log'
+        arguments:
+          - type: 'StringLiteral'
+            value: 'Hello, world!'
+# TODO
+# ---
+# description: Parse member expression on call result
+# source: 'foo().property;'
+# expected_ast:
+#   type: 'Program'
+#   body: []
+
+# ---
+# description: Parse computed member expression on call result
+# source: 'foo()[index];'
+# expected_ast:
+#   type: 'Program'
+#   body: []
+
+# ---
+# description: Parse member access chain with call
+# source: 'obj.getInner().property;'
+# expected_ast:
+#   type: 'Program'
+#   body: []
+
+# ---
+# description: Parse complex call chain
+# source: 'a().b().c();'
+# expected_ast:
+#   type: 'Program'
+#   body: []
