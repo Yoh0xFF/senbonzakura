@@ -1,0 +1,876 @@
+---
+description: Parse simple class declaration
+source: |
+  class Person {
+      // Empty class
+  }
+expected_ast:
+  type: Program
+  body:
+    - type: ClassDeclaration
+      name:
+        type: Identifier
+        name: Person
+      super_class: null
+      body:
+        type: Block
+        body: []
+
+---
+description: Parse class with methods
+source: |
+  class Person {
+      def getName() {
+          return "John";
+      }
+
+      def getAge() {
+          return 30;
+      }
+  }
+expected_ast:
+  type: Program
+  body:
+    - type: ClassDeclaration
+      name:
+        type: Identifier
+        name: Person
+      super_class: null
+      body:
+        type: Block
+        body:
+          - type: FunctionDeclaration
+            name:
+              type: Identifier
+              name: getName
+            parameters: []
+            return_type:
+              type: Void
+            body:
+              type: Block
+              body:
+                - type: Return
+                  argument:
+                    type: StringLiteral
+                    value: John
+          - type: FunctionDeclaration
+            name:
+              type: Identifier
+              name: getAge
+            parameters: []
+            return_type:
+              type: Void
+            body:
+              type: Block
+              body:
+                - type: Return
+                  argument:
+                    type: NumericLiteral
+                    value: 30
+
+---
+description: Parse class with inheritance
+source: |
+  class Student extends Person {
+      def getGrade() {
+          return "A";
+      }
+  }
+expected_ast:
+  type: Program
+  body:
+    - type: ClassDeclaration
+      name:
+        type: Identifier
+        name: Student
+      super_class:
+        type: Identifier
+        name: Person
+      body:
+        type: Block
+        body:
+          - type: FunctionDeclaration
+            name:
+              type: Identifier
+              name: getGrade
+            parameters: []
+            return_type:
+              type: Void
+            body:
+              type: Block
+              body:
+                - type: Return
+                  argument:
+                    type: StringLiteral
+                    value: A
+
+---
+description: Parse class with constructor-like method
+source: |
+  class Person {
+      def constructor(name: string, age: number) {
+          this.name = name;
+          this.age = age;
+      }
+
+      def getName() {
+          return this.name;
+      }
+
+      def getAge() {
+          return this.age;
+      }
+  }
+expected_ast:
+  type: Program
+  body:
+    - type: ClassDeclaration
+      name:
+        type: Identifier
+        name: Person
+      super_class: null
+      body:
+        type: Block
+        body:
+          - type: FunctionDeclaration
+            name:
+              type: Identifier
+              name: constructor
+            parameters:
+              - - type: Identifier
+                  name: name
+                - type: Primitive
+                  value: String
+              - - type: Identifier
+                  name: age
+                - type: Primitive
+                  value: Number
+            return_type:
+              type: Void
+            body:
+              type: Block
+              body:
+                - type: Expression
+                  expression:
+                    type: Assignment
+                    operator: Assign
+                    left:
+                      type: Member
+                      computed: false
+                      object:
+                        type: This
+                      property:
+                        type: Identifier
+                        name: name
+                    right:
+                      type: Identifier
+                      name: name
+                - type: Expression
+                  expression:
+                    type: Assignment
+                    operator: Assign
+                    left:
+                      type: Member
+                      computed: false
+                      object:
+                        type: This
+                      property:
+                        type: Identifier
+                        name: age
+                    right:
+                      type: Identifier
+                      name: age
+          - type: FunctionDeclaration
+            name:
+              type: Identifier
+              name: getName
+            parameters: []
+            return_type:
+              type: Void
+            body:
+              type: Block
+              body:
+                - type: Return
+                  argument:
+                    type: Member
+                    computed: false
+                    object:
+                      type: This
+                    property:
+                      type: Identifier
+                      name: name
+          - type: FunctionDeclaration
+            name:
+              type: Identifier
+              name: getAge
+            parameters: []
+            return_type:
+              type: Void
+            body:
+              type: Block
+              body:
+                - type: Return
+                  argument:
+                    type: Member
+                    computed: false
+                    object:
+                      type: This
+                    property:
+                      type: Identifier
+                      name: age
+
+---
+description: Parse class with instance variables
+source: |
+  class Rectangle {
+      def constructor(width: number, height: number) {
+          this.width = width;
+          this.height = height;
+      }
+
+      def getArea(): number {
+          return this.width * this.height;
+      }
+  }
+expected_ast:
+  type: Program
+  body:
+    - type: ClassDeclaration
+      name:
+        type: Identifier
+        name: Rectangle
+      super_class: null
+      body:
+        type: Block
+        body:
+          - type: FunctionDeclaration
+            name:
+              type: Identifier
+              name: constructor
+            parameters:
+              - - type: Identifier
+                  name: width
+                - type: Primitive
+                  value: Number
+              - - type: Identifier
+                  name: height
+                - type: Primitive
+                  value: Number
+            return_type:
+              type: Void
+            body:
+              type: Block
+              body:
+                - type: Expression
+                  expression:
+                    type: Assignment
+                    operator: Assign
+                    left:
+                      type: Member
+                      computed: false
+                      object:
+                        type: This
+                      property:
+                        type: Identifier
+                        name: width
+                    right:
+                      type: Identifier
+                      name: width
+                - type: Expression
+                  expression:
+                    type: Assignment
+                    operator: Assign
+                    left:
+                      type: Member
+                      computed: false
+                      object:
+                        type: This
+                      property:
+                        type: Identifier
+                        name: height
+                    right:
+                      type: Identifier
+                      name: height
+          - type: FunctionDeclaration
+            name:
+              type: Identifier
+              name: getArea
+            parameters: []
+            return_type:
+              type: Primitive
+              value: Number
+            body:
+              type: Block
+              body:
+                - type: Return
+                  argument:
+                    type: Binary
+                    operator: Multiply
+                    left:
+                      type: Member
+                      computed: false
+                      object:
+                        type: This
+                      property:
+                        type: Identifier
+                        name: width
+                    right:
+                      type: Member
+                      computed: false
+                      object:
+                        type: This
+                      property:
+                        type: Identifier
+                        name: height
+
+---
+description: Parse class with super calls
+source: |
+  class Child extends Parent {
+      def constructor(name: string, age: number) {
+          super(name);
+          this.age = age;
+      }
+
+      def describe(): string {
+          return super.getName() + " is " + this.age + " years old";
+      }
+  }
+expected_ast:
+  type: Program
+  body:
+    - type: ClassDeclaration
+      name:
+        type: Identifier
+        name: Child
+      super_class:
+        type: Identifier
+        name: Parent
+      body:
+        type: Block
+        body:
+          - type: FunctionDeclaration
+            name:
+              type: Identifier
+              name: constructor
+            parameters:
+              - - type: Identifier
+                  name: name
+                - type: Primitive
+                  value: String
+              - - type: Identifier
+                  name: age
+                - type: Primitive
+                  value: Number
+            return_type:
+              type: Void
+            body:
+              type: Block
+              body:
+                - type: Expression
+                  expression:
+                    type: Call
+                    callee:
+                      type: Super
+                    arguments:
+                      - type: Identifier
+                        name: name
+                - type: Expression
+                  expression:
+                    type: Assignment
+                    operator: Assign
+                    left:
+                      type: Member
+                      computed: false
+                      object:
+                        type: This
+                      property:
+                        type: Identifier
+                        name: age
+                    right:
+                      type: Identifier
+                      name: age
+          - type: FunctionDeclaration
+            name:
+              type: Identifier
+              name: describe
+            parameters: []
+            return_type:
+              type: Primitive
+              value: String
+            body:
+              type: Block
+              body:
+                - type: Return
+                  argument:
+                    type: Binary
+                    operator: Add
+                    left:
+                      type: Binary
+                      operator: Add
+                      left:
+                        type: Binary
+                        operator: Add
+                        left:
+                          type: Call
+                          callee:
+                            type: Member
+                            computed: false
+                            object:
+                              type: Super
+                            property:
+                              type: Identifier
+                              name: getName
+                          arguments: []
+                        right:
+                          type: StringLiteral
+                          value: ' is '
+                      right:
+                        type: Member
+                        computed: false
+                        object:
+                          type: This
+                        property:
+                          type: Identifier
+                          name: age
+                    right:
+                      type: StringLiteral
+                      value: ' years old'
+
+---
+description: Parse multiple classes
+source: |
+  class Animal {
+      def makeSound(): string {
+          return "Generic animal sound";
+      }
+  }
+
+  class Dog extends Animal {
+      def makeSound(): string {
+          return "Woof";
+      }
+  }
+expected_ast:
+  type: Program
+  body:
+    - type: ClassDeclaration
+      name:
+        type: Identifier
+        name: Animal
+      super_class: null
+      body:
+        type: Block
+        body:
+          - type: FunctionDeclaration
+            name:
+              type: Identifier
+              name: makeSound
+            parameters: []
+            return_type:
+              type: Primitive
+              value: String
+            body:
+              type: Block
+              body:
+                - type: Return
+                  argument:
+                    type: StringLiteral
+                    value: Generic animal sound
+    - type: ClassDeclaration
+      name:
+        type: Identifier
+        name: Dog
+      super_class:
+        type: Identifier
+        name: Animal
+      body:
+        type: Block
+        body:
+          - type: FunctionDeclaration
+            name:
+              type: Identifier
+              name: makeSound
+            parameters: []
+            return_type:
+              type: Primitive
+              value: String
+            body:
+              type: Block
+              body:
+                - type: Return
+                  argument:
+                    type: StringLiteral
+                    value: Woof
+
+---
+description: Parse class with method using if statement
+source: |
+  class Calculator {
+      def max(a: number, b: number): number {
+          if (a > b) {
+              return a;
+          } else {
+              return b;
+          }
+      }
+  }
+expected_ast:
+  type: Program
+  body:
+    - type: ClassDeclaration
+      name:
+        type: Identifier
+        name: Calculator
+      super_class: null
+      body:
+        type: Block
+        body:
+          - type: FunctionDeclaration
+            name:
+              type: Identifier
+              name: max
+            parameters:
+              - - type: Identifier
+                  name: a
+                - type: Primitive
+                  value: Number
+              - - type: Identifier
+                  name: b
+                - type: Primitive
+                  value: Number
+            return_type:
+              type: Primitive
+              value: Number
+            body:
+              type: Block
+              body:
+                - type: If
+                  condition:
+                    type: Binary
+                    operator: GreaterThan
+                    left:
+                      type: Identifier
+                      name: a
+                    right:
+                      type: Identifier
+                      name: b
+                  consequent:
+                    type: Block
+                    body:
+                      - type: Return
+                        argument:
+                          type: Identifier
+                          name: a
+                  alternative:
+                    type: Block
+                    body:
+                      - type: Return
+                        argument:
+                          type: Identifier
+                          name: b
+
+---
+description: Parse class with method using loops
+source: |
+  class Summation {
+      def sum(n: number): number {
+          let result: number = 0;
+          for (let i: number = 1; i <= n; i = i + 1) {
+              result = result + i;
+          }
+          return result;
+      }
+  }
+expected_ast:
+  type: Program
+  body:
+    - type: ClassDeclaration
+      name:
+        type: Identifier
+        name: Summation
+      super_class: null
+      body:
+        type: Block
+        body:
+          - type: FunctionDeclaration
+            name:
+              type: Identifier
+              name: sum
+            parameters:
+              - - type: Identifier
+                  name: n
+                - type: Primitive
+                  value: Number
+            return_type:
+              type: Primitive
+              value: Number
+            body:
+              type: Block
+              body:
+                - type: VariableDeclaration
+                  variables:
+                    - type: Variable
+                      identifier:
+                        type: Identifier
+                        name: result
+                      type_annotation:
+                        type: Primitive
+                        value: Number
+                      initializer:
+                        type: NumericLiteral
+                        value: 0
+                - type: For
+                  initializer:
+                    type: VariableDeclaration
+                    variables:
+                      - type: Variable
+                        identifier:
+                          type: Identifier
+                          name: i
+                        type_annotation:
+                          type: Primitive
+                          value: Number
+                        initializer:
+                          type: NumericLiteral
+                          value: 1
+                  condition:
+                    type: Binary
+                    operator: LessThanOrEqualTo
+                    left:
+                      type: Identifier
+                      name: i
+                    right:
+                      type: Identifier
+                      name: n
+                  increment:
+                    type: Assignment
+                    operator: Assign
+                    left:
+                      type: Identifier
+                      name: i
+                    right:
+                      type: Binary
+                      operator: Add
+                      left:
+                        type: Identifier
+                        name: i
+                      right:
+                        type: NumericLiteral
+                        value: 1
+                  body:
+                    type: Block
+                    body:
+                      - type: Expression
+                        expression:
+                          type: Assignment
+                          operator: Assign
+                          left:
+                            type: Identifier
+                            name: result
+                          right:
+                            type: Binary
+                            operator: Add
+                            left:
+                              type: Identifier
+                              name: result
+                            right:
+                              type: Identifier
+                              name: i
+                - type: Return
+                  argument:
+                    type: Identifier
+                    name: result
+
+---
+description: Parse class with method using function calls
+source: |
+  class MathUtils {
+      def factorial(n: number): number {
+          if (n <= 1) {
+              return 1;
+          }
+          return n * this.factorial(n - 1);
+      }
+  }
+expected_ast:
+  type: Program
+  body:
+    - type: ClassDeclaration
+      name:
+        type: Identifier
+        name: MathUtils
+      super_class: null
+      body:
+        type: Block
+        body:
+          - type: FunctionDeclaration
+            name:
+              type: Identifier
+              name: factorial
+            parameters:
+              - - type: Identifier
+                  name: n
+                - type: Primitive
+                  value: Number
+            return_type:
+              type: Primitive
+              value: Number
+            body:
+              type: Block
+              body:
+                - type: If
+                  condition:
+                    type: Binary
+                    operator: LessThanOrEqualTo
+                    left:
+                      type: Identifier
+                      name: n
+                    right:
+                      type: NumericLiteral
+                      value: 1
+                  consequent:
+                    type: Block
+                    body:
+                      - type: Return
+                        argument:
+                          type: NumericLiteral
+                          value: 1
+                  alternative: null
+                - type: Return
+                  argument:
+                    type: Binary
+                    operator: Multiply
+                    left:
+                      type: Identifier
+                      name: n
+                    right:
+                      type: Call
+                      callee:
+                        type: Member
+                        computed: false
+                        object:
+                          type: This
+                        property:
+                          type: Identifier
+                          name: factorial
+                      arguments:
+                        - type: Binary
+                          operator: Subtract
+                          left:
+                            type: Identifier
+                            name: n
+                          right:
+                            type: NumericLiteral
+                            value: 1
+
+---
+description: Parse class instantiation
+source: |
+  class Point {
+      def constructor(x: number, y: number) {
+          this.x = x;
+          this.y = y;
+      }
+  }
+
+  let p: Point = new Point(10, 20);
+expected_ast:
+  type: Program
+  body:
+    - type: ClassDeclaration
+      name:
+        type: Identifier
+        name: Point
+      super_class: null
+      body:
+        type: Block
+        body:
+          - type: FunctionDeclaration
+            name:
+              type: Identifier
+              name: constructor
+            parameters:
+              - - type: Identifier
+                  name: x
+                - type: Primitive
+                  value: Number
+              - - type: Identifier
+                  name: y
+                - type: Primitive
+                  value: Number
+            return_type:
+              type: Void
+            body:
+              type: Block
+              body:
+                - type: Expression
+                  expression:
+                    type: Assignment
+                    operator: Assign
+                    left:
+                      type: Member
+                      computed: false
+                      object:
+                        type: This
+                      property:
+                        type: Identifier
+                        name: x
+                    right:
+                      type: Identifier
+                      name: x
+                - type: Expression
+                  expression:
+                    type: Assignment
+                    operator: Assign
+                    left:
+                      type: Member
+                      computed: false
+                      object:
+                        type: This
+                      property:
+                        type: Identifier
+                        name: y
+                    right:
+                      type: Identifier
+                      name: y
+    - type: VariableDeclaration
+      variables:
+        - type: Variable
+          identifier:
+            type: Identifier
+            name: p
+          type_annotation:
+            type: Class
+            value:
+              name: Point
+              super_class: null
+          initializer:
+            type: New
+            callee:
+              type: Identifier
+              name: Point
+            arguments:
+              - type: NumericLiteral
+                value: 10
+              - type: NumericLiteral
+                value: 20
+
+---
+description: Parse empty class with extends
+source: |
+  class Empty extends Base {
+  }
+expected_ast:
+  type: Program
+  body:
+    - type: ClassDeclaration
+      name:
+        type: Identifier
+        name: Empty
+      super_class:
+        type: Identifier
+        name: Base
+      body:
+        type: Block
+        body: []

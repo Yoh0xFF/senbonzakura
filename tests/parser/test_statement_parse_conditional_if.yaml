@@ -1,0 +1,140 @@
+---
+description: Parse simple if statement with relational condition
+source: |
+  if (x > 5) {
+      y = 10;
+  }
+expected_ast:
+  type: Program
+  body:
+    - type: If
+      condition:
+        type: Binary
+        operator: GreaterThan
+        left:
+          type: Identifier
+          name: x
+        right:
+          type: NumericLiteral
+          value: 5
+      consequent:
+        type: Block
+        body:
+          - type: Expression
+            expression:
+              type: Assignment
+              operator: Assign
+              left:
+                type: Identifier
+                name: y
+              right:
+                type: NumericLiteral
+                value: 10
+
+---
+description: Parse if-else statement with relational condition
+source: |
+  if (x > 5) {
+      y = 10;
+  } else {
+      y = 0;
+  }
+expected_ast:
+  type: Program
+  body:
+    - type: If
+      condition:
+        type: Binary
+        operator: GreaterThan
+        left:
+          type: Identifier
+          name: x
+        right:
+          type: NumericLiteral
+          value: 5
+      consequent:
+        type: Block
+        body:
+          - type: Expression
+            expression:
+              type: Assignment
+              operator: Assign
+              left:
+                type: Identifier
+                name: y
+              right:
+                type: NumericLiteral
+                value: 10
+      alternative:
+        type: Block
+        body:
+          - type: Expression
+            expression:
+              type: Assignment
+              operator: Assign
+              left:
+                type: Identifier
+                name: y
+              right:
+                type: NumericLiteral
+                value: 0
+
+---
+description: Parse if statement with greater-than-or-equal condition
+source: |
+  if (x >= 10) {
+      y = 20;
+  }
+expected_ast:
+  type: Program
+  body:
+    - type: If
+      condition:
+        type: Binary
+        operator: GreaterThanOrEqualTo
+        left:
+          type: Identifier
+          name: x
+        right:
+          type: NumericLiteral
+          value: 10
+      consequent:
+        type: Block
+        body:
+          - type: Expression
+            expression:
+              type: Assignment
+              operator: Assign
+              left:
+                type: Identifier
+                name: y
+              right:
+                type: NumericLiteral
+                value: 20
+
+---
+description: Parse if statement with boolean literal condition
+source: |
+  if (true) {
+      x = 10;
+  }
+expected_ast:
+  type: Program
+  body:
+    - type: If
+      condition:
+        type: BooleanLiteral
+        value: true
+      consequent:
+        type: Block
+        body:
+          - type: Expression
+            expression:
+              type: Assignment
+              operator: Assign
+              left:
+                type: Identifier
+                name: x
+              right:
+                type: NumericLiteral
+                value: 10

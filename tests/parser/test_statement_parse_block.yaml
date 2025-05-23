@@ -1,0 +1,69 @@
+---
+description: Parse test block statement with string and number expressions
+source: |
+  {
+      "Hello";
+      17;
+  }
+expected_ast:
+  type: Program
+  body:
+    - type: Block
+      body:
+        - type: Expression
+          expression:
+            type: StringLiteral
+            value: 'Hello'
+        - type: Expression
+          expression:
+            type: NumericLiteral
+            value: 17
+
+---
+description: Parse test empty block statement
+source: |
+  {
+  }
+expected_ast:
+  type: Program
+  body:
+    - type: Block
+      body: []
+
+---
+description: Parse test nested block statement
+source: |
+  {
+      "Hello";
+      {
+          17;
+      }
+  }
+expected_ast:
+  type: Program
+  body:
+    - type: Block
+      body:
+        - type: Expression
+          expression:
+            type: StringLiteral
+            value: 'Hello'
+        - type: Block
+          body:
+            - type: Expression
+              expression:
+                type: NumericLiteral
+                value: 17
+
+---
+description: Parse test empty statement in block
+source: |
+  {
+      ;
+  }
+expected_ast:
+  type: Program
+  body:
+    - type: Block
+      body:
+        - type: Empty

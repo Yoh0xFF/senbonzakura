@@ -5,6 +5,7 @@ mod expression_parse_literals;
 mod expression_parse_primary;
 mod expression_parse_relational_and_logical;
 mod expression_parse_unary;
+mod internal_util;
 mod root;
 mod statement_parse_block;
 mod statement_parse_class_declaration;
@@ -14,6 +15,5 @@ mod statement_parse_function_declaration;
 mod statement_parse_loop;
 mod statement_parse_variable_declaration;
 mod type_parse_annotations;
-mod internal_util;
 
 pub(crate) use root::{parse_root_expression, parse_root_statement};

@@ -86,10 +86,7 @@ impl<'a> Parser<'a> {
     /// Check if the expression is valid assignment target
     ///
     #[allow(dead_code)]
-    pub(super) fn is_expression_valid_assignment_target(
-        &self,
-        expression: &ExpressionRef,
-    ) -> bool {
+    pub(super) fn is_expression_valid_assignment_target(&self, expression: &ExpressionRef) -> bool {
         matches!(
             expression.as_ref(),
             Expression::Identifier { .. } | Expression::Member { .. }

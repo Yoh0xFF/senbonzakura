@@ -24,13 +24,14 @@ fn main() {
 
     let mut parser = Parser::new(
         r#"
-        def add(a: number, b: number): number {
-            return a + b;
-        }
+        class Point {
+      def constructor(x: number, y: number) {
+          this.x = x;
+          this.y = y;
+      }
+  }
 
-        def subtract(a: number, b: number): number {
-            return a - b;
-        }
+  let p: Point = new Point(10, 20);
         "#,
     );
     let ast = parse_root_statement(&mut parser);
