@@ -1,0 +1,15 @@
+---
+description: 'Test number token parsing'
+source: '12'
+expected_tokens:
+  - token_type: Number
+    i: 0
+    j: 2
+
+---
+description: 'Test number token parsing with leading whitespace'
+source: '    12'
+expected_tokens:
+  - token_type: Number
+    i: 4
+    j: 6
