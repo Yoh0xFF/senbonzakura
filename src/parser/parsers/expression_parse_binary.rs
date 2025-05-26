@@ -13,11 +13,14 @@ use crate::parser::Parser;
 pub(super) fn parse_additive_expression(parser: &mut Parser) -> ExpressionRef {
     parse_binary_expression(
         parser,
-        TokenType::AdditiveOperator,
+        &[
+            TokenType::AdditivePlusOperator,
+            TokenType::AdditiveMinusOperator,
+        ],
         |parser| parse_factor_expression(parser),
         |op| match op {
-            "+" => BinaryOperator::Add,
-            "-" => BinaryOperator::Subtract,
+            TokenType::AdditivePlusOperator => BinaryOperator::Add,
+            TokenType::AdditiveMinusOperator => BinaryOperator::Subtract,
             _ => panic!("Unknown additive operator {}", op),
         },
     )
@@ -32,11 +35,14 @@ pub(super) fn parse_additive_expression(parser: &mut Parser) -> ExpressionRef {
 pub(super) fn parse_factor_expression(parser: &mut Parser) -> ExpressionRef {
     parse_binary_expression(
         parser,
-        TokenType::FactorOperator,
+        &[
+            TokenType::FactorMultiplicationOperator,
+            TokenType::FactorDivisionOperator,
+        ],
         |parser| parse_unary_expression(parser),
         |op| match op {
-            "*" => BinaryOperator::Multiply,
-            "/" => BinaryOperator::Divide,
+            TokenType::FactorMultiplicationOperator => BinaryOperator::Multiply,
+            TokenType::FactorDivisionOperator => BinaryOperator::Divide,
             _ => panic!("Unknown factor operator {}", op),
         },
     )

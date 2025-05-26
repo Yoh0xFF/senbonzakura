@@ -15,10 +15,16 @@ pub(super) fn execute_yaml_test(test_case: &YamlTestCase) {
     let mut lexer = Lexer::new(&test_case.source);
 
     let mut actual_tokens: Vec<Token> = vec![];
-    let mut token = lexer.next_token();
+    let mut token = match lexer.next_token() {
+        Ok(token) => token,
+        Err(error) => panic!("Failed to get next token: {:?}", error),
+    };
     while token.token_type != TokenType::End {
         actual_tokens.push(token);
-        token = lexer.next_token();
+        token = match lexer.next_token() {
+            Ok(token) => token,
+            Err(error) => panic!("Failed to get next token: {:?}", error),
+        };
     }
 
     assert_eq!(actual_tokens, test_case.expected_tokens);

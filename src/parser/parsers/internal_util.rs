@@ -7,20 +7,19 @@ use crate::parser::Parser;
 ///
 pub(super) fn parse_binary_expression<OperandParserFnType, OperatorMapperFnType>(
     parser: &mut Parser,
-    token_type: TokenType,
+    token_types: &[TokenType],
     operand_parser: OperandParserFnType,
     operator_mapper: OperatorMapperFnType,
 ) -> ExpressionRef
 where
     OperandParserFnType: Fn(&mut Parser) -> ExpressionRef,
-    OperatorMapperFnType: Fn(&str) -> BinaryOperator,
+    OperatorMapperFnType: Fn(TokenType) -> BinaryOperator,
 {
     let mut left = operand_parser(parser);
 
-    while parser.lookahead.token_type == token_type {
-        let operator_token = parser.eat_token(token_type);
-        let operator_value = &parser.source[operator_token.i..operator_token.j];
-        let operator = operator_mapper(operator_value);
+    while parser.is_next_token_any_of_type(token_types) {
+        let operator_token = parser.eat_any_of_token(token_types);
+        let operator = operator_mapper(operator_token.token_type);
 
         let right = operand_parser(parser);
 
@@ -39,20 +38,19 @@ where
 ///
 pub(super) fn parse_logical_expression<OperandParserFnType, OperatorMapperFnType>(
     parser: &mut Parser,
-    token_type: TokenType,
+    token_types: &[TokenType],
     operand_parser: OperandParserFnType,
     operator_mapper: OperatorMapperFnType,
 ) -> ExpressionRef
 where
     OperandParserFnType: Fn(&mut Parser) -> ExpressionRef,
-    OperatorMapperFnType: Fn(&str) -> LogicalOperator,
+    OperatorMapperFnType: Fn(TokenType) -> LogicalOperator,
 {
     let mut left = operand_parser(parser);
 
-    while parser.lookahead.token_type == token_type {
-        let operator_token = parser.eat_token(token_type);
-        let operator_value = &parser.source[operator_token.i..operator_token.j];
-        let operator = operator_mapper(operator_value);
+    while parser.is_next_token_any_of_type(token_types) {
+        let operator_token = parser.eat_any_of_token(token_types);
+        let operator = operator_mapper(operator_token.token_type);
 
         let right = operand_parser(parser);
 

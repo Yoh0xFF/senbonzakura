@@ -18,17 +18,18 @@ pub(super) fn parse_assignment_expression(parser: &mut Parser) -> ExpressionRef 
 
     let assignment_operator_token = parser.eat_any_of_token(&[
         TokenType::SimpleAssignmentOperator,
-        TokenType::ComplexAssignmentOperator,
+        TokenType::ComplexPlusAssignmentOperator,
+        TokenType::ComplexMinusAssignmentOperator,
+        TokenType::ComplexMultiplyAssignmentOperator,
+        TokenType::ComplexDivideAssignmentOperator,
     ]);
-    let assignment_operator_value =
-        &parser.source[assignment_operator_token.i..assignment_operator_token.j];
-    let assignment_operator = match assignment_operator_value {
-        "=" => AssignmentOperator::Assign,
-        "+=" => AssignmentOperator::AssignAdd,
-        "-=" => AssignmentOperator::AssignSubtract,
-        "*=" => AssignmentOperator::AssignMultiply,
-        "/=" => AssignmentOperator::AssignDivide,
-        _ => panic!("Unknown assignment operator {}", assignment_operator_value),
+    let assignment_operator = match assignment_operator_token.token_type {
+        TokenType::SimpleAssignmentOperator => AssignmentOperator::Assign,
+        TokenType::ComplexPlusAssignmentOperator => AssignmentOperator::AssignAdd,
+        TokenType::ComplexMinusAssignmentOperator => AssignmentOperator::AssignSubtract,
+        TokenType::ComplexMultiplyAssignmentOperator => AssignmentOperator::AssignMultiply,
+        TokenType::ComplexDivideAssignmentOperator => AssignmentOperator::AssignDivide,
+        _ => panic!("Unknown assignment operator {}", assignment_operator_token),
     };
 
     if !parser.is_expression_valid_assignment_target(&left) {

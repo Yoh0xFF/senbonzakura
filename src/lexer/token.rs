@@ -46,18 +46,27 @@ pub enum TokenType {
     Identifier,
 
     // Equality operators
-    EqualityOperator,
+    EqualOperator,
+    NotEqualOperator,
 
     // Assignment operators
     SimpleAssignmentOperator,
-    ComplexAssignmentOperator,
+    ComplexPlusAssignmentOperator,
+    ComplexMinusAssignmentOperator,
+    ComplexMultiplyAssignmentOperator,
+    ComplexDivideAssignmentOperator,
 
     // Math operators
-    AdditiveOperator,
-    FactorOperator,
+    AdditivePlusOperator,
+    AdditiveMinusOperator,
+    FactorMultiplicationOperator,
+    FactorDivisionOperator,
 
     // Relational operators
-    RelationalOperator,
+    RelationalGreaterThanOperator,
+    RelationalGreaterThanOrEqualToOperator,
+    RelationalLessThanOperator,
+    RelationalLessThanOrEqualToOperator,
 
     // Logical operators
     LogicalAndOperator,
@@ -65,13 +74,15 @@ pub enum TokenType {
     LogicalNotOperator,
 
     // Literals
-    Boolean,
+    BooleanTrue,
+    BooleanFalse,
     Nil,
     Number,
     String,
 
     // End
     End,
+    Unknown,
 }
 
 impl fmt::Display for TokenType {
@@ -80,21 +91,60 @@ impl fmt::Display for TokenType {
     }
 }
 
+///
+/// Token position in the source
+///
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+pub struct TokenPosition {
+    pub line: usize,
+    pub column: usize,
+    pub offset: usize,
+}
+
+impl TokenPosition {
+    pub fn new() -> Self {
+        TokenPosition {
+            line: 1,
+            column: 1,
+            offset: 0,
+        }
+    }
+
+    pub fn advance(&mut self, ch: char) {
+        self.offset += ch.len_utf8();
+        if ch == '\n' {
+            self.line += 1;
+            self.column = 1;
+        } else {
+            self.column += 1;
+        }
+    }
+}
+
+///
+/// Token structure
+///
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Token {
     pub token_type: TokenType,
-    pub i: usize,
-    pub j: usize,
+    pub start: TokenPosition,
+    pub end: TokenPosition,
+}
+
+impl Token {
+    pub fn text<'a>(&self, source: &'a str) -> &'a str {
+        &source[self.start.offset..self.end.offset]
+    }
 }
 
 impl fmt::Display for Token {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(
             f,
-            "Token ({}, {}, {})",
+            "Token ({}, {:?}, {:?})",
             self.token_type.to_string(),
-            self.i,
-            self.j,
+            self.start,
+            self.end,
         )
     }
 }

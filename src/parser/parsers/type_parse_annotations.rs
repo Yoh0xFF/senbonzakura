@@ -25,7 +25,7 @@ pub(super) fn parse_type(parser: &mut Parser) -> Type {
         TokenType::Identifier => {
             // Handle class types or custom types
             let identifier_token = parser.eat_token(TokenType::Identifier);
-            let type_name = &parser.source[identifier_token.i..identifier_token.j];
+            let type_name = identifier_token.text(parser.source);
 
             // Check for generic type parameters
             if parser.is_next_token_of_type(TokenType::OpeningBracket) {

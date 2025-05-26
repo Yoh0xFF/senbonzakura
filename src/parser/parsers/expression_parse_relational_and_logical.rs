@@ -13,10 +13,10 @@ use crate::parser::Parser;
 pub(super) fn parse_logical_or_expression(parser: &mut Parser) -> ExpressionRef {
     parse_logical_expression(
         parser,
-        TokenType::LogicalOrOperator,
+        &[TokenType::LogicalOrOperator],
         |parser| parse_logical_and_expression(parser),
         |op| match op {
-            "||" => LogicalOperator::Or,
+            TokenType::LogicalOrOperator => LogicalOperator::Or,
             _ => panic!("Unknown logical operator {}", op),
         },
     )
@@ -31,10 +31,10 @@ pub(super) fn parse_logical_or_expression(parser: &mut Parser) -> ExpressionRef 
 pub(super) fn parse_logical_and_expression(parser: &mut Parser) -> ExpressionRef {
     parse_logical_expression(
         parser,
-        TokenType::LogicalAndOperator,
+        &[TokenType::LogicalAndOperator],
         |parser| parse_equality_expression(parser),
         |op| match op {
-            "&&" => LogicalOperator::And,
+            TokenType::LogicalAndOperator => LogicalOperator::And,
             _ => panic!("Unknown logical operator {}", op),
         },
     )
@@ -49,11 +49,11 @@ pub(super) fn parse_logical_and_expression(parser: &mut Parser) -> ExpressionRef
 pub(super) fn parse_equality_expression(parser: &mut Parser) -> ExpressionRef {
     parse_binary_expression(
         parser,
-        TokenType::EqualityOperator,
+        &[TokenType::EqualOperator, TokenType::NotEqualOperator],
         |parser| parse_relational_expression(parser),
         |op| match op {
-            "==" => BinaryOperator::Equal,
-            "!=" => BinaryOperator::NotEqual,
+            TokenType::EqualOperator => BinaryOperator::Equal,
+            TokenType::NotEqualOperator => BinaryOperator::NotEqual,
             _ => panic!("Unknown relational operator {}", op),
         },
     )
@@ -68,13 +68,20 @@ pub(super) fn parse_equality_expression(parser: &mut Parser) -> ExpressionRef {
 pub(super) fn parse_relational_expression(parser: &mut Parser) -> ExpressionRef {
     parse_binary_expression(
         parser,
-        TokenType::RelationalOperator,
+        &[
+            TokenType::RelationalGreaterThanOperator,
+            TokenType::RelationalGreaterThanOrEqualToOperator,
+            TokenType::RelationalLessThanOperator,
+            TokenType::RelationalLessThanOrEqualToOperator,
+        ],
         |parser| parse_additive_expression(parser),
         |op| match op {
-            ">" => BinaryOperator::GreaterThan,
-            ">=" => BinaryOperator::GreaterThanOrEqualTo,
-            "<" => BinaryOperator::LessThan,
-            "<=" => BinaryOperator::LessThanOrEqualTo,
+            TokenType::RelationalGreaterThanOperator => BinaryOperator::GreaterThan,
+            TokenType::RelationalGreaterThanOrEqualToOperator => {
+                BinaryOperator::GreaterThanOrEqualTo
+            }
+            TokenType::RelationalLessThanOperator => BinaryOperator::LessThan,
+            TokenType::RelationalLessThanOrEqualToOperator => BinaryOperator::LessThanOrEqualTo,
             _ => panic!("Unknown relational operator {}", op),
         },
     )

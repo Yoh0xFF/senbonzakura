@@ -7,18 +7,6 @@ mod lexer;
 mod parser;
 
 fn main() {
-    let mut lexer = Lexer::new(r#"12 17 "Hello"   'world' "#);
-    let next_token = lexer.next_token();
-    println!("Token: {}", next_token);
-    let next_token = lexer.next_token();
-    println!("Token: {}", next_token);
-    let next_token = lexer.next_token();
-    println!("Token: {}", next_token);
-    let next_token = lexer.next_token();
-    println!("Token: {}", next_token);
-    let next_token = lexer.next_token();
-    println!("Token: {}", next_token);
-
     let mut parser = Parser::new(
         r#"
         class Point {

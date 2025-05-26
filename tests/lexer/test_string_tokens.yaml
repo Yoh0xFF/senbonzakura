@@ -3,16 +3,34 @@ description: 'Test double quote and single quote string tokens'
 source: '  "Hello" ''world''  '
 expected_tokens:
   - token_type: String
-    i: 2
-    j: 9
+    start:
+      line: 1
+      column: 3
+      offset: 2
+    end:
+      line: 1
+      column: 10
+      offset: 9
   - token_type: String
-    i: 10
-    j: 17
+    start:
+      line: 1
+      column: 11
+      offset: 10
+    end:
+      line: 1
+      column: 18
+      offset: 17
 
 ---
 description: 'Test string token with internal whitespace'
 source: '  " Hello "  '
 expected_tokens:
   - token_type: String
-    i: 2
-    j: 11
+    start:
+      line: 1
+      column: 3
+      offset: 2
+    end:
+      line: 1
+      column: 12
+      offset: 11

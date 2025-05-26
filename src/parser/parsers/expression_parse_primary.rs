@@ -50,7 +50,7 @@ pub(super) fn parse_group_expression(parser: &mut Parser) -> ExpressionRef {
 ///
 pub(super) fn parse_identifier_expression(parser: &mut Parser) -> ExpressionRef {
     let identifier_token = parser.eat_token(TokenType::Identifier);
-    let identifier_value = &parser.source[identifier_token.i..identifier_token.j];
+    let identifier_value = identifier_token.text(parser.source);
 
     Box::new(Expression::Identifier {
         name: String::from(identifier_value),

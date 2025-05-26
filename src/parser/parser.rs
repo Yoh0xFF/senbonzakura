@@ -17,7 +17,10 @@ pub struct Parser<'a> {
 impl<'a> Parser<'a> {
     pub fn new(source: &'a str) -> Self {
         let mut lexer = Lexer::new(&source);
-        let lookahead = lexer.next_token();
+        let lookahead = match lexer.next_token() {
+            Ok(token) => token,
+            Err(error) => panic!("Could not parse token: {:?}", error),
+        };
 
         Parser {
             source,
@@ -38,7 +41,10 @@ impl<'a> Parser<'a> {
         }
 
         let pre_token = self.lookahead;
-        self.lookahead = self.lexer.next_token();
+        self.lookahead = match self.lexer.next_token() {
+            Ok(token) => token,
+            Err(error) => panic!("Could not parse token: {:?}", error),
+        };
         pre_token
     }
 
@@ -49,7 +55,10 @@ impl<'a> Parser<'a> {
         for token_type in token_types {
             if self.lookahead.token_type == *token_type {
                 let pre_token = self.lookahead;
-                self.lookahead = self.lexer.next_token();
+                self.lookahead = match self.lexer.next_token() {
+                    Ok(token) => token,
+                    Err(error) => panic!("Could not parse token: {:?}", error),
+                };
                 return pre_token;
             }
         }
@@ -95,7 +104,8 @@ impl<'a> Parser<'a> {
     ///
     pub(super) fn is_next_token_literal(&self) -> bool {
         self.is_next_token_any_of_type(&[
-            TokenType::Boolean,
+            TokenType::BooleanTrue,
+            TokenType::BooleanFalse,
             TokenType::Nil,
             TokenType::Number,
             TokenType::String,
@@ -108,7 +118,10 @@ impl<'a> Parser<'a> {
     pub(super) fn is_next_token_assignment_operator(&self) -> bool {
         self.is_next_token_any_of_type(&[
             TokenType::SimpleAssignmentOperator,
-            TokenType::ComplexAssignmentOperator,
+            TokenType::ComplexPlusAssignmentOperator,
+            TokenType::ComplexMinusAssignmentOperator,
+            TokenType::ComplexMultiplyAssignmentOperator,
+            TokenType::ComplexDivideAssignmentOperator,
         ])
     }
 }

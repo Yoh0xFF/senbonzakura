@@ -14,18 +14,22 @@ use super::expression_parse_left_hand_side::parse_left_hand_side_expression;
 pub(super) fn parse_unary_expression(parser: &mut Parser) -> ExpressionRef {
     let mut operator: Option<UnaryOperator> = None;
 
-    if parser
-        .is_next_token_any_of_type(&[TokenType::AdditiveOperator, TokenType::LogicalNotOperator])
-    {
-        let token =
-            parser.eat_any_of_token(&[TokenType::AdditiveOperator, TokenType::LogicalNotOperator]);
-        let token_value = &parser.source[token.i..token.j];
+    if parser.is_next_token_any_of_type(&[
+        TokenType::AdditivePlusOperator,
+        TokenType::AdditiveMinusOperator,
+        TokenType::LogicalNotOperator,
+    ]) {
+        let token = parser.eat_any_of_token(&[
+            TokenType::AdditivePlusOperator,
+            TokenType::AdditiveMinusOperator,
+            TokenType::LogicalNotOperator,
+        ]);
 
-        operator = Some(match token_value {
-            "+" => UnaryOperator::Plus,
-            "-" => UnaryOperator::Minus,
-            "!" => UnaryOperator::Not,
-            _ => panic!("Unknown unary operator {}", token_value),
+        operator = Some(match token.token_type {
+            TokenType::AdditivePlusOperator => UnaryOperator::Plus,
+            TokenType::AdditiveMinusOperator => UnaryOperator::Minus,
+            TokenType::LogicalNotOperator => UnaryOperator::Not,
+            _ => panic!("Unknown unary operator {}", token.token_type),
         });
     }
 

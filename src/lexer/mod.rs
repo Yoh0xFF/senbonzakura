@@ -1,5 +1,4 @@
 mod lexer;
-mod regex_rules;
 mod tests;
 mod token;
 
