@@ -2,7 +2,7 @@ use crate::ast::{BinaryOperator, ExpressionRef, LogicalOperator};
 use crate::lexer::TokenType;
 use crate::parser::parsers::expression_parse_binary::parse_additive_expression;
 use crate::parser::parsers::internal_util::{parse_binary_expression, parse_logical_expression};
-use crate::parser::Parser;
+use crate::parser::{Parser, ParserError, ParserResult};
 
 ///
 /// LogicalOrExpression
@@ -10,14 +10,16 @@ use crate::parser::Parser;
 ///  | LogicalAndExpression
 ///  ;
 ///
-pub(super) fn parse_logical_or_expression(parser: &mut Parser) -> ExpressionRef {
+pub(super) fn parse_logical_or_expression(parser: &mut Parser) -> ParserResult<ExpressionRef> {
     parse_logical_expression(
         parser,
         &[TokenType::LogicalOrOperator],
         |parser| parse_logical_and_expression(parser),
         |op| match op {
-            TokenType::LogicalOrOperator => LogicalOperator::Or,
-            _ => panic!("Unknown logical operator {}", op),
+            TokenType::LogicalOrOperator => Ok(LogicalOperator::Or),
+            _ => Err(ParserError::ParserError {
+                message: format!("Unknown logical operator {}", op),
+            }),
         },
     )
 }
@@ -28,14 +30,16 @@ pub(super) fn parse_logical_or_expression(parser: &mut Parser) -> ExpressionRef 
 ///  | EqualityExpression
 ///  ;
 ///
-pub(super) fn parse_logical_and_expression(parser: &mut Parser) -> ExpressionRef {
+pub(super) fn parse_logical_and_expression(parser: &mut Parser) -> ParserResult<ExpressionRef> {
     parse_logical_expression(
         parser,
         &[TokenType::LogicalAndOperator],
         |parser| parse_equality_expression(parser),
         |op| match op {
-            TokenType::LogicalAndOperator => LogicalOperator::And,
-            _ => panic!("Unknown logical operator {}", op),
+            TokenType::LogicalAndOperator => Ok(LogicalOperator::And),
+            _ => Err(ParserError::ParserError {
+                message: format!("Unknown logical operator {}", op),
+            }),
         },
     )
 }
@@ -46,15 +50,17 @@ pub(super) fn parse_logical_and_expression(parser: &mut Parser) -> ExpressionRef
 ///  | RelationalExpression
 ///  ;
 ///
-pub(super) fn parse_equality_expression(parser: &mut Parser) -> ExpressionRef {
+pub(super) fn parse_equality_expression(parser: &mut Parser) -> ParserResult<ExpressionRef> {
     parse_binary_expression(
         parser,
         &[TokenType::EqualOperator, TokenType::NotEqualOperator],
         |parser| parse_relational_expression(parser),
         |op| match op {
-            TokenType::EqualOperator => BinaryOperator::Equal,
-            TokenType::NotEqualOperator => BinaryOperator::NotEqual,
-            _ => panic!("Unknown relational operator {}", op),
+            TokenType::EqualOperator => Ok(BinaryOperator::Equal),
+            TokenType::NotEqualOperator => Ok(BinaryOperator::NotEqual),
+            _ => Err(ParserError::ParserError {
+                message: format!("Unknown relational operator {}", op),
+            }),
         },
     )
 }
@@ -65,7 +71,7 @@ pub(super) fn parse_equality_expression(parser: &mut Parser) -> ExpressionRef {
 ///  | AdditiveExpression RELATIONAL_OPERATOR AdditiveExpression
 ///  ;
 ///
-pub(super) fn parse_relational_expression(parser: &mut Parser) -> ExpressionRef {
+pub(super) fn parse_relational_expression(parser: &mut Parser) -> ParserResult<ExpressionRef> {
     parse_binary_expression(
         parser,
         &[
@@ -76,13 +82,15 @@ pub(super) fn parse_relational_expression(parser: &mut Parser) -> ExpressionRef 
         ],
         |parser| parse_additive_expression(parser),
         |op| match op {
-            TokenType::RelationalGreaterThanOperator => BinaryOperator::GreaterThan,
+            TokenType::RelationalGreaterThanOperator => Ok(BinaryOperator::GreaterThan),
             TokenType::RelationalGreaterThanOrEqualToOperator => {
-                BinaryOperator::GreaterThanOrEqualTo
+                Ok(BinaryOperator::GreaterThanOrEqualTo)
             }
-            TokenType::RelationalLessThanOperator => BinaryOperator::LessThan,
-            TokenType::RelationalLessThanOrEqualToOperator => BinaryOperator::LessThanOrEqualTo,
-            _ => panic!("Unknown relational operator {}", op),
+            TokenType::RelationalLessThanOperator => Ok(BinaryOperator::LessThan),
+            TokenType::RelationalLessThanOrEqualToOperator => Ok(BinaryOperator::LessThanOrEqualTo),
+            _ => Err(ParserError::ParserError {
+                message: format!("Unknown relational operator {}", op),
+            }),
         },
     )
 }

@@ -1,27 +1,7 @@
 use super::{
     token::{Token, TokenType},
-    TokenPosition,
+    LexerError, LexerResult, TokenPosition,
 };
-use thiserror::Error;
-
-#[derive(Error, Debug)]
-pub enum LexerError {
-    #[error("Unexpected character '{char}' at line {line}, column {column}")]
-    UnexpectedCharacter {
-        char: char,
-        line: usize,
-        column: usize,
-    },
-
-    #[error("Unterminated string literal at line {line}, column {column}")]
-    UnterminatedString { line: usize, column: usize },
-
-    #[error("Unterminated comment at line {line}, column {column}")]
-    UnterminatedComment { line: usize, column: usize },
-
-    #[error("Invalid number format at line {line}, column {column}")]
-    InvalidNumber { line: usize, column: usize },
-}
 
 #[derive(Debug, Clone)]
 pub struct Lexer<'a> {
@@ -44,7 +24,7 @@ impl<'a> Lexer<'a> {
         }
     }
 
-    pub fn next_token(&mut self) -> Result<Token, LexerError> {
+    pub fn next_token(&mut self) -> LexerResult<Token> {
         self.skip_whitespace_and_comments()?;
 
         let Some(ch) = self.peek_char() else {
@@ -100,7 +80,7 @@ impl<'a> Lexer<'a> {
     }
 
     #[allow(dead_code)]
-    pub fn peek_token(&mut self) -> Result<Token, LexerError> {
+    pub fn peek_token(&mut self) -> LexerResult<Token> {
         // Save current state
         let saved_position = self.position;
         let saved_chars = self.chars.clone();
@@ -121,7 +101,7 @@ impl<'a> Lexer<'a> {
         &mut self,
         token_type: TokenType,
         start_pos: TokenPosition,
-    ) -> Result<Token, LexerError> {
+    ) -> LexerResult<Token> {
         self.advance();
         Ok(Token {
             token_type,
@@ -131,10 +111,7 @@ impl<'a> Lexer<'a> {
     }
 
     // Optimized operator reading methods
-    fn read_equality_or_assignment(
-        &mut self,
-        start_pos: TokenPosition,
-    ) -> Result<Token, LexerError> {
+    fn read_equality_or_assignment(&mut self, start_pos: TokenPosition) -> LexerResult<Token> {
         self.advance(); // consume '='
 
         let token_type = if self.peek_char() == Some('=') {
@@ -151,7 +128,7 @@ impl<'a> Lexer<'a> {
         })
     }
 
-    fn read_plus_operator(&mut self, start_pos: TokenPosition) -> Result<Token, LexerError> {
+    fn read_plus_operator(&mut self, start_pos: TokenPosition) -> LexerResult<Token> {
         self.advance(); // consume '+'
 
         let token_type = if self.peek_char() == Some('=') {
@@ -168,7 +145,7 @@ impl<'a> Lexer<'a> {
         })
     }
 
-    fn read_minus_operator(&mut self, start_pos: TokenPosition) -> Result<Token, LexerError> {
+    fn read_minus_operator(&mut self, start_pos: TokenPosition) -> LexerResult<Token> {
         self.advance(); // consume '-'
 
         let token_type = if self.peek_char() == Some('=') {
@@ -185,7 +162,7 @@ impl<'a> Lexer<'a> {
         })
     }
 
-    fn read_multiply_operator(&mut self, start_pos: TokenPosition) -> Result<Token, LexerError> {
+    fn read_multiply_operator(&mut self, start_pos: TokenPosition) -> LexerResult<Token> {
         self.advance(); // consume '*'
 
         let token_type = if self.peek_char() == Some('=') {
@@ -202,7 +179,7 @@ impl<'a> Lexer<'a> {
         })
     }
 
-    fn read_divide_operator(&mut self, start_pos: TokenPosition) -> Result<Token, LexerError> {
+    fn read_divide_operator(&mut self, start_pos: TokenPosition) -> LexerResult<Token> {
         self.advance(); // consume '/'
 
         let token_type = if self.peek_char() == Some('=') {
@@ -219,10 +196,7 @@ impl<'a> Lexer<'a> {
         })
     }
 
-    fn read_greater_than_operator(
-        &mut self,
-        start_pos: TokenPosition,
-    ) -> Result<Token, LexerError> {
+    fn read_greater_than_operator(&mut self, start_pos: TokenPosition) -> LexerResult<Token> {
         self.advance(); // consume '>'
 
         let token_type = if self.peek_char() == Some('=') {
@@ -239,7 +213,7 @@ impl<'a> Lexer<'a> {
         })
     }
 
-    fn read_less_than_operator(&mut self, start_pos: TokenPosition) -> Result<Token, LexerError> {
+    fn read_less_than_operator(&mut self, start_pos: TokenPosition) -> LexerResult<Token> {
         self.advance(); // consume '<'
 
         let token_type = if self.peek_char() == Some('=') {
@@ -256,7 +230,7 @@ impl<'a> Lexer<'a> {
         })
     }
 
-    fn read_logical_and(&mut self, start_pos: TokenPosition) -> Result<Token, LexerError> {
+    fn read_logical_and(&mut self, start_pos: TokenPosition) -> LexerResult<Token> {
         self.advance(); // consume first '&'
 
         if self.peek_char() == Some('&') {
@@ -275,7 +249,7 @@ impl<'a> Lexer<'a> {
         }
     }
 
-    fn read_logical_or(&mut self, start_pos: TokenPosition) -> Result<Token, LexerError> {
+    fn read_logical_or(&mut self, start_pos: TokenPosition) -> LexerResult<Token> {
         self.advance(); // consume first '|'
 
         if self.peek_char() == Some('|') {
@@ -294,7 +268,7 @@ impl<'a> Lexer<'a> {
         }
     }
 
-    fn read_not_operator(&mut self, start_pos: TokenPosition) -> Result<Token, LexerError> {
+    fn read_not_operator(&mut self, start_pos: TokenPosition) -> LexerResult<Token> {
         self.advance(); // consume '!'
 
         let token_type = if self.peek_char() == Some('=') {
@@ -312,7 +286,7 @@ impl<'a> Lexer<'a> {
     }
 
     // Improved string reading with escape sequence support
-    fn read_string(&mut self, quote: char) -> Result<Token, LexerError> {
+    fn read_string(&mut self, quote: char) -> LexerResult<Token> {
         let start_pos = self.position;
         self.advance(); // Skip opening quote
 
@@ -365,7 +339,7 @@ impl<'a> Lexer<'a> {
     }
 
     // Enhanced number reading with better float support
-    fn read_number(&mut self) -> Result<Token, LexerError> {
+    fn read_number(&mut self) -> LexerResult<Token> {
         let start_pos = self.position;
 
         // Read integer part

@@ -1,6 +1,6 @@
 use crate::ast::{BinaryOperator, Expression, ExpressionRef, LogicalOperator};
 use crate::lexer::TokenType;
-use crate::parser::Parser;
+use crate::parser::{Parser, ParserResult};
 
 ///
 /// Parse generic binary expression
@@ -10,18 +10,18 @@ pub(super) fn parse_binary_expression<OperandParserFnType, OperatorMapperFnType>
     token_types: &[TokenType],
     operand_parser: OperandParserFnType,
     operator_mapper: OperatorMapperFnType,
-) -> ExpressionRef
+) -> ParserResult<ExpressionRef>
 where
-    OperandParserFnType: Fn(&mut Parser) -> ExpressionRef,
-    OperatorMapperFnType: Fn(TokenType) -> BinaryOperator,
+    OperandParserFnType: Fn(&mut Parser) -> ParserResult<ExpressionRef>,
+    OperatorMapperFnType: Fn(TokenType) -> ParserResult<BinaryOperator>,
 {
-    let mut left = operand_parser(parser);
+    let mut left = operand_parser(parser)?;
 
     while parser.is_next_token_any_of_type(token_types) {
-        let operator_token = parser.eat_any_of_token(token_types);
-        let operator = operator_mapper(operator_token.token_type);
+        let operator_token = parser.eat_any_of_token(token_types)?;
+        let operator = operator_mapper(operator_token.token_type)?;
 
-        let right = operand_parser(parser);
+        let right = operand_parser(parser)?;
 
         left = Box::new(Expression::Binary {
             operator,
@@ -30,7 +30,7 @@ where
         });
     }
 
-    left
+    Ok(left)
 }
 
 ///
@@ -41,18 +41,18 @@ pub(super) fn parse_logical_expression<OperandParserFnType, OperatorMapperFnType
     token_types: &[TokenType],
     operand_parser: OperandParserFnType,
     operator_mapper: OperatorMapperFnType,
-) -> ExpressionRef
+) -> ParserResult<ExpressionRef>
 where
-    OperandParserFnType: Fn(&mut Parser) -> ExpressionRef,
-    OperatorMapperFnType: Fn(TokenType) -> LogicalOperator,
+    OperandParserFnType: Fn(&mut Parser) -> ParserResult<ExpressionRef>,
+    OperatorMapperFnType: Fn(TokenType) -> ParserResult<LogicalOperator>,
 {
-    let mut left = operand_parser(parser);
+    let mut left = operand_parser(parser)?;
 
     while parser.is_next_token_any_of_type(token_types) {
-        let operator_token = parser.eat_any_of_token(token_types);
-        let operator = operator_mapper(operator_token.token_type);
+        let operator_token = parser.eat_any_of_token(token_types)?;
+        let operator = operator_mapper(operator_token.token_type)?;
 
-        let right = operand_parser(parser);
+        let right = operand_parser(parser)?;
 
         left = Box::new(Expression::Logical {
             operator,
@@ -61,5 +61,5 @@ where
         });
     }
 
-    left
+    Ok(left)
 }

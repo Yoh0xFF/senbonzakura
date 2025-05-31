@@ -12,13 +12,24 @@ pub(super) struct YamlTestCase {
 }
 
 pub(super) fn execute_yaml_test(test_case: &YamlTestCase) {
-    let mut parser = Parser::new(&test_case.source);
-    let actual_ast = parse_root_statement(&mut parser);
+    let Ok(mut parser) = Parser::new(&test_case.source) else {
+        panic!(
+            "Failed to parse the test case source:\n{}\n",
+            test_case.source
+        )
+    };
+    let ast_result = parse_root_statement(&mut parser);
 
-    // Convert Box<Statement> to Statement for comparison
-    let actual_statement = *actual_ast;
-
-    assert_eq!(actual_statement, test_case.expected_ast);
+    match ast_result {
+        Ok(ast) => {
+            // Convert Box<Statement> to Statement for comparison
+            assert_eq!(*ast, test_case.expected_ast);
+        }
+        Err(_) => panic!(
+            "Failed to parse the test case source:\n{}\n",
+            test_case.source
+        ),
+    }
 }
 
 pub(super) fn load_yaml_test_cases(path: &str) -> Vec<YamlTestCase> {

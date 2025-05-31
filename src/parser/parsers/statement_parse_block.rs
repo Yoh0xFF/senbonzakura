@@ -12,7 +12,7 @@ use crate::parser::parsers::statement_parse_loop::{
     parse_do_while_statement, parse_for_statement, parse_while_statement,
 };
 use crate::parser::parsers::statement_parse_variable_declaration::parse_variable_declaration_statement;
-use crate::parser::Parser;
+use crate::parser::{Parser, ParserResult};
 
 ///
 /// Main entry point
@@ -20,11 +20,11 @@ use crate::parser::Parser;
 ///  : StatementList
 ///  ;
 ///
-pub(super) fn parse_program_statement(parser: &mut Parser) -> StatementRef {
-    let statement_list = parse_statement_list(parser, None);
-    Box::new(Statement::Program {
+pub(super) fn parse_program_statement(parser: &mut Parser) -> ParserResult<StatementRef> {
+    let statement_list = parse_statement_list(parser, None)?;
+    Ok(Box::new(Statement::Program {
         body: statement_list,
-    })
+    }))
 }
 
 ///
@@ -32,18 +32,18 @@ pub(super) fn parse_program_statement(parser: &mut Parser) -> StatementRef {
 ///  : '{' OptStatementList '}'
 ///  ;
 ///
-pub(super) fn parse_block_statement(parser: &mut Parser) -> StatementRef {
-    parser.eat_token(TokenType::OpeningBrace);
+pub(super) fn parse_block_statement(parser: &mut Parser) -> ParserResult<StatementRef> {
+    parser.eat_token(TokenType::OpeningBrace)?;
 
     let block = if !parser.is_next_token_of_type(TokenType::ClosingBrace) {
-        parse_statement_list(parser, Some(TokenType::ClosingBrace))
+        parse_statement_list(parser, Some(TokenType::ClosingBrace))?
     } else {
         vec![]
     };
 
-    parser.eat_token(TokenType::ClosingBrace);
+    parser.eat_token(TokenType::ClosingBrace)?;
 
-    Box::new(Statement::Block { body: block })
+    Ok(Box::new(Statement::Block { body: block }))
 }
 
 ///
@@ -55,17 +55,17 @@ pub(super) fn parse_block_statement(parser: &mut Parser) -> StatementRef {
 pub(super) fn parse_statement_list(
     parser: &mut Parser,
     stop_token_type: Option<TokenType>,
-) -> StatementList {
+) -> ParserResult<StatementList> {
     let mut statement_list: Vec<Statement> = vec![];
 
     while !parser.is_next_token_of_type(TokenType::End)
         && !parser.is_next_token_of_type(stop_token_type.unwrap_or(TokenType::End))
     {
-        let statement = parse_statement(parser);
+        let statement = parse_statement(parser)?;
         statement_list.push(*statement);
     }
 
-    statement_list
+    Ok(statement_list)
 }
 
 ///
@@ -81,7 +81,7 @@ pub(super) fn parse_statement_list(
 ///  | ClassDeclaration
 ///  ;
 ///
-pub(super) fn parse_statement(parser: &mut Parser) -> StatementRef {
+pub(super) fn parse_statement(parser: &mut Parser) -> ParserResult<StatementRef> {
     match parser.lookahead.token_type {
         TokenType::StatementEnd => parse_empty_statement(parser),
         TokenType::OpeningBrace => parse_block_statement(parser),

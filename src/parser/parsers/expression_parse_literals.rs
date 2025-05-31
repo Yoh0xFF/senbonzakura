@@ -1,6 +1,6 @@
 use crate::ast::{Expression, ExpressionRef};
 use crate::lexer::TokenType;
-use crate::parser::Parser;
+use crate::parser::{Parser, ParserError, ParserResult};
 
 ///
 /// Literal
@@ -10,14 +10,16 @@ use crate::parser::Parser;
 ///  | StringLiteral
 ///  ;
 ///
-pub(super) fn parse_literal_expression(parser: &mut Parser) -> ExpressionRef {
+pub(super) fn parse_literal_expression(parser: &mut Parser) -> ParserResult<ExpressionRef> {
     match parser.lookahead.token_type {
         TokenType::BooleanTrue => parse_boolean_literal_expression(parser),
         TokenType::BooleanFalse => parse_boolean_literal_expression(parser),
         TokenType::Nil => parse_nil_literal_expression(parser),
         TokenType::Number => parse_numeric_literal_expression(parser),
         TokenType::String => parse_string_literal_expression(parser),
-        _ => panic!("Literal: unexpected literal production"),
+        _ => Err(ParserError::SemanticError {
+            message: String::from("Literal: unexpected literal production"),
+        }),
     }
 }
 
@@ -26,11 +28,11 @@ pub(super) fn parse_literal_expression(parser: &mut Parser) -> ExpressionRef {
 ///  : BOOLEAN
 ///  ;
 ///
-pub(super) fn parse_boolean_literal_expression(parser: &mut Parser) -> ExpressionRef {
-    let token = parser.eat_any_of_token(&[TokenType::BooleanTrue, TokenType::BooleanFalse]);
+pub(super) fn parse_boolean_literal_expression(parser: &mut Parser) -> ParserResult<ExpressionRef> {
+    let token = parser.eat_any_of_token(&[TokenType::BooleanTrue, TokenType::BooleanFalse])?;
     let bool_value = token.token_type == TokenType::BooleanTrue;
 
-    Box::new(Expression::BooleanLiteral { value: bool_value })
+    Ok(Box::new(Expression::BooleanLiteral { value: bool_value }))
 }
 
 ///
@@ -38,10 +40,10 @@ pub(super) fn parse_boolean_literal_expression(parser: &mut Parser) -> Expressio
 ///  : NIL
 ///  ;
 ///
-pub(super) fn parse_nil_literal_expression(parser: &mut Parser) -> ExpressionRef {
-    parser.eat_token(TokenType::Nil);
+pub(super) fn parse_nil_literal_expression(parser: &mut Parser) -> ParserResult<ExpressionRef> {
+    parser.eat_token(TokenType::Nil)?;
 
-    Box::new(Expression::NilLiteral)
+    Ok(Box::new(Expression::NilLiteral))
 }
 
 ///
@@ -49,12 +51,12 @@ pub(super) fn parse_nil_literal_expression(parser: &mut Parser) -> ExpressionRef
 ///  : NUMBER
 ///  ;
 ///
-pub(super) fn parse_numeric_literal_expression(parser: &mut Parser) -> ExpressionRef {
-    let token = parser.eat_token(TokenType::Number);
+pub(super) fn parse_numeric_literal_expression(parser: &mut Parser) -> ParserResult<ExpressionRef> {
+    let token = parser.eat_token(TokenType::Number)?;
     let token_value = token.text(parser.source);
     let token_value = token_value.trim().parse().unwrap();
 
-    Box::new(Expression::NumericLiteral { value: token_value })
+    Ok(Box::new(Expression::NumericLiteral { value: token_value }))
 }
 
 ///
@@ -62,11 +64,11 @@ pub(super) fn parse_numeric_literal_expression(parser: &mut Parser) -> Expressio
 ///  : STRING
 ///  ;
 ///
-pub(super) fn parse_string_literal_expression(parser: &mut Parser) -> ExpressionRef {
-    let token = parser.eat_token(TokenType::String);
+pub(super) fn parse_string_literal_expression(parser: &mut Parser) -> ParserResult<ExpressionRef> {
+    let token = parser.eat_token(TokenType::String)?;
     let token_value = &parser.source[token.start.offset + 1..token.end.offset - 1];
 
-    Box::new(Expression::StringLiteral {
+    Ok(Box::new(Expression::StringLiteral {
         value: String::from(token_value),
-    })
+    }))
 }

@@ -1,17 +1,17 @@
 use crate::ast::{Statement, StatementRef};
 use crate::lexer::TokenType;
 use crate::parser::parsers::parse_root_expression;
-use crate::parser::Parser;
+use crate::parser::{Parser, ParserResult};
 
 ///
 /// EmptyStatement
 ///  : ';'
 ///  ;
 ///
-pub(super) fn parse_empty_statement(parser: &mut Parser) -> StatementRef {
-    parser.eat_token(TokenType::StatementEnd);
+pub(super) fn parse_empty_statement(parser: &mut Parser) -> ParserResult<StatementRef> {
+    parser.eat_token(TokenType::StatementEnd)?;
 
-    Box::new(Statement::Empty)
+    Ok(Box::new(Statement::Empty))
 }
 
 ///
@@ -22,12 +22,12 @@ pub(super) fn parse_empty_statement(parser: &mut Parser) -> StatementRef {
 pub(super) fn parse_expression_statement(
     parser: &mut Parser,
     consume_statement_end: bool,
-) -> StatementRef {
-    let expression = parse_root_expression(parser);
+) -> ParserResult<StatementRef> {
+    let expression = parse_root_expression(parser)?;
 
     if consume_statement_end {
-        parser.eat_token(TokenType::StatementEnd);
+        parser.eat_token(TokenType::StatementEnd)?;
     }
 
-    Box::new(Statement::Expression { expression })
+    Ok(Box::new(Statement::Expression { expression }))
 }

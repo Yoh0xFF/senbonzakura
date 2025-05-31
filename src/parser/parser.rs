@@ -4,6 +4,8 @@ use crate::{
     Lexer, Token,
 };
 
+use super::{ParserError, ParserResult};
+
 ///
 /// Recursive descent parser
 ///
@@ -16,58 +18,74 @@ pub struct Parser<'a> {
 
 #[allow(dead_code)]
 impl<'a> Parser<'a> {
-    pub fn new(source: &'a str) -> Self {
+    pub fn new(source: &'a str) -> ParserResult<Self> {
         let mut lexer = Lexer::new(&source);
         let lookahead = match lexer.next_token() {
             Ok(token) => token,
-            Err(error) => panic!("Could not parse token: {:?}", error),
+            Err(error) => {
+                return Err(ParserError::LexicalError {
+                    message: format!("Could not parse token: {:?}", error),
+                })
+            }
         };
 
-        Parser {
+        Ok(Parser {
             source,
             lexer,
             lookahead,
-        }
+        })
     }
 
     ///
     /// Expects a token of a given type
     ///
-    pub(super) fn eat_token(&mut self, token_type: TokenType) -> Token {
+    pub(super) fn eat_token(&mut self, token_type: TokenType) -> ParserResult<Token> {
         if self.lookahead.token_type != token_type {
-            panic!(
-                "Unexpected token: {}, expected token: '{}'",
-                self.lookahead.token_type, token_type
-            );
+            return Err(ParserError::LexicalError {
+                message: format!(
+                    "Unexpected token: {}, expected token: '{}'",
+                    self.lookahead.token_type, token_type
+                ),
+            });
         }
 
         let pre_token = self.lookahead;
         self.lookahead = match self.lexer.next_token() {
             Ok(token) => token,
-            Err(error) => panic!("Could not parse token: {:?}", error),
+            Err(error) => {
+                return Err(ParserError::LexicalError {
+                    message: format!("Could not parse token: {:?}", error),
+                });
+            }
         };
-        pre_token
+        Ok(pre_token)
     }
 
     ///
     /// Expects a token of a given types
     ///
-    pub(super) fn eat_any_of_token(&mut self, token_types: &[TokenType]) -> Token {
+    pub(super) fn eat_any_of_token(&mut self, token_types: &[TokenType]) -> ParserResult<Token> {
         for token_type in token_types {
             if self.lookahead.token_type == *token_type {
                 let pre_token = self.lookahead;
                 self.lookahead = match self.lexer.next_token() {
                     Ok(token) => token,
-                    Err(error) => panic!("Could not parse token: {:?}", error),
+                    Err(error) => {
+                        return Err(ParserError::LexicalError {
+                            message: format!("Could not parse token: {:?}", error),
+                        });
+                    }
                 };
-                return pre_token;
+                return Ok(pre_token);
             }
         }
 
-        panic!(
-            "Unexpected token: {}, expected tokens: '{:?}'",
-            self.lookahead.token_type, token_types
-        );
+        return Err(ParserError::LexicalError {
+            message: format!(
+                "Unexpected token: {}, expected tokens: '{:?}'",
+                self.lookahead.token_type, token_types
+            ),
+        });
     }
 
     ///
