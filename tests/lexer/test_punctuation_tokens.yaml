@@ -1,0 +1,94 @@
+---
+description: 'Parse punctuation tokens'
+source: '; { } [ ] ( ) , . :'
+expected_tokens:
+  - token_type: StatementEnd
+    start:
+      line: 1
+      column: 1
+      offset: 0
+    end:
+      line: 1
+      column: 2
+      offset: 1
+  - token_type: OpeningBrace
+    start:
+      line: 1
+      column: 3
+      offset: 2
+    end:
+      line: 1
+      column: 4
+      offset: 3
+  - token_type: ClosingBrace
+    start:
+      line: 1
+      column: 5
+      offset: 4
+    end:
+      line: 1
+      column: 6
+      offset: 5
+  - token_type: OpeningBracket
+    start:
+      line: 1
+      column: 7
+      offset: 6
+    end:
+      line: 1
+      column: 8
+      offset: 7
+  - token_type: ClosingBracket
+    start:
+      line: 1
+      column: 9
+      offset: 8
+    end:
+      line: 1
+      column: 10
+      offset: 9
+  - token_type: OpeningParenthesis
+    start:
+      line: 1
+      column: 11
+      offset: 10
+    end:
+      line: 1
+      column: 12
+      offset: 11
+  - token_type: ClosingParenthesis
+    start:
+      line: 1
+      column: 13
+      offset: 12
+    end:
+      line: 1
+      column: 14
+      offset: 13
+  - token_type: Comma
+    start:
+      line: 1
+      column: 15
+      offset: 14
+    end:
+      line: 1
+      column: 16
+      offset: 15
+  - token_type: Dot
+    start:
+      line: 1
+      column: 17
+      offset: 16
+    end:
+      line: 1
+      column: 18
+      offset: 17
+  - token_type: Colon
+    start:
+      line: 1
+      column: 19
+      offset: 18
+    end:
+      line: 1
+      column: 20
+      offset: 19

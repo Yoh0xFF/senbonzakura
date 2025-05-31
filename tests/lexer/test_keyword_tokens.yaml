@@ -1,0 +1,149 @@
+---
+description: 'Parse control flow keyword tokens'
+source: 'if else while do for return identifier'
+expected_tokens:
+  - token_type: IfKeyword
+    start:
+      line: 1
+      column: 1
+      offset: 0
+    end:
+      line: 1
+      column: 3
+      offset: 2
+  - token_type: ElseKeyword
+    start:
+      line: 1
+      column: 4
+      offset: 3
+    end:
+      line: 1
+      column: 8
+      offset: 7
+  - token_type: WhileKeyword
+    start:
+      line: 1
+      column: 9
+      offset: 8
+    end:
+      line: 1
+      column: 14
+      offset: 13
+  - token_type: DoKeyword
+    start:
+      line: 1
+      column: 15
+      offset: 14
+    end:
+      line: 1
+      column: 17
+      offset: 16
+  - token_type: ForKeyword
+    start:
+      line: 1
+      column: 18
+      offset: 17
+    end:
+      line: 1
+      column: 21
+      offset: 20
+  - token_type: ReturnKeyword
+    start:
+      line: 1
+      column: 22
+      offset: 21
+    end:
+      line: 1
+      column: 28
+      offset: 27
+  - token_type: Identifier
+    start:
+      line: 1
+      column: 29
+      offset: 28
+    end:
+      line: 1
+      column: 39
+      offset: 38
+
+---
+description: 'Parse declaration keywor tokens'
+source: 'let def class extends'
+expected_tokens:
+  - token_type: LetKeyword
+    start:
+      line: 1
+      column: 1
+      offset: 0
+    end:
+      line: 1
+      column: 4
+      offset: 3
+  - token_type: DefKeyword
+    start:
+      line: 1
+      column: 5
+      offset: 4
+    end:
+      line: 1
+      column: 8
+      offset: 7
+  - token_type: ClassKeyword
+    start:
+      line: 1
+      column: 9
+      offset: 8
+    end:
+      line: 1
+      column: 14
+      offset: 13
+  - token_type: ExtendsKeyword
+    start:
+      line: 1
+      column: 15
+      offset: 14
+    end:
+      line: 1
+      column: 22
+      offset: 21
+
+---
+description: 'Parse special keyword tokens'
+source: 'this super new type'
+expected_tokens:
+  - token_type: ThisKeyword
+    start:
+      line: 1
+      column: 1
+      offset: 0
+    end:
+      line: 1
+      column: 5
+      offset: 4
+  - token_type: SuperKeyword
+    start:
+      line: 1
+      column: 6
+      offset: 5
+    end:
+      line: 1
+      column: 11
+      offset: 10
+  - token_type: NewKeyword
+    start:
+      line: 1
+      column: 12
+      offset: 11
+    end:
+      line: 1
+      column: 15
+      offset: 14
+  - token_type: TypeKeyword
+    start:
+      line: 1
+      column: 16
+      offset: 15
+    end:
+      line: 1
+      column: 20
+      offset: 19

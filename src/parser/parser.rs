@@ -14,6 +14,7 @@ pub struct Parser<'a> {
     pub(super) lookahead: Token,
 }
 
+#[allow(dead_code)]
 impl<'a> Parser<'a> {
     pub fn new(source: &'a str) -> Self {
         let mut lexer = Lexer::new(&source);

@@ -1,0 +1,181 @@
+---
+description: 'Parse arithmetic operator tokens'
+source: '+ - * /'
+expected_tokens:
+  - token_type: AdditivePlusOperator
+    start:
+      line: 1
+      column: 1
+      offset: 0
+    end:
+      line: 1
+      column: 2
+      offset: 1
+  - token_type: AdditiveMinusOperator
+    start:
+      line: 1
+      column: 3
+      offset: 2
+    end:
+      line: 1
+      column: 4
+      offset: 3
+  - token_type: FactorMultiplicationOperator
+    start:
+      line: 1
+      column: 5
+      offset: 4
+    end:
+      line: 1
+      column: 6
+      offset: 5
+  - token_type: FactorDivisionOperator
+    start:
+      line: 1
+      column: 7
+      offset: 6
+    end:
+      line: 1
+      column: 8
+      offset: 7
+
+---
+description: 'Parse assignment operator tokens'
+source: '= += -= *= /='
+expected_tokens:
+  - token_type: SimpleAssignmentOperator
+    start:
+      line: 1
+      column: 1
+      offset: 0
+    end:
+      line: 1
+      column: 2
+      offset: 1
+  - token_type: ComplexPlusAssignmentOperator
+    start:
+      line: 1
+      column: 3
+      offset: 2
+    end:
+      line: 1
+      column: 5
+      offset: 4
+  - token_type: ComplexMinusAssignmentOperator
+    start:
+      line: 1
+      column: 6
+      offset: 5
+    end:
+      line: 1
+      column: 8
+      offset: 7
+  - token_type: ComplexMultiplyAssignmentOperator
+    start:
+      line: 1
+      column: 9
+      offset: 8
+    end:
+      line: 1
+      column: 11
+      offset: 10
+  - token_type: ComplexDivideAssignmentOperator
+    start:
+      line: 1
+      column: 12
+      offset: 11
+    end:
+      line: 1
+      column: 14
+      offset: 13
+
+---
+description: 'Parse comparison operator tokens'
+source: '== != > >= < <='
+expected_tokens:
+  - token_type: EqualOperator
+    start:
+      line: 1
+      column: 1
+      offset: 0
+    end:
+      line: 1
+      column: 3
+      offset: 2
+  - token_type: NotEqualOperator
+    start:
+      line: 1
+      column: 4
+      offset: 3
+    end:
+      line: 1
+      column: 6
+      offset: 5
+  - token_type: RelationalGreaterThanOperator
+    start:
+      line: 1
+      column: 7
+      offset: 6
+    end:
+      line: 1
+      column: 8
+      offset: 7
+  - token_type: RelationalGreaterThanOrEqualToOperator
+    start:
+      line: 1
+      column: 9
+      offset: 8
+    end:
+      line: 1
+      column: 11
+      offset: 10
+  - token_type: RelationalLessThanOperator
+    start:
+      line: 1
+      column: 12
+      offset: 11
+    end:
+      line: 1
+      column: 13
+      offset: 12
+  - token_type: RelationalLessThanOrEqualToOperator
+    start:
+      line: 1
+      column: 14
+      offset: 13
+    end:
+      line: 1
+      column: 16
+      offset: 15
+
+---
+description: 'Parse logical operator tokens'
+source: '&& || !'
+expected_tokens:
+  - token_type: LogicalAndOperator
+    start:
+      line: 1
+      column: 1
+      offset: 0
+    end:
+      line: 1
+      column: 3
+      offset: 2
+  - token_type: LogicalOrOperator
+    start:
+      line: 1
+      column: 4
+      offset: 3
+    end:
+      line: 1
+      column: 6
+      offset: 5
+  - token_type: LogicalNotOperator
+    start:
+      line: 1
+      column: 7
+      offset: 6
+    end:
+      line: 1
+      column: 8
+      offset: 7
