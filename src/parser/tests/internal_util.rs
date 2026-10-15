@@ -50,13 +50,10 @@ pub(super) fn execute_sexp_test(test_case: &SexpTestCase) {
     match parse_root_statement(&mut parser) {
         Ok(ast) => {
             let actual_ast = statement_to_sexpr(&ast);
-            assert!(
-                actual_ast == test_case.expected_ast,
+            assert_eq!(
+                actual_ast, test_case.expected_ast,
                 "AST mismatch for test case: {}\n\nSource:\n{}\nExpected:\n{}\n\nActual:\n{}\n",
-                test_case.description,
-                test_case.source,
-                test_case.expected_ast,
-                actual_ast
+                test_case.description, test_case.source, test_case.expected_ast, actual_ast
             );
         }
         Err(error) => panic!(
