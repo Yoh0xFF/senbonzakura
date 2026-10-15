@@ -1,6 +1,4 @@
-=============================================================
-Parse test block statement with string and number expressions
-=============================================================
+=== Parse test block statement with string and number expressions
 {
   "Hello";
   17;
@@ -11,18 +9,14 @@ Parse test block statement with string and number expressions
     (Expression (StringLiteral "Hello"))
     (Expression (NumericLiteral 17))))
 
-================================
-Parse test empty block statement
-================================
+=== Parse test empty block statement
 {
 }
 ---
 (Program
   (Block))
 
-=================================
-Parse test nested block statement
-=================================
+=== Parse test nested block statement
 {
   "Hello";
   {
@@ -36,9 +30,7 @@ Parse test nested block statement
     (Block
       (Expression (NumericLiteral 17)))))
 
-===================================
-Parse test empty statement in block
-===================================
+=== Parse test empty statement in block
 {
   ;
 }

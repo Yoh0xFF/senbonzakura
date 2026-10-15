@@ -1,22 +1,16 @@
-==============================================
-Parse binary expression with additive operator
-==============================================
+=== Parse binary expression with additive operator
 2 + 5;
 ---
 (Program
   (Expression (Binary Add (NumericLiteral 2) (NumericLiteral 5))))
 
-============================================
-Parse binary expression with factor operator
-============================================
+=== Parse binary expression with factor operator
 2 * 5;
 ---
 (Program
   (Expression (Binary Multiply (NumericLiteral 2) (NumericLiteral 5))))
 
-========================================================
-Parse binary expression with multiple additive operators
-========================================================
+=== Parse binary expression with multiple additive operators
 1 + 8 - 2;
 ---
 (Program
@@ -25,9 +19,7 @@ Parse binary expression with multiple additive operators
       (Binary Add (NumericLiteral 1) (NumericLiteral 8))
       (NumericLiteral 2))))
 
-======================================================
-Parse binary expression with multiple factor operators
-======================================================
+=== Parse binary expression with multiple factor operators
 2 * 9 / 3;
 ---
 (Program
@@ -36,9 +28,7 @@ Parse binary expression with multiple factor operators
       (Binary Multiply (NumericLiteral 2) (NumericLiteral 9))
       (NumericLiteral 3))))
 
-========================================
-Parse binary expression with parentheses
-========================================
+=== Parse binary expression with parentheses
 1 + (8 - 2);
 ---
 (Program
@@ -47,9 +37,7 @@ Parse binary expression with parentheses
       (NumericLiteral 1)
       (Binary Subtract (NumericLiteral 8) (NumericLiteral 2)))))
 
-==========================================================
-Parse binary expression with additive and factor operators
-==========================================================
+=== Parse binary expression with additive and factor operators
 1 + 4 * 5;
 ---
 (Program
@@ -58,9 +46,7 @@ Parse binary expression with additive and factor operators
       (NumericLiteral 1)
       (Binary Multiply (NumericLiteral 4) (NumericLiteral 5)))))
 
-=======================================================================
-Parse binary expression with additive, factor operators and parentheses
-=======================================================================
+=== Parse binary expression with additive, factor operators and parentheses
 (1 + 4) * 5;
 ---
 (Program

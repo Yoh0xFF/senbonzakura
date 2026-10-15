@@ -1,6 +1,4 @@
-=======================
-Parse simple while loop
-=======================
+=== Parse simple while loop
 while (i < 10) {
   i = i + 1;
 }
@@ -14,9 +12,7 @@ while (i < 10) {
           (Identifier i)
           (Binary Add (Identifier i) (NumericLiteral 1)))))))
 
-==============================================
-Parse simple while loop with boolean condition
-==============================================
+=== Parse simple while loop with boolean condition
 while (true) {
   i = i + 1;
 }
@@ -30,9 +26,7 @@ while (true) {
           (Identifier i)
           (Binary Add (Identifier i) (NumericLiteral 1)))))))
 
-=======================================
-Parse while loop with complex condition
-=======================================
+=== Parse while loop with complex condition
 while (x > 5 && y < 20) {
   x = x - 1;
   y = y + 1;
@@ -53,18 +47,14 @@ while (x > 5 && y < 20) {
           (Identifier y)
           (Binary Add (Identifier y) (NumericLiteral 1)))))))
 
-======================
-Parse empty while loop
-======================
+=== Parse empty while loop
 while (condition) {
 }
 ---
 (Program
   (While (Identifier condition) (Block)))
 
-========================
-Parse nested while loops
-========================
+=== Parse nested while loops
 while (outer > 0) {
   outer = outer - 1;
 
@@ -89,9 +79,7 @@ while (outer > 0) {
               (Identifier inner)
               (Binary Add (Identifier inner) (NumericLiteral 1)))))))))
 
-=====================================
-Parse while loop with unary condition
-=====================================
+=== Parse while loop with unary condition
 while (!done) {
   x = x + 1;
 }

@@ -8,16 +8,17 @@ use std::fs;
 /// Test files contain one or more cases in the following layout:
 ///
 /// ```text
-/// ==========================
-/// Description of the test
-/// ==========================
+/// === Description of the test
+/// === that may continue on further `===` lines
 /// source code to parse;
 /// ---
 /// (Program
 ///   (Expression ...))
 /// ```
 ///
-/// Header rules are made of three or more `=`, the separator of three or more `-`.
+/// A case starts with one or more lines prefixed with `===`, which are joined into its
+/// description. The source runs until a line of three or more `-`, and the expected AST
+/// runs until the next header. Anything before the first header is ignored.
 /// Inside the expected AST, `;` starts a comment that runs to the end of the line.
 ///
 #[derive(Debug)]
@@ -27,9 +28,15 @@ pub(super) struct SexpTestCase {
     expected_ast: SExpr,
 }
 
-fn is_rule(line: &str, ch: char) -> bool {
+const HEADER_PREFIX: &str = "===";
+
+fn is_header(line: &str) -> bool {
+    line.starts_with(HEADER_PREFIX)
+}
+
+fn is_separator(line: &str) -> bool {
     let line = line.trim_end();
-    line.len() >= 3 && line.chars().all(|c| c == ch)
+    line.len() >= 3 && line.chars().all(|c| c == '-')
 }
 
 pub(super) fn execute_sexp_test(test_case: &SexpTestCase) {
@@ -64,22 +71,21 @@ pub(super) fn parse_sexp_test_cases(content: &str) -> Result<Vec<SexpTestCase>, 
     let mut test_cases = Vec::new();
 
     // Skip anything before the first header
-    while lines.next_if(|(_, line)| !is_rule(line, '=')).is_some() {}
+    while lines.next_if(|(_, line)| !is_header(line)).is_some() {}
 
-    while let Some((header_line, _)) = lines.next() {
+    while let Some(&(header_line, _)) = lines.peek() {
         let mut description = Vec::new();
-        loop {
-            match lines.next() {
-                Some((_, line)) if is_rule(line, '=') => break,
-                Some((_, line)) => description.push(line.trim()),
-                None => return Err(format!("Unclosed header at line {}", header_line + 1)),
+        while let Some((_, line)) = lines.next_if(|(_, line)| is_header(line)) {
+            let part = line[HEADER_PREFIX.len()..].trim();
+            if !part.is_empty() {
+                description.push(part);
             }
         }
 
         let mut source = String::new();
         loop {
             match lines.next() {
-                Some((_, line)) if is_rule(line, '-') => break,
+                Some((_, line)) if is_separator(line) => break,
                 Some((_, line)) => {
                     source.push_str(line);
                     source.push('\n');
@@ -94,7 +100,7 @@ pub(super) fn parse_sexp_test_cases(content: &str) -> Result<Vec<SexpTestCase>, 
         }
 
         let mut expected = String::new();
-        while let Some((_, line)) = lines.next_if(|(_, line)| !is_rule(line, '=')) {
+        while let Some((_, line)) = lines.next_if(|(_, line)| !is_header(line)) {
             expected.push_str(line);
             expected.push('\n');
         }
@@ -159,18 +165,15 @@ pub(super) fn execute_sexp_test_cases(path: &str) {
 fn test_sexp_test_file_format() {
     let content = "\
 leading notes are ignored
-=====
-First
-=====
+=== First
 1;
 ---
 (Program
   ; a comment
   (Expression (NumericLiteral 1)))
 
-======
-Second
-======
+=== Second case
+===   spanning two lines
 s = \"a  b\";
 ---
 (Program (Expression (Assignment Assign (Identifier s) (StringLiteral \"a  b\"))))
@@ -179,6 +182,7 @@ s = \"a  b\";
     assert_eq!(test_cases.len(), 2);
     assert_eq!(test_cases[0].description, "First");
     assert_eq!(test_cases[0].source, "1;\n");
+    assert_eq!(test_cases[1].description, "Second case spanning two lines");
     assert_eq!(
         test_cases[0].expected_ast.to_string(),
         "(Program\n  (Expression (NumericLiteral 1)))"
@@ -199,8 +203,8 @@ fn test_sexp_string_escapes_round_trip() {
 
 #[test]
 fn test_sexp_test_file_format_errors() {
-    assert!(parse_sexp_test_cases("===\nNo end").is_err());
-    assert!(parse_sexp_test_cases("===\nA\n===\n1;\n").is_err());
-    assert!(parse_sexp_test_cases("===\nA\n===\n1;\n---\n(Program").is_err());
-    assert!(parse_sexp_test_cases("===\nA\n===\n1;\n---\n(Program))").is_err());
+    assert!(parse_sexp_test_cases("=== A\n1;\n").is_err());
+    assert!(parse_sexp_test_cases("=== A\n1;\n---\n").is_err());
+    assert!(parse_sexp_test_cases("=== A\n1;\n---\n(Program").is_err());
+    assert!(parse_sexp_test_cases("=== A\n1;\n---\n(Program))").is_err());
 }

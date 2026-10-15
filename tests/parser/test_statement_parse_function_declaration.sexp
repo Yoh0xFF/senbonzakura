@@ -1,6 +1,4 @@
-=================================
-Parse simple function declaration
-=================================
+=== Parse simple function declaration
 def myFunction() {
   x = 10;
 }
@@ -13,9 +11,7 @@ def myFunction() {
     (Block
       (Expression (Assignment Assign (Identifier x) (NumericLiteral 10))))))
 
-================================================
-Parse function declaration with single parameter
-================================================
+=== Parse function declaration with single parameter
 def add(x: number): number {
   return x + 1;
 }
@@ -28,9 +24,7 @@ def add(x: number): number {
     (Block
       (Return (Binary Add (Identifier x) (NumericLiteral 1))))))
 
-===================================================
-Parse function declaration with multiple parameters
-===================================================
+=== Parse function declaration with multiple parameters
 def add(x: number, y: number, z: number): number {
   return x + y + z;
 }
@@ -47,18 +41,14 @@ def add(x: number, y: number, z: number): number {
       (Return
         (Binary Add (Binary Add (Identifier x) (Identifier y)) (Identifier z))))))
 
-==========================================
-Parse function declaration with empty body
-==========================================
+=== Parse function declaration with empty body
 def emptyFunction() {
 }
 ---
 (Program
   (FunctionDeclaration (Identifier emptyFunction) (Parameters) Void (Block)))
 
-====================================================
-Parse function declaration with variable declaration
-====================================================
+=== Parse function declaration with variable declaration
 def initFunction(): number {
   let x: number = 10;
   let y: number = 20;
@@ -75,9 +65,7 @@ def initFunction(): number {
       (VariableDeclaration (Variable (Identifier y) Number (NumericLiteral 20)))
       (Return (Binary Add (Identifier x) (Identifier y))))))
 
-============================================
-Parse function declaration with if statement
-============================================
+=== Parse function declaration with if statement
 def max(a: number, b: number): number {
   if (a > b) {
     return a;
@@ -101,9 +89,7 @@ def max(a: number, b: number): number {
         (Block
           (Return (Identifier b)))))))
 
-==========================================
-Parse function declaration with while loop
-==========================================
+=== Parse function declaration with while loop
 def factorial(n: number): number {
   let result: number = 1;
   while (n > 1) {
@@ -134,9 +120,7 @@ def factorial(n: number): number {
               (Binary Subtract (Identifier n) (NumericLiteral 1))))))
       (Return (Identifier result)))))
 
-===========================================
-Parse function declaration with return type
-===========================================
+=== Parse function declaration with return type
 def earlyReturn(x: number): number {
   if (x <= 0) {
     return 0;
@@ -156,9 +140,7 @@ def earlyReturn(x: number): number {
           (Return (NumericLiteral 0))))
       (Return (Identifier x)))))
 
-==================================================
-Parse function declaration with complex expression
-==================================================
+=== Parse function declaration with complex expression
 def evaluate(a: number, b: number, c: number): number {
   return a * b + c * (a + b);
 }
@@ -179,9 +161,7 @@ def evaluate(a: number, b: number, c: number): number {
             (Identifier c)
             (Binary Add (Identifier a) (Identifier b))))))))
 
-====================================
-Parse multiple function declarations
-====================================
+=== Parse multiple function declarations
 def add(a: number, b: number): number {
   return a + b;
 }

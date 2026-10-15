@@ -1,6 +1,4 @@
-==============================
-Parse simple class declaration
-==============================
+=== Parse simple class declaration
 class Person {
   // Empty class
 }
@@ -8,9 +6,7 @@ class Person {
 (Program
   (ClassDeclaration (Identifier Person) _ (Block)))
 
-========================
-Parse class with methods
-========================
+=== Parse class with methods
 class Person {
   def getName() {
     return "John";
@@ -39,9 +35,7 @@ class Person {
         (Block
           (Return (NumericLiteral 30)))))))
 
-============================
-Parse class with inheritance
-============================
+=== Parse class with inheritance
 class Student extends Person {
   def getGrade() {
     return "A";
@@ -60,9 +54,7 @@ class Student extends Person {
         (Block
           (Return (StringLiteral "A")))))))
 
-========================================
-Parse class with constructor-like method
-========================================
+=== Parse class with constructor-like method
 class Person {
   def constructor(name: string, age: number) {
     this.name = name;
@@ -111,9 +103,7 @@ class Person {
         (Block
           (Return (Member (This) (Identifier age))))))))
 
-===================================
-Parse class with instance variables
-===================================
+=== Parse class with instance variables
 class Rectangle {
   def constructor(width: number, height: number) {
     this.width = width;
@@ -155,9 +145,7 @@ class Rectangle {
               (Member (This) (Identifier width))
               (Member (This) (Identifier height)))))))))
 
-============================
-Parse class with super calls
-============================
+=== Parse class with super calls
 class Child extends Parent {
   def constructor(name: string, age: number) {
     super(name);
@@ -200,9 +188,7 @@ class Child extends Parent {
                 (Member (This) (Identifier age)))
               (StringLiteral " years old"))))))))
 
-======================
-Parse multiple classes
-======================
+=== Parse multiple classes
 class Animal {
   def makeSound(): string {
     return "Generic animal sound";
@@ -237,9 +223,7 @@ class Dog extends Animal {
         (Block
           (Return (StringLiteral "Woof")))))))
 
-==========================================
-Parse class with method using if statement
-==========================================
+=== Parse class with method using if statement
 class Calculator {
   def max(a: number, b: number): number {
     if (a > b) {
@@ -269,9 +253,7 @@ class Calculator {
             (Block
               (Return (Identifier b)))))))))
 
-===================================
-Parse class with method using loops
-===================================
+=== Parse class with method using loops
 class Summation {
   def sum(n: number): number {
     let result: number = 0;
@@ -308,9 +290,7 @@ class Summation {
                   (Binary Add (Identifier result) (Identifier i))))))
           (Return (Identifier result)))))))
 
-============================================
-Parse class with method using function calls
-============================================
+=== Parse class with method using function calls
 class MathUtils {
   def factorial(n: number): number {
     if (n <= 1) {
@@ -341,9 +321,7 @@ class MathUtils {
                 (Member (This) (Identifier factorial))
                 (Binary Subtract (Identifier n) (NumericLiteral 1))))))))))
 
-=========================
-Parse class instantiation
-=========================
+=== Parse class instantiation
 class Point {
   def constructor(x: number, y: number) {
     this.x = x;
@@ -375,9 +353,7 @@ let p: Point = new Point(10, 20);
       (Class Point)
       (New (Identifier Point) (NumericLiteral 10) (NumericLiteral 20)))))
 
-==============================
-Parse empty class with extends
-==============================
+=== Parse empty class with extends
 class Empty extends Base {
 }
 ---

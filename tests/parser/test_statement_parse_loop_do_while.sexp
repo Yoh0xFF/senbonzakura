@@ -1,6 +1,4 @@
-==========================
-Parse simple do while loop
-==========================
+=== Parse simple do while loop
 do {
   i = i + 1;
 } while (i < 10);
@@ -14,9 +12,7 @@ do {
           (Binary Add (Identifier i) (NumericLiteral 1)))))
     (Binary LessThan (Identifier i) (NumericLiteral 10))))
 
-==========================================
-Parse do while loop with boolean condition
-==========================================
+=== Parse do while loop with boolean condition
 do {
   x = x + 1;
 } while (true);
@@ -30,9 +26,7 @@ do {
           (Binary Add (Identifier x) (NumericLiteral 1)))))
     (BooleanLiteral true)))
 
-==========================================
-Parse do while loop with complex condition
-==========================================
+=== Parse do while loop with complex condition
 do {
   x = x - 1;
   y = y + 1;
@@ -53,18 +47,14 @@ do {
       (Binary GreaterThan (Identifier x) (NumericLiteral 5))
       (Binary LessThan (Identifier y) (NumericLiteral 20)))))
 
-===================================
-Parse do while loop with empty body
-===================================
+=== Parse do while loop with empty body
 do {
 } while (condition);
 ---
 (Program
   (DoWhile (Block) (Identifier condition)))
 
-===========================
-Parse nested do while loops
-===========================
+=== Parse nested do while loops
 do {
   outer = outer - 1;
   do {
@@ -88,9 +78,7 @@ do {
         (Binary LessThan (Identifier inner) (NumericLiteral 3))))
     (Binary GreaterThan (Identifier outer) (NumericLiteral 0))))
 
-========================================
-Parse do while loop with unary condition
-========================================
+=== Parse do while loop with unary condition
 do {
   x = x + 1;
 } while (!done);

@@ -1,56 +1,42 @@
-============================================
-Parse simple member access with dot notation
-============================================
+=== Parse simple member access with dot notation
 obj.property;
 ---
 (Program
   (Expression (Member (Identifier obj) (Identifier property))))
 
-==================================================
-Parse computed member access with bracket notation
-==================================================
+=== Parse computed member access with bracket notation
 obj[property];
 ---
 (Program
   (Expression (ComputedMember (Identifier obj) (Identifier property))))
 
-=================================================
-Parse computed member access with numeric literal
-=================================================
+=== Parse computed member access with numeric literal
 obj[42];
 ---
 (Program
   (Expression (ComputedMember (Identifier obj) (NumericLiteral 42))))
 
-================================================
-Parse computed member access with string literal
-================================================
+=== Parse computed member access with string literal
 obj["property"];
 ---
 (Program
   (Expression (ComputedMember (Identifier obj) (StringLiteral "property"))))
 
-===================================================
-Parse computed member access with binary expression
-===================================================
+=== Parse computed member access with binary expression
 obj[x + y];
 ---
 (Program
   (Expression
     (ComputedMember (Identifier obj) (Binary Add (Identifier x) (Identifier y)))))
 
-=============================================
-Parse chained member access with dot notation
-=============================================
+=== Parse chained member access with dot notation
 obj.inner.property;
 ---
 (Program
   (Expression
     (Member (Member (Identifier obj) (Identifier inner)) (Identifier property))))
 
-====================================
-Parse chained computed member access
-====================================
+=== Parse chained computed member access
 obj[x][y];
 ---
 (Program
@@ -59,9 +45,7 @@ obj[x][y];
       (ComputedMember (Identifier obj) (Identifier x))
       (Identifier y))))
 
-====================================================
-Parse mixed member access (dot and bracket notation)
-====================================================
+=== Parse mixed member access (dot and bracket notation)
 obj.inner[index].property;
 ---
 (Program
@@ -72,9 +56,7 @@ obj.inner[index].property;
         (Identifier index))
       (Identifier property))))
 
-==========================================
-Parse member access with simple assignment
-==========================================
+=== Parse member access with simple assignment
 obj.property = 42;
 ---
 (Program
@@ -83,9 +65,7 @@ obj.property = 42;
       (Member (Identifier obj) (Identifier property))
       (NumericLiteral 42))))
 
-============================================
-Parse computed member access with assignment
-============================================
+=== Parse computed member access with assignment
 obj[property] = 42;
 ---
 (Program
@@ -94,9 +74,7 @@ obj[property] = 42;
       (ComputedMember (Identifier obj) (Identifier property))
       (NumericLiteral 42))))
 
-====================================================
-Parse member access with complex assignment operator
-====================================================
+=== Parse member access with complex assignment operator
 obj.property += 42;
 ---
 (Program
@@ -105,9 +83,7 @@ obj.property += 42;
       (Member (Identifier obj) (Identifier property))
       (NumericLiteral 42))))
 
-===============================
-Parse deep nested member access
-===============================
+=== Parse deep nested member access
 obj.a.b.c.d.property;
 ---
 (Program
@@ -120,9 +96,7 @@ obj.a.b.c.d.property;
         (Identifier d))
       (Identifier property))))
 
-========================================
-Parse member access in binary expression
-========================================
+=== Parse member access in binary expression
 obj.value + 10;
 ---
 (Program
@@ -131,9 +105,7 @@ obj.value + 10;
       (Member (Identifier obj) (Identifier value))
       (NumericLiteral 10))))
 
-=========================================
-Parse member access in logical expression
-=========================================
+=== Parse member access in logical expression
 obj.valid && hasPermission;
 ---
 (Program
@@ -142,9 +114,7 @@ obj.valid && hasPermission;
       (Member (Identifier obj) (Identifier valid))
       (Identifier hasPermission))))
 
-=============================================
-Parse variable declaration with member access
-=============================================
+=== Parse variable declaration with member access
 let value: string = obj.property;
 ---
 (Program
@@ -154,9 +124,7 @@ let value: string = obj.property;
       String
       (Member (Identifier obj) (Identifier property)))))
 
-===============================================
-Parse if statement with member access condition
-===============================================
+=== Parse if statement with member access condition
 if (user.isAdmin) {
   permission.granted = true;
 }
@@ -170,9 +138,7 @@ if (user.isAdmin) {
           (Member (Identifier permission) (Identifier granted))
           (BooleanLiteral true))))))
 
-==============================================
-Parse if statement with computed member access
-==============================================
+=== Parse if statement with computed member access
 if (permissions[role]) {
   access[level] = true;
 }
@@ -186,9 +152,7 @@ if (permissions[role]) {
           (ComputedMember (Identifier access) (Identifier level))
           (BooleanLiteral true))))))
 
-====================================================
-Parse complex computed member access with arithmetic
-====================================================
+=== Parse complex computed member access with arithmetic
 matrix[i * 10 + j];
 ---
 (Program
@@ -199,75 +163,57 @@ matrix[i * 10 + j];
         (Binary Multiply (Identifier i) (NumericLiteral 10))
         (Identifier j)))))
 
-============================================
-Parse member access with unary NOT operation
-============================================
+=== Parse member access with unary NOT operation
 !obj.enabled;
 ---
 (Program
   (Expression (Unary Not (Member (Identifier obj) (Identifier enabled)))))
 
-============================================
-Parse simple function call with no arguments
-============================================
+=== Parse simple function call with no arguments
 foo();
 ---
 (Program
   (Expression (Call (Identifier foo))))
 
-========================================
-Parse function call with single argument
-========================================
+=== Parse function call with single argument
 foo(42);
 ---
 (Program
   (Expression (Call (Identifier foo) (NumericLiteral 42))))
 
-===========================================
-Parse function call with multiple arguments
-===========================================
+=== Parse function call with multiple arguments
 foo(x, y, 42);
 ---
 (Program
   (Expression
     (Call (Identifier foo) (Identifier x) (Identifier y) (NumericLiteral 42))))
 
-============================================
-Parse function call with expression argument
-============================================
+=== Parse function call with expression argument
 foo(x + y);
 ---
 (Program
   (Expression
     (Call (Identifier foo) (Binary Add (Identifier x) (Identifier y)))))
 
-============================
-Parse chained function calls
-============================
+=== Parse chained function calls
 foo()();
 ---
 (Program
   (Expression (Call (Call (Identifier foo)))))
 
-===========================
-Parse method call on object
-===========================
+=== Parse method call on object
 obj.method();
 ---
 (Program
   (Expression (Call (Member (Identifier obj) (Identifier method)))))
 
-==============================================
-Parse method call using computed member access
-==============================================
+=== Parse method call using computed member access
 obj['method']();
 ---
 (Program
   (Expression (Call (ComputedMember (Identifier obj) (StringLiteral "method")))))
 
-===================================
-Parse complex nested function calls
-===================================
+=== Parse complex nested function calls
 foo(bar(), baz(42));
 ---
 (Program
@@ -277,35 +223,27 @@ foo(bar(), baz(42));
       (Call (Identifier bar))
       (Call (Identifier baz) (NumericLiteral 42)))))
 
-=========================================
-Parse function calls in binary expression
-=========================================
+=== Parse function calls in binary expression
 foo() + bar();
 ---
 (Program
   (Expression (Binary Add (Call (Identifier foo)) (Call (Identifier bar)))))
 
-==========================================
-Parse function calls in logical expression
-==========================================
+=== Parse function calls in logical expression
 isValid() && hasPermission();
 ---
 (Program
   (Expression
     (Logical And (Call (Identifier isValid)) (Call (Identifier hasPermission)))))
 
-=================================
-Parse function call in assignment
-=================================
+=== Parse function call in assignment
 result = getValue();
 ---
 (Program
   (Expression
     (Assignment Assign (Identifier result) (Call (Identifier getValue)))))
 
-================================================================
-Parse function call with complex nested expressions as arguments
-================================================================
+=== Parse function call with complex nested expressions as arguments
 calculate(x + y, z * 2, obj.property);
 ---
 (Program
@@ -316,18 +254,14 @@ calculate(x + y, z * 2, obj.property);
       (Binary Multiply (Identifier z) (NumericLiteral 2))
       (Member (Identifier obj) (Identifier property)))))
 
-=============================================
-Parse variable declaration with function call
-=============================================
+=== Parse variable declaration with function call
 let result: string = getValue();
 ---
 (Program
   (VariableDeclaration
     (Variable (Identifier result) String (Call (Identifier getValue)))))
 
-===============================================
-Parse if statement with function call condition
-===============================================
+=== Parse if statement with function call condition
 if (isAdmin()) {
     grantAccess();
 }
@@ -338,17 +272,13 @@ if (isAdmin()) {
     (Block
       (Expression (Call (Identifier grantAccess))))))
 
-=========================================
-Parse function call with boolean argument
-=========================================
+=== Parse function call with boolean argument
 setEnabled(true);
 ---
 (Program
   (Expression (Call (Identifier setEnabled) (BooleanLiteral true))))
 
-========================================
-Parse function call with string argument
-========================================
+=== Parse function call with string argument
 log("Hello, world!");
 ---
 (Program
