@@ -1,5 +1,5 @@
 use crate::{
-    ast::{Statement, StatementRef},
+    ast::Statement,
     lexer::TokenType,
     parser::{parsers::statement_parse_block::parse_block_statement, ParserResult},
     Parser,
@@ -10,7 +10,7 @@ use crate::{
 ///  : class IDENTIFIER [ClassExtendsExpression] BlockStatement
 ///  ;
 ///
-pub(super) fn parse_class_declaration(parser: &mut Parser) -> ParserResult<StatementRef> {
+pub(super) fn parse_class_declaration(parser: &mut Parser) -> ParserResult<Box<Statement>> {
     parser.eat_token(TokenType::ClassKeyword)?;
 
     let name_token = parser.eat_token(TokenType::Identifier)?;

@@ -1,4 +1,4 @@
-use crate::ast::{AssignmentOperator, Expression, ExpressionRef};
+use crate::ast::{AssignmentOperator, Expression};
 use crate::lexer::TokenType;
 use crate::parser::parsers::expression_parse_relational_and_logical::parse_logical_or_expression;
 use crate::parser::{Parser, ParserError, ParserResult};
@@ -9,7 +9,7 @@ use crate::parser::{Parser, ParserError, ParserResult};
 ///  | LeftHandSideExpression ASSIGNMENT_OPERATOR AssignmentExpression
 ///  ;
 ///
-pub(super) fn parse_assignment_expression(parser: &mut Parser) -> ParserResult<ExpressionRef> {
+pub(super) fn parse_assignment_expression(parser: &mut Parser) -> ParserResult<Box<Expression>> {
     let left = parse_logical_or_expression(parser)?;
 
     if !parser.is_next_token_assignment_operator() {

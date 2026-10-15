@@ -1,4 +1,4 @@
-use crate::ast::{Statement, StatementRef};
+use crate::ast::Statement;
 use crate::lexer::TokenType;
 use crate::parser::parsers::parse_root_expression;
 use crate::parser::parsers::statement_parse_block::parse_statement;
@@ -11,7 +11,7 @@ use crate::parser::{Parser, ParserResult};
 ///  : while '(' Expression ')' Statement ';'
 ///  ;
 ///
-pub(super) fn parse_while_statement(parser: &mut Parser) -> ParserResult<StatementRef> {
+pub(super) fn parse_while_statement(parser: &mut Parser) -> ParserResult<Box<Statement>> {
     parser.eat_token(TokenType::WhileKeyword)?;
 
     parser.eat_token(TokenType::OpeningParenthesis)?;
@@ -28,7 +28,7 @@ pub(super) fn parse_while_statement(parser: &mut Parser) -> ParserResult<Stateme
 ///  : do Statement while '(' Expression ')' ';'
 ///  ;
 ///
-pub(super) fn parse_do_while_statement(parser: &mut Parser) -> ParserResult<StatementRef> {
+pub(super) fn parse_do_while_statement(parser: &mut Parser) -> ParserResult<Box<Statement>> {
     parser.eat_token(TokenType::DoKeyword)?;
 
     let body = parse_statement(parser)?;
@@ -49,7 +49,7 @@ pub(super) fn parse_do_while_statement(parser: &mut Parser) -> ParserResult<Stat
 ///  : for '(' [InitExpression] ';' [Expression] ';' [Expression] ')' Statement
 ///  ;
 ///
-pub(super) fn parse_for_statement(parser: &mut Parser) -> ParserResult<StatementRef> {
+pub(super) fn parse_for_statement(parser: &mut Parser) -> ParserResult<Box<Statement>> {
     parser.eat_token(TokenType::ForKeyword)?;
     parser.eat_token(TokenType::OpeningParenthesis)?;
 
@@ -95,7 +95,7 @@ pub(super) fn parse_for_statement(parser: &mut Parser) -> ParserResult<Statement
 ///
 pub(super) fn parse_for_statement_init_statement(
     parser: &mut Parser,
-) -> ParserResult<StatementRef> {
+) -> ParserResult<Box<Statement>> {
     if parser.is_next_token_of_type(TokenType::LetKeyword) {
         return parse_variable_declaration_statement(parser, false);
     }

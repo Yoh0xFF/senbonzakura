@@ -1,9 +1,4 @@
-use crate::{
-    ast::{Expression, ExpressionList, ExpressionRef},
-    lexer::TokenType,
-    parser::ParserResult,
-    Parser,
-};
+use crate::{ast::Expression, lexer::TokenType, parser::ParserResult, Parser};
 
 use super::{
     expression_parse_assignment::parse_assignment_expression,
@@ -16,7 +11,9 @@ use super::{
 ///  : CallMemberExpression
 ///  ;
 ///
-pub(super) fn parse_left_hand_side_expression(parser: &mut Parser) -> ParserResult<ExpressionRef> {
+pub(super) fn parse_left_hand_side_expression(
+    parser: &mut Parser,
+) -> ParserResult<Box<Expression>> {
     parse_call_member_expression(parser)
 }
 
@@ -26,7 +23,7 @@ pub(super) fn parse_left_hand_side_expression(parser: &mut Parser) -> ParserResu
 ///  | CallExpression
 /// ;
 ///
-pub(super) fn parse_call_member_expression(parser: &mut Parser) -> ParserResult<ExpressionRef> {
+pub(super) fn parse_call_member_expression(parser: &mut Parser) -> ParserResult<Box<Expression>> {
     // Member part might be part of a call
     let member = parse_member_expression(parser)?;
 
@@ -53,8 +50,8 @@ pub(super) fn parse_call_member_expression(parser: &mut Parser) -> ParserResult<
 ///
 pub(super) fn parse_call_expression(
     parser: &mut Parser,
-    callee: ExpressionRef,
-) -> ParserResult<ExpressionRef> {
+    callee: Box<Expression>,
+) -> ParserResult<Box<Expression>> {
     let mut call_expression = Box::new(Expression::Call {
         callee: callee.clone(),
         arguments: parse_arguments(parser)?,
@@ -72,7 +69,7 @@ pub(super) fn parse_call_expression(
 ///  : '(' [ArgumentList] ')'
 /// ;
 ///
-pub(super) fn parse_arguments(parser: &mut Parser) -> ParserResult<ExpressionList> {
+pub(super) fn parse_arguments(parser: &mut Parser) -> ParserResult<Vec<Expression>> {
     parser.eat_token(TokenType::OpeningParenthesis)?;
     let arguments = if parser.is_next_token_of_type(TokenType::ClosingParenthesis) {
         vec![]
@@ -90,7 +87,7 @@ pub(super) fn parse_arguments(parser: &mut Parser) -> ParserResult<ExpressionLis
 ///  | ArgumentList ',' AssignmentExpression
 /// ;
 ///
-pub(super) fn parse_arguments_list(parser: &mut Parser) -> ParserResult<ExpressionList> {
+pub(super) fn parse_arguments_list(parser: &mut Parser) -> ParserResult<Vec<Expression>> {
     let mut arguments = vec![];
 
     loop {
@@ -114,7 +111,7 @@ pub(super) fn parse_arguments_list(parser: &mut Parser) -> ParserResult<Expressi
 ///  | MemberExpression '[' Expression ']'
 ///  ;
 ///
-pub(super) fn parse_member_expression(parser: &mut Parser) -> ParserResult<ExpressionRef> {
+pub(super) fn parse_member_expression(parser: &mut Parser) -> ParserResult<Box<Expression>> {
     let mut object = parse_primary_expression(parser)?;
 
     while parser.is_next_token_any_of_type(&[TokenType::Dot, TokenType::OpeningBracket]) {

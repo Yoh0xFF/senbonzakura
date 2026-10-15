@@ -1,5 +1,5 @@
 use super::statement_parse_class_declaration::parse_class_declaration;
-use crate::ast::{Statement, StatementList, StatementRef};
+use crate::ast::Statement;
 use crate::lexer::TokenType;
 use crate::parser::parsers::statement_parse_conditional::parse_if_statement;
 use crate::parser::parsers::statement_parse_empty_and_expression::{
@@ -20,7 +20,7 @@ use crate::parser::{Parser, ParserResult};
 ///  : StatementList
 ///  ;
 ///
-pub(super) fn parse_program_statement(parser: &mut Parser) -> ParserResult<StatementRef> {
+pub(super) fn parse_program_statement(parser: &mut Parser) -> ParserResult<Box<Statement>> {
     let statement_list = parse_statement_list(parser, None)?;
     Ok(Box::new(Statement::Program {
         body: statement_list,
@@ -32,7 +32,7 @@ pub(super) fn parse_program_statement(parser: &mut Parser) -> ParserResult<State
 ///  : '{' OptStatementList '}'
 ///  ;
 ///
-pub(super) fn parse_block_statement(parser: &mut Parser) -> ParserResult<StatementRef> {
+pub(super) fn parse_block_statement(parser: &mut Parser) -> ParserResult<Box<Statement>> {
     parser.eat_token(TokenType::OpeningBrace)?;
 
     let block = if !parser.is_next_token_of_type(TokenType::ClosingBrace) {
@@ -55,7 +55,7 @@ pub(super) fn parse_block_statement(parser: &mut Parser) -> ParserResult<Stateme
 pub(super) fn parse_statement_list(
     parser: &mut Parser,
     stop_token_type: Option<TokenType>,
-) -> ParserResult<StatementList> {
+) -> ParserResult<Vec<Statement>> {
     let mut statement_list: Vec<Statement> = vec![];
 
     while !parser.is_next_token_of_type(TokenType::End)
@@ -81,7 +81,7 @@ pub(super) fn parse_statement_list(
 ///  | ClassDeclaration
 ///  ;
 ///
-pub(super) fn parse_statement(parser: &mut Parser) -> ParserResult<StatementRef> {
+pub(super) fn parse_statement(parser: &mut Parser) -> ParserResult<Box<Statement>> {
     match parser.lookahead.token_type {
         TokenType::StatementEnd => parse_empty_statement(parser),
         TokenType::OpeningBrace => parse_block_statement(parser),

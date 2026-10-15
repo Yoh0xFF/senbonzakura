@@ -1,4 +1,4 @@
-use crate::ast::{ExpressionRef, StatementRef};
+use crate::ast::{Expression, Statement};
 use crate::parser::parsers::expression_parse_assignment::parse_assignment_expression;
 use crate::parser::parsers::statement_parse_block::parse_program_statement;
 use crate::parser::{Parser, ParserResult};
@@ -6,7 +6,7 @@ use crate::parser::{Parser, ParserResult};
 ///
 /// Parses a string into an AST
 ///
-pub fn parse_root_statement(parser: &mut Parser) -> ParserResult<StatementRef> {
+pub fn parse_root_statement(parser: &mut Parser) -> ParserResult<Box<Statement>> {
     parse_program_statement(parser)
 }
 
@@ -15,6 +15,6 @@ pub fn parse_root_statement(parser: &mut Parser) -> ParserResult<StatementRef> {
 ///  : AssignmentExpression
 ///  ;
 ///
-pub fn parse_root_expression(parser: &mut Parser) -> ParserResult<ExpressionRef> {
+pub fn parse_root_expression(parser: &mut Parser) -> ParserResult<Box<Expression>> {
     parse_assignment_expression(parser)
 }

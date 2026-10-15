@@ -1,4 +1,4 @@
-use crate::ast::{BinaryOperator, Expression, ExpressionRef, LogicalOperator};
+use crate::ast::{BinaryOperator, Expression, LogicalOperator};
 use crate::lexer::TokenType;
 use crate::parser::{Parser, ParserResult};
 
@@ -10,9 +10,9 @@ pub(super) fn parse_binary_expression<OperandParserFnType, OperatorMapperFnType>
     token_types: &[TokenType],
     operand_parser: OperandParserFnType,
     operator_mapper: OperatorMapperFnType,
-) -> ParserResult<ExpressionRef>
+) -> ParserResult<Box<Expression>>
 where
-    OperandParserFnType: Fn(&mut Parser) -> ParserResult<ExpressionRef>,
+    OperandParserFnType: Fn(&mut Parser) -> ParserResult<Box<Expression>>,
     OperatorMapperFnType: Fn(TokenType) -> ParserResult<BinaryOperator>,
 {
     let mut left = operand_parser(parser)?;
@@ -41,9 +41,9 @@ pub(super) fn parse_logical_expression<OperandParserFnType, OperatorMapperFnType
     token_types: &[TokenType],
     operand_parser: OperandParserFnType,
     operator_mapper: OperatorMapperFnType,
-) -> ParserResult<ExpressionRef>
+) -> ParserResult<Box<Expression>>
 where
-    OperandParserFnType: Fn(&mut Parser) -> ParserResult<ExpressionRef>,
+    OperandParserFnType: Fn(&mut Parser) -> ParserResult<Box<Expression>>,
     OperatorMapperFnType: Fn(TokenType) -> ParserResult<LogicalOperator>,
 {
     let mut left = operand_parser(parser)?;

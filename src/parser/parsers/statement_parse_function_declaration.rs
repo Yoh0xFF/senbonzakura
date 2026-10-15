@@ -1,4 +1,4 @@
-use crate::ast::{Parameter, ParameterList, Statement, StatementRef, Type};
+use crate::ast::{Parameter, Statement, Type};
 use crate::lexer::TokenType;
 use crate::parser::parsers::parse_root_expression;
 use crate::parser::parsers::statement_parse_block::parse_block_statement;
@@ -12,7 +12,7 @@ use super::type_parse_annotations::parse_type;
 ///
 pub(super) fn parse_function_declaration_statement(
     parser: &mut Parser,
-) -> ParserResult<StatementRef> {
+) -> ParserResult<Box<Statement>> {
     parser.eat_token(TokenType::DefKeyword)?;
     let name_token = parser.eat_token(TokenType::Identifier)?;
     let name = String::from(name_token.text(parser.source));
@@ -51,7 +51,7 @@ pub(super) fn parse_function_declaration_statement(
 ///
 pub(super) fn parse_formal_parameter_list_expression(
     parser: &mut Parser,
-) -> ParserResult<ParameterList> {
+) -> ParserResult<Vec<Parameter>> {
     let mut parameters = vec![];
 
     // Parse first parameter
@@ -87,7 +87,7 @@ fn parse_formal_parameter(parser: &mut Parser) -> ParserResult<Parameter> {
 /// ReturnStatement
 ///  : return [Expression] 'l'
 ///
-pub(super) fn parse_return_statement(parser: &mut Parser) -> ParserResult<StatementRef> {
+pub(super) fn parse_return_statement(parser: &mut Parser) -> ParserResult<Box<Statement>> {
     parser.eat_token(TokenType::ReturnKeyword)?;
     let argument = if parser.is_next_token_of_type(TokenType::StatementEnd) {
         None

@@ -1,4 +1,4 @@
-use crate::ast::{BinaryOperator, ExpressionRef};
+use crate::ast::{BinaryOperator, Expression};
 use crate::lexer::TokenType;
 use crate::parser::parsers::expression_parse_unary::parse_unary_expression;
 use crate::parser::parsers::internal_util::parse_binary_expression;
@@ -10,7 +10,7 @@ use crate::parser::{Parser, ParserError, ParserResult};
 ///  | AdditiveExpression ADDITIVE_OPERATOR FactorExpression
 ///  ;
 ///
-pub(super) fn parse_additive_expression(parser: &mut Parser) -> ParserResult<ExpressionRef> {
+pub(super) fn parse_additive_expression(parser: &mut Parser) -> ParserResult<Box<Expression>> {
     parse_binary_expression(
         parser,
         &[
@@ -34,7 +34,7 @@ pub(super) fn parse_additive_expression(parser: &mut Parser) -> ParserResult<Exp
 ///  | FactorExpression FACTOR_OPERATOR PrimaryExpression
 ///  ;
 ///
-pub(super) fn parse_factor_expression(parser: &mut Parser) -> ParserResult<ExpressionRef> {
+pub(super) fn parse_factor_expression(parser: &mut Parser) -> ParserResult<Box<Expression>> {
     parse_binary_expression(
         parser,
         &[
