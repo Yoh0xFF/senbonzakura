@@ -1,0 +1,31 @@
+=== Parse number token
+12
+---
+Number  1:1-1:3  0..2  "12"
+
+=== Parse number token with leading whitespace
+    12
+---
+Number  1:5-1:7  4..6  "12"
+
+=== Parse double quote and single quote string tokens
+  "Hello" 'world'  
+---
+String  1:3-1:10   2..9    "\"Hello\""
+String  1:11-1:18  10..17  "'world'"
+
+=== Parse string token with internal whitespace
+  " Hello "  
+---
+String  1:3-1:12  2..11  "\" Hello \""
+
+=== Parse boolean tokens
+ true false 
+---
+BooleanTrue   1:2-1:6   1..5   "true"
+BooleanFalse  1:7-1:12  6..11  "false"
+
+=== Parse nil token
+ nil 
+---
+Nil  1:2-1:5  1..4  "nil"

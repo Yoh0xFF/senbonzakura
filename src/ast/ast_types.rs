@@ -1,10 +1,7 @@
 use std::fmt;
 
-use serde::{Deserialize, Serialize};
-
 #[allow(dead_code)]
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-#[serde(tag = "type", content = "value", rename_all = "PascalCase")]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Type {
     Primitive(PrimitiveType),
 
@@ -28,8 +25,7 @@ pub enum Type {
     Void,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-#[serde(rename_all = "PascalCase")]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum PrimitiveType {
     Number,
     Boolean,

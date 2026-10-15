@@ -5,6 +5,8 @@ use parser::{parse_root_statement, Parser};
 mod ast;
 mod lexer;
 mod parser;
+#[cfg(test)]
+mod test_files;
 
 fn main() {
     let Ok(mut parser) = Parser::new(
@@ -25,7 +27,6 @@ fn main() {
 
     match ast_result {
         Ok(ast) => {
-            println!("Yaml:\n{}", serde_yaml::to_string(&ast).unwrap());
             println!("S-expression:\n{}", ast::statement_to_sexpr(&ast));
         }
         Err(error) => {

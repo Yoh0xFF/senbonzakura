@@ -1,0 +1,33 @@
+=== Parse arithmetic operator tokens
++ - * /
+---
+AdditivePlusOperator          1:1-1:2  0..1  "+"
+AdditiveMinusOperator         1:3-1:4  2..3  "-"
+FactorMultiplicationOperator  1:5-1:6  4..5  "*"
+FactorDivisionOperator        1:7-1:8  6..7  "/"
+
+=== Parse assignment operator tokens
+= += -= *= /=
+---
+SimpleAssignmentOperator           1:1-1:2    0..1    "="
+ComplexPlusAssignmentOperator      1:3-1:5    2..4    "+="
+ComplexMinusAssignmentOperator     1:6-1:8    5..7    "-="
+ComplexMultiplyAssignmentOperator  1:9-1:11   8..10   "*="
+ComplexDivideAssignmentOperator    1:12-1:14  11..13  "/="
+
+=== Parse comparison operator tokens
+== != > >= < <=
+---
+EqualOperator                           1:1-1:3    0..2    "=="
+NotEqualOperator                        1:4-1:6    3..5    "!="
+RelationalGreaterThanOperator           1:7-1:8    6..7    ">"
+RelationalGreaterThanOrEqualToOperator  1:9-1:11   8..10   ">="
+RelationalLessThanOperator              1:12-1:13  11..12  "<"
+RelationalLessThanOrEqualToOperator     1:14-1:16  13..15  "<="
+
+=== Parse logical operator tokens
+&& || !
+---
+LogicalAndOperator  1:1-1:3  0..2  "&&"
+LogicalOrOperator   1:4-1:6  3..5  "||"
+LogicalNotOperator  1:7-1:8  6..7  "!"

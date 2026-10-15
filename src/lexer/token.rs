@@ -1,9 +1,7 @@
 use core::fmt;
 
-use serde::{Deserialize, Serialize};
-
-#[derive(Debug, Copy, Clone, PartialEq, Eq, Serialize, Deserialize)]
-#[serde(rename_all = "PascalCase")]
+#[allow(dead_code)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub enum TokenType {
     // Literals
     Number,
@@ -112,7 +110,7 @@ impl fmt::Display for TokenType {
 ///
 /// Token position in the source
 ///
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct TokenPosition {
     pub line: usize,
     pub column: usize,
@@ -142,7 +140,7 @@ impl TokenPosition {
 ///
 /// Token structure
 ///
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Token {
     pub token_type: TokenType,
     pub start: TokenPosition,
