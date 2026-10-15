@@ -1,6 +1,6 @@
 use super::expression_parse_assignment::parse_assignment_expression;
 use super::type_parse_annotations::parse_type;
-use crate::ast::{Expression, Statement};
+use crate::ast::{Expression, Statement, VariableDeclarator};
 use crate::lexer::TokenType;
 use crate::parser::{Parser, ParserResult};
 
@@ -9,20 +9,19 @@ use crate::parser::{Parser, ParserResult};
 ///  : 'let' VariableList ';'
 ///
 /// VariableList
-///  : VariableExpression
-///  | VariableList ',' VariableExpression
+///  : VariableDeclarator
+///  | VariableList ',' VariableDeclarator
 ///  ;
 ///
 pub(super) fn parse_variable_declaration_statement(
     parser: &mut Parser,
     consume_statement_end: bool,
 ) -> ParserResult<Box<Statement>> {
-    let mut variables: Vec<Expression> = vec![];
+    let mut variables: Vec<VariableDeclarator> = vec![];
 
     parser.eat_token(TokenType::LetKeyword)?;
     loop {
-        let variable_expression = parse_variable_expression(parser)?;
-        variables.push(*variable_expression);
+        variables.push(parse_variable_declarator(parser)?);
 
         if !parser.is_next_token_of_type(TokenType::Comma) {
             break;
@@ -38,13 +37,13 @@ pub(super) fn parse_variable_declaration_statement(
 }
 
 ///
-/// VariableInitializationExpression
+/// VariableDeclarator
 ///  : IDENTIFIER ':' Type ['=' Initializer]
 ///  ;
 ///
-pub(super) fn parse_variable_expression(parser: &mut Parser) -> ParserResult<Box<Expression>> {
-    let identifier_token = parser.eat_token(TokenType::Identifier)?;
-    let identifier = String::from(identifier_token.text(parser.source));
+pub(super) fn parse_variable_declarator(parser: &mut Parser) -> ParserResult<VariableDeclarator> {
+    let name_token = parser.eat_token(TokenType::Identifier)?;
+    let name = String::from(name_token.text(parser.source));
 
     // Require type annotation
     parser.eat_token(TokenType::Colon)?;
@@ -59,9 +58,9 @@ pub(super) fn parse_variable_expression(parser: &mut Parser) -> ParserResult<Box
             Some(initializer)
         };
 
-    Ok(Box::new(Expression::Variable {
-        identifier,
+    Ok(VariableDeclarator {
+        name,
         type_annotation,
         initializer,
-    }))
+    })
 }

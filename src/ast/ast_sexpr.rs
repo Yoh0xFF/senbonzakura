@@ -1,6 +1,6 @@
 use std::fmt;
 
-use super::{Expression, Statement, Type};
+use super::{Expression, Statement, Type, VariableDeclarator};
 
 ///
 /// Maximum line width the pretty printer aims for
@@ -146,9 +146,10 @@ pub fn statement_to_sexpr(statement: &Statement) -> SExpr {
         Statement::Expression { expression } => {
             SExpr::node("Expression", vec![expression_to_sexpr(expression)])
         }
-        Statement::VariableDeclaration { variables } => {
-            SExpr::node("VariableDeclaration", expressions(variables))
-        }
+        Statement::VariableDeclaration { variables } => SExpr::node(
+            "VariableDeclaration",
+            variables.iter().map(variable_declarator_to_sexpr).collect(),
+        ),
         Statement::If {
             condition,
             consequent,
@@ -235,19 +236,22 @@ pub fn statement_to_sexpr(statement: &Statement) -> SExpr {
 }
 
 ///
+/// Convert a variable declarator to its s-expression form
+///
+fn variable_declarator_to_sexpr(variable: &VariableDeclarator) -> SExpr {
+    let mut children = vec![
+        identifier(&variable.name),
+        type_to_sexpr(&variable.type_annotation),
+    ];
+    children.extend(variable.initializer.as_deref().map(expression_to_sexpr));
+    SExpr::node("Variable", children)
+}
+
+///
 /// Convert an expression to its s-expression form
 ///
 pub fn expression_to_sexpr(expression: &Expression) -> SExpr {
     match expression {
-        Expression::Variable {
-            identifier: name,
-            type_annotation,
-            initializer,
-        } => {
-            let mut children = vec![identifier(name), type_to_sexpr(type_annotation)];
-            children.extend(initializer.as_deref().map(expression_to_sexpr));
-            SExpr::node("Variable", children)
-        }
         Expression::Assignment {
             operator,
             left,
