@@ -9,7 +9,13 @@ pub type StatementRef = Box<Statement>;
 pub type ExpressionRef = Box<Expression>;
 pub type StatementList = Vec<Statement>;
 pub type ExpressionList = Vec<Expression>;
-pub type ParameterList = Vec<(Expression, Type)>;
+pub type ParameterList = Vec<Parameter>;
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct Parameter {
+    pub name: String,
+    pub type_annotation: Type,
+}
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(tag = "type", rename_all = "PascalCase")]

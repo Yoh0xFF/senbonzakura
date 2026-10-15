@@ -1,4 +1,4 @@
-use crate::ast::{ParameterList, Statement, StatementRef, Type};
+use crate::ast::{Parameter, ParameterList, Statement, StatementRef, Type};
 use crate::lexer::TokenType;
 use crate::parser::parsers::expression_parse_primary::parse_identifier_expression;
 use crate::parser::parsers::parse_root_expression;
@@ -45,8 +45,8 @@ pub(super) fn parse_function_declaration_statement(
 
 ///
 /// FormalParameterList
-///  : IdentifierExpression ':' Type
-///  | FormalParameterList ',' IdentifierExpression ':' Type
+///  : FormalParameter
+///  | FormalParameterList ',' FormalParameter
 ///  ;
 ///
 pub(super) fn parse_formal_parameter_list_expression(
@@ -55,21 +55,32 @@ pub(super) fn parse_formal_parameter_list_expression(
     let mut parameters = vec![];
 
     // Parse first parameter
-    let param_name = parse_identifier_expression(parser)?;
-    parser.eat_token(TokenType::Colon)?;
-    let param_type = parse_type(parser)?;
-    parameters.push((*param_name, param_type));
+    parameters.push(parse_formal_parameter(parser)?);
 
     // Parse additional parameters if any
     while parser.is_next_token_of_type(TokenType::Comma) {
         parser.eat_token(TokenType::Comma)?;
-        let param_name = parse_identifier_expression(parser)?;
-        parser.eat_token(TokenType::Colon)?;
-        let param_type = parse_type(parser)?;
-        parameters.push((*param_name, param_type));
+        parameters.push(parse_formal_parameter(parser)?);
     }
 
     Ok(parameters)
+}
+
+///
+/// FormalParameter
+///  : IDENTIFIER ':' Type
+///  ;
+///
+fn parse_formal_parameter(parser: &mut Parser) -> ParserResult<Parameter> {
+    let name_token = parser.eat_token(TokenType::Identifier)?;
+    let name = String::from(name_token.text(parser.source));
+    parser.eat_token(TokenType::Colon)?;
+    let type_annotation = parse_type(parser)?;
+
+    Ok(Parameter {
+        name,
+        type_annotation,
+    })
 }
 
 ///
