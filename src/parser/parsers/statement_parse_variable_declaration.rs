@@ -1,5 +1,4 @@
 use super::expression_parse_assignment::parse_assignment_expression;
-use super::expression_parse_primary::parse_identifier_expression;
 use super::type_parse_annotations::parse_type;
 use crate::ast::{Expression, ExpressionRef, Statement, StatementRef};
 use crate::lexer::TokenType;
@@ -40,11 +39,12 @@ pub(super) fn parse_variable_declaration_statement(
 
 ///
 /// VariableInitializationExpression
-///  : Identifier ':' Type ['=' Initializer]
+///  : IDENTIFIER ':' Type ['=' Initializer]
 ///  ;
 ///
 pub(super) fn parse_variable_expression(parser: &mut Parser) -> ParserResult<ExpressionRef> {
-    let identifier = parse_identifier_expression(parser)?;
+    let identifier_token = parser.eat_token(TokenType::Identifier)?;
+    let identifier = String::from(identifier_token.text(parser.source));
 
     // Require type annotation
     parser.eat_token(TokenType::Colon)?;

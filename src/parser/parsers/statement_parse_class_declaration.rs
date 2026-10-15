@@ -1,29 +1,24 @@
 use crate::{
-    ast::{ExpressionRef, Statement, StatementRef},
+    ast::{Statement, StatementRef},
     lexer::TokenType,
-    parser::{
-        parsers::{
-            expression_parse_primary::parse_identifier_expression,
-            statement_parse_block::parse_block_statement,
-        },
-        ParserResult,
-    },
+    parser::{parsers::statement_parse_block::parse_block_statement, ParserResult},
     Parser,
 };
 
 ///
 /// ClassDeclaration
-///  : class IdentifierExpression [ClassExtendsExpression] BlockStatement
+///  : class IDENTIFIER [ClassExtendsExpression] BlockStatement
 ///  ;
 ///
 pub(super) fn parse_class_declaration(parser: &mut Parser) -> ParserResult<StatementRef> {
     parser.eat_token(TokenType::ClassKeyword)?;
 
-    let name = parse_identifier_expression(parser)?;
+    let name_token = parser.eat_token(TokenType::Identifier)?;
+    let name = String::from(name_token.text(parser.source));
 
     let super_class = if parser.is_next_token_of_type(TokenType::ExtendsKeyword) {
-        let expression = parse_class_extends_expression(parser)?;
-        Some(expression)
+        let super_class = parse_class_extends_expression(parser)?;
+        Some(super_class)
     } else {
         None
     };
@@ -39,10 +34,11 @@ pub(super) fn parse_class_declaration(parser: &mut Parser) -> ParserResult<State
 
 ///
 /// ClassExtendsExpression
-///  : extends IdentifierExpression
+///  : extends IDENTIFIER
 ///  ;
 ///
-fn parse_class_extends_expression(parser: &mut Parser) -> ParserResult<ExpressionRef> {
+fn parse_class_extends_expression(parser: &mut Parser) -> ParserResult<String> {
     parser.eat_token(TokenType::ExtendsKeyword)?;
-    parse_identifier_expression(parser)
+    let name_token = parser.eat_token(TokenType::Identifier)?;
+    Ok(String::from(name_token.text(parser.source)))
 }
