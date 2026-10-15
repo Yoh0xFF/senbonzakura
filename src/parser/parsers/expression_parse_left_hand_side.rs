@@ -1,9 +1,13 @@
-use crate::{ast::Expression, lexer::TokenType, parser::ParserResult, Parser};
+use crate::{
+    ast::{Expression, MemberProperty},
+    lexer::TokenType,
+    parser::ParserResult,
+    Parser,
+};
 
 use super::{
     expression_parse_assignment::parse_assignment_expression,
-    expression_parse_primary::{parse_identifier_expression, parse_primary_expression},
-    parse_root_expression,
+    expression_parse_primary::parse_primary_expression, parse_root_expression,
 };
 
 ///
@@ -117,12 +121,12 @@ pub(super) fn parse_member_expression(parser: &mut Parser) -> ParserResult<Box<E
     while parser.is_next_token_any_of_type(&[TokenType::Dot, TokenType::OpeningBracket]) {
         if parser.is_next_token_of_type(TokenType::Dot) {
             parser.eat_token(TokenType::Dot)?;
-            let property = parse_identifier_expression(parser)?;
+            let property_token = parser.eat_token(TokenType::Identifier)?;
+            let property = String::from(property_token.text(parser.source));
 
             object = Box::new(Expression::Member {
-                computed: false,
                 object,
-                property,
+                property: MemberProperty::Named(property),
             });
         }
 
@@ -132,9 +136,8 @@ pub(super) fn parse_member_expression(parser: &mut Parser) -> ParserResult<Box<E
             parser.eat_token(TokenType::ClosingBracket)?;
 
             object = Box::new(Expression::Member {
-                computed: true,
                 object,
-                property,
+                property: MemberProperty::Computed(property),
             });
         }
     }

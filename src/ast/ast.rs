@@ -12,6 +12,19 @@ pub struct Parameter {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct VariableDeclarator {
+    pub name: String,
+    pub type_annotation: Type,
+    pub initializer: Option<Box<Expression>>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum MemberProperty {
+    Named(String),
+    Computed(Box<Expression>),
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(tag = "type", rename_all = "PascalCase")]
 pub enum Statement {
     Program {
@@ -29,7 +42,7 @@ pub enum Statement {
     },
 
     VariableDeclaration {
-        variables: Vec<Expression>,
+        variables: Vec<VariableDeclarator>,
     },
 
     If {
@@ -59,7 +72,7 @@ pub enum Statement {
         name: String,
         parameters: Vec<Parameter>,
         return_type: Type,
-        body: Box<Statement>,
+        body: Vec<Statement>,
     },
 
     Return {
@@ -69,19 +82,13 @@ pub enum Statement {
     ClassDeclaration {
         name: String,
         super_class: Option<String>,
-        body: Box<Statement>,
+        body: Vec<Statement>,
     },
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(tag = "type", rename_all = "PascalCase")]
 pub enum Expression {
-    Variable {
-        identifier: String,
-        type_annotation: Type,
-        initializer: Option<Box<Expression>>,
-    },
-
     Assignment {
         operator: AssignmentOperator,
         left: Box<Expression>,
@@ -124,9 +131,8 @@ pub enum Expression {
     },
 
     Member {
-        computed: bool,
         object: Box<Expression>,
-        property: Box<Expression>,
+        property: MemberProperty,
     },
 
     Call {

@@ -33,9 +33,18 @@ pub(super) fn parse_program_statement(parser: &mut Parser) -> ParserResult<Box<S
 ///  ;
 ///
 pub(super) fn parse_block_statement(parser: &mut Parser) -> ParserResult<Box<Statement>> {
+    let body = parse_block_body(parser)?;
+    Ok(Box::new(Statement::Block { body }))
+}
+
+///
+/// Parses a braced block and returns its statements,
+/// used for function and class bodies, which are always blocks
+///
+pub(super) fn parse_block_body(parser: &mut Parser) -> ParserResult<Vec<Statement>> {
     parser.eat_token(TokenType::OpeningBrace)?;
 
-    let block = if !parser.is_next_token_of_type(TokenType::ClosingBrace) {
+    let body = if !parser.is_next_token_of_type(TokenType::ClosingBrace) {
         parse_statement_list(parser, Some(TokenType::ClosingBrace))?
     } else {
         vec![]
@@ -43,7 +52,7 @@ pub(super) fn parse_block_statement(parser: &mut Parser) -> ParserResult<Box<Sta
 
     parser.eat_token(TokenType::ClosingBrace)?;
 
-    Ok(Box::new(Statement::Block { body: block }))
+    Ok(body)
 }
 
 ///
