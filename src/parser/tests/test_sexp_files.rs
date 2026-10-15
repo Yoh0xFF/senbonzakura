@@ -36,6 +36,11 @@ fn test_expression_parse_unary() {
 }
 
 #[test]
+fn test_parse_errors() {
+    execute_sexp_test_cases("tests/parser/test_parse_errors.sexp");
+}
+
+#[test]
 fn test_statement_parse_block() {
     execute_sexp_test_cases("tests/parser/test_statement_parse_block.sexp");
 }
