@@ -19,6 +19,12 @@ pub struct VariableDeclarator {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum MemberProperty {
+    Named(String),
+    Computed(Box<Expression>),
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(tag = "type", rename_all = "PascalCase")]
 pub enum Statement {
     Program {
@@ -125,9 +131,8 @@ pub enum Expression {
     },
 
     Member {
-        computed: bool,
         object: Box<Expression>,
-        property: Box<Expression>,
+        property: MemberProperty,
     },
 
     Call {

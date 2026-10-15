@@ -1,6 +1,6 @@
 use std::fmt;
 
-use super::{Expression, Statement, Type, VariableDeclarator};
+use super::{Expression, MemberProperty, Statement, Type, VariableDeclarator};
 
 ///
 /// Maximum line width the pretty printer aims for
@@ -306,18 +306,16 @@ pub fn expression_to_sexpr(expression: &Expression) -> SExpr {
             SExpr::node("NumericLiteral", vec![SExpr::atom(value)])
         }
         Expression::Identifier { name } => identifier(name),
-        Expression::Member {
-            computed,
-            object,
-            property,
-        } => SExpr::node(
-            if *computed {
-                "ComputedMember"
-            } else {
-                "Member"
-            },
-            vec![expression_to_sexpr(object), expression_to_sexpr(property)],
-        ),
+        Expression::Member { object, property } => match property {
+            MemberProperty::Named(name) => SExpr::node(
+                "Member",
+                vec![expression_to_sexpr(object), identifier(name)],
+            ),
+            MemberProperty::Computed(property) => SExpr::node(
+                "ComputedMember",
+                vec![expression_to_sexpr(object), expression_to_sexpr(property)],
+            ),
+        },
         Expression::Call { callee, arguments } => {
             let mut children = vec![expression_to_sexpr(callee)];
             children.extend(expressions(arguments));
