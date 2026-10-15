@@ -1,0 +1,7 @@
+=== Parse type keyword tokens
+number string boolean void
+---
+NumberTypeKeyword   1:1-1:7    0..6    "number"
+StringTypeKeyword   1:8-1:14   7..13   "string"
+BooleanTypeKeyword  1:15-1:22  14..21  "boolean"
+VoidTypeKeyword     1:23-1:27  22..26  "void"

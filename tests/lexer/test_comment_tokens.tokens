@@ -1,0 +1,23 @@
+=== Parse single line comment
+// This is single line comment
+17
+---
+Number  2:1-2:3  31..33  "17"
+
+=== Parse multi line comment
+/*
+This is multi line comment,
+and we should skip it
+*/
+1719
+---
+Number  5:1-5:5  56..60  "1719"
+
+=== Parse formatted multi line comment
+/**
+* This is multi line comment,
+* and we should skip it
+*/
+1719
+---
+Number  5:1-5:5  61..65  "1719"

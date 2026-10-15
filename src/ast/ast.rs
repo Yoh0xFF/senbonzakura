@@ -1,31 +1,28 @@
-use serde::{Deserialize, Serialize};
-
 use super::{
     ast_operators::{AssignmentOperator, BinaryOperator, LogicalOperator, UnaryOperator},
     ast_types::Type,
 };
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Parameter {
     pub name: String,
     pub type_annotation: Type,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct VariableDeclarator {
     pub name: String,
     pub type_annotation: Type,
     pub initializer: Option<Box<Expression>>,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum MemberProperty {
     Named(String),
     Computed(Box<Expression>),
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-#[serde(tag = "type", rename_all = "PascalCase")]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Statement {
     Program {
         body: Vec<Statement>,
@@ -86,8 +83,7 @@ pub enum Statement {
     },
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-#[serde(tag = "type", rename_all = "PascalCase")]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Expression {
     Assignment {
         operator: AssignmentOperator,

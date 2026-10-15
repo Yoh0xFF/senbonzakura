@@ -398,10 +398,7 @@ pub fn parse_sexpr(text: &str) -> Result<SExpr, String> {
 }
 
 #[cfg(test)]
-fn parse_next(
-    chars: &mut std::iter::Peekable<std::str::Chars<'_>>,
-) -> Result<Option<SExpr>, String> {
-    // Skip whitespace and comments
+fn skip_whitespace_and_comments(chars: &mut std::iter::Peekable<std::str::Chars<'_>>) {
     loop {
         match chars.peek() {
             Some(ch) if ch.is_whitespace() => {
@@ -411,6 +408,13 @@ fn parse_next(
             _ => break,
         }
     }
+}
+
+#[cfg(test)]
+fn parse_next(
+    chars: &mut std::iter::Peekable<std::str::Chars<'_>>,
+) -> Result<Option<SExpr>, String> {
+    skip_whitespace_and_comments(chars);
 
     match chars.next() {
         None => Ok(None),
@@ -418,7 +422,7 @@ fn parse_next(
         Some('(') => {
             let mut items = Vec::new();
             loop {
-                while chars.next_if(|ch| ch.is_whitespace()).is_some() {}
+                skip_whitespace_and_comments(chars);
                 match chars.peek() {
                     Some(')') => {
                         chars.next();

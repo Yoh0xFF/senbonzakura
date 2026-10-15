@@ -1,6 +1,6 @@
 use crate::ast::{parse_sexpr, statement_to_sexpr, SExpr};
 use crate::parser::{parse_root_statement, Parser, ParserError};
-use std::fs;
+use crate::test_files::{load_test_cases, split_test_cases, RawTestCase};
 
 ///
 /// A single parser test case loaded from a `.sexp` test file
@@ -35,17 +35,6 @@ pub(super) struct SexpTestCase {
     description: String,
     source: String,
     expected: SExpr,
-}
-
-const HEADER_PREFIX: &str = "===";
-
-fn is_header(line: &str) -> bool {
-    line.starts_with(HEADER_PREFIX)
-}
-
-fn is_separator(line: &str) -> bool {
-    let line = line.trim_end();
-    line.len() >= 3 && line.chars().all(|c| c == '-')
 }
 
 ///
@@ -86,92 +75,30 @@ pub(super) fn execute_sexp_test(test_case: &SexpTestCase) {
     );
 }
 
-pub(super) fn parse_sexp_test_cases(content: &str) -> Result<Vec<SexpTestCase>, String> {
-    let mut lines = content.lines().enumerate().peekable();
-    let mut test_cases = Vec::new();
+fn parse_sexp_test_case(test_case: RawTestCase) -> Result<SexpTestCase, String> {
+    let expected = parse_sexpr(&test_case.expected).map_err(|error| {
+        format!(
+            "Invalid expected s-expression in test case at line {}: {}",
+            test_case.line, error
+        )
+    })?;
 
-    // Skip anything before the first header
-    while lines.next_if(|(_, line)| !is_header(line)).is_some() {}
-
-    while let Some(&(header_line, _)) = lines.peek() {
-        let mut description = Vec::new();
-        while let Some((_, line)) = lines.next_if(|(_, line)| is_header(line)) {
-            let part = line[HEADER_PREFIX.len()..].trim();
-            if !part.is_empty() {
-                description.push(part);
-            }
-        }
-
-        let mut source = String::new();
-        loop {
-            match lines.next() {
-                Some((_, line)) if is_separator(line) => break,
-                Some((_, line)) => {
-                    source.push_str(line);
-                    source.push('\n');
-                }
-                None => {
-                    return Err(format!(
-                        "Missing '---' separator in test case at line {}",
-                        header_line + 1
-                    ))
-                }
-            }
-        }
-
-        let mut expected = String::new();
-        while let Some((_, line)) = lines.next_if(|(_, line)| !is_header(line)) {
-            expected.push_str(line);
-            expected.push('\n');
-        }
-
-        let expected = parse_sexpr(&expected).map_err(|error| {
-            format!(
-                "Invalid expected s-expression in test case at line {}: {}",
-                header_line + 1,
-                error
-            )
-        })?;
-
-        test_cases.push(SexpTestCase {
-            description: description.join(" "),
-            source,
-            expected,
-        });
-    }
-
-    Ok(test_cases)
+    Ok(SexpTestCase {
+        description: test_case.description,
+        source: test_case.source,
+        expected,
+    })
 }
 
-pub(super) fn load_sexp_test_cases(path: &str) -> Vec<SexpTestCase> {
-    let content = match fs::read_to_string(path) {
-        Ok(content) => content,
-        Err(error) => {
-            eprintln!("Failed to read the test file: {}", error);
-            eprintln!("Path: {}", path);
-            panic!("Could not read test file: {}", error);
-        }
-    };
-
-    let test_cases = match parse_sexp_test_cases(&content) {
-        Ok(test_cases) => test_cases,
-        Err(error) => {
-            eprintln!("Path: {}", path);
-            panic!("Could not parse test file: {}", error);
-        }
-    };
-
-    // Verify that we found some test cases
-    if test_cases.is_empty() {
-        eprintln!("No test cases found in file: {}", path);
-        panic!("File contained no valid test cases");
-    }
-
-    test_cases
+pub(super) fn parse_sexp_test_cases(content: &str) -> Result<Vec<SexpTestCase>, String> {
+    split_test_cases(content)?
+        .into_iter()
+        .map(parse_sexp_test_case)
+        .collect()
 }
 
 pub(super) fn execute_sexp_test_cases(path: &str) {
-    let test_cases = load_sexp_test_cases(path);
+    let test_cases = load_test_cases(path, parse_sexp_test_case);
 
     for (index, test_case) in test_cases.iter().enumerate() {
         println!("Testing case #{}:\n{}\n", index + 1, test_case.description);
@@ -227,4 +154,8 @@ fn test_sexp_test_file_format_errors() {
     assert!(parse_sexp_test_cases("=== A\n1;\n---\n").is_err());
     assert!(parse_sexp_test_cases("=== A\n1;\n---\n(Program").is_err());
     assert!(parse_sexp_test_cases("=== A\n1;\n---\n(Program))").is_err());
+    assert!(parse_sexp_test_cases(
+        "=== A\n1;\n---\n(Program (Expression (NumericLiteral 1)) ; trailing\n)"
+    )
+    .is_ok());
 }
