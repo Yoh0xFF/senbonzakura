@@ -1,8 +1,4 @@
-use crate::{
-    ast::{Expression, ExpressionRef},
-    lexer::TokenType,
-    Lexer, Token,
-};
+use crate::{ast::Expression, lexer::TokenType, Lexer, Token};
 
 use super::{ParserError, ParserResult};
 
@@ -111,9 +107,9 @@ impl<'a> Parser<'a> {
     ///
     /// Check if the expression is valid assignment target
     ///
-    pub(super) fn is_expression_valid_assignment_target(&self, expression: &ExpressionRef) -> bool {
+    pub(super) fn is_expression_valid_assignment_target(&self, expression: &Expression) -> bool {
         matches!(
-            expression.as_ref(),
+            expression,
             Expression::Identifier { .. } | Expression::Member { .. }
         )
     }

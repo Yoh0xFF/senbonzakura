@@ -1,4 +1,4 @@
-use crate::ast::{BinaryOperator, ExpressionRef, LogicalOperator};
+use crate::ast::{BinaryOperator, Expression, LogicalOperator};
 use crate::lexer::TokenType;
 use crate::parser::parsers::expression_parse_binary::parse_additive_expression;
 use crate::parser::parsers::internal_util::{parse_binary_expression, parse_logical_expression};
@@ -10,7 +10,7 @@ use crate::parser::{Parser, ParserError, ParserResult};
 ///  | LogicalAndExpression
 ///  ;
 ///
-pub(super) fn parse_logical_or_expression(parser: &mut Parser) -> ParserResult<ExpressionRef> {
+pub(super) fn parse_logical_or_expression(parser: &mut Parser) -> ParserResult<Box<Expression>> {
     parse_logical_expression(
         parser,
         &[TokenType::LogicalOrOperator],
@@ -30,7 +30,7 @@ pub(super) fn parse_logical_or_expression(parser: &mut Parser) -> ParserResult<E
 ///  | EqualityExpression
 ///  ;
 ///
-pub(super) fn parse_logical_and_expression(parser: &mut Parser) -> ParserResult<ExpressionRef> {
+pub(super) fn parse_logical_and_expression(parser: &mut Parser) -> ParserResult<Box<Expression>> {
     parse_logical_expression(
         parser,
         &[TokenType::LogicalAndOperator],
@@ -50,7 +50,7 @@ pub(super) fn parse_logical_and_expression(parser: &mut Parser) -> ParserResult<
 ///  | RelationalExpression
 ///  ;
 ///
-pub(super) fn parse_equality_expression(parser: &mut Parser) -> ParserResult<ExpressionRef> {
+pub(super) fn parse_equality_expression(parser: &mut Parser) -> ParserResult<Box<Expression>> {
     parse_binary_expression(
         parser,
         &[TokenType::EqualOperator, TokenType::NotEqualOperator],
@@ -71,7 +71,7 @@ pub(super) fn parse_equality_expression(parser: &mut Parser) -> ParserResult<Exp
 ///  | AdditiveExpression RELATIONAL_OPERATOR AdditiveExpression
 ///  ;
 ///
-pub(super) fn parse_relational_expression(parser: &mut Parser) -> ParserResult<ExpressionRef> {
+pub(super) fn parse_relational_expression(parser: &mut Parser) -> ParserResult<Box<Expression>> {
     parse_binary_expression(
         parser,
         &[

@@ -1,4 +1,4 @@
-use crate::ast::{Statement, StatementRef};
+use crate::ast::Statement;
 use crate::lexer::TokenType;
 use crate::parser::parsers::parse_root_expression;
 use crate::parser::parsers::statement_parse_block::parse_statement;
@@ -8,7 +8,7 @@ use crate::parser::{Parser, ParserResult};
 /// ConditionalStatement
 ///  : if '(' Expression ')' Statement [else Statement]
 ///
-pub(super) fn parse_if_statement(parser: &mut Parser) -> ParserResult<StatementRef> {
+pub(super) fn parse_if_statement(parser: &mut Parser) -> ParserResult<Box<Statement>> {
     parser.eat_token(TokenType::IfKeyword)?;
 
     parser.eat_token(TokenType::OpeningParenthesis)?;

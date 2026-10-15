@@ -5,12 +5,6 @@ use super::{
     ast_types::Type,
 };
 
-pub type StatementRef = Box<Statement>;
-pub type ExpressionRef = Box<Expression>;
-pub type StatementList = Vec<Statement>;
-pub type ExpressionList = Vec<Expression>;
-pub type ParameterList = Vec<Parameter>;
-
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Parameter {
     pub name: String,
@@ -21,61 +15,61 @@ pub struct Parameter {
 #[serde(tag = "type", rename_all = "PascalCase")]
 pub enum Statement {
     Program {
-        body: StatementList,
+        body: Vec<Statement>,
     },
 
     Block {
-        body: StatementList,
+        body: Vec<Statement>,
     },
 
     Empty,
 
     Expression {
-        expression: ExpressionRef,
+        expression: Box<Expression>,
     },
 
     VariableDeclaration {
-        variables: ExpressionList,
+        variables: Vec<Expression>,
     },
 
     If {
-        condition: ExpressionRef,
-        consequent: StatementRef,
-        alternative: Option<StatementRef>,
+        condition: Box<Expression>,
+        consequent: Box<Statement>,
+        alternative: Option<Box<Statement>>,
     },
 
     While {
-        condition: ExpressionRef,
-        body: StatementRef,
+        condition: Box<Expression>,
+        body: Box<Statement>,
     },
 
     DoWhile {
-        body: StatementRef,
-        condition: ExpressionRef,
+        body: Box<Statement>,
+        condition: Box<Expression>,
     },
 
     For {
-        initializer: Option<StatementRef>,
-        condition: Option<ExpressionRef>,
-        increment: Option<ExpressionRef>,
-        body: StatementRef,
+        initializer: Option<Box<Statement>>,
+        condition: Option<Box<Expression>>,
+        increment: Option<Box<Expression>>,
+        body: Box<Statement>,
     },
 
     FunctionDeclaration {
         name: String,
-        parameters: ParameterList,
+        parameters: Vec<Parameter>,
         return_type: Type,
-        body: StatementRef,
+        body: Box<Statement>,
     },
 
     Return {
-        argument: Option<ExpressionRef>,
+        argument: Option<Box<Expression>>,
     },
 
     ClassDeclaration {
         name: String,
         super_class: Option<String>,
-        body: StatementRef,
+        body: Box<Statement>,
     },
 }
 
@@ -85,30 +79,30 @@ pub enum Expression {
     Variable {
         identifier: String,
         type_annotation: Type,
-        initializer: Option<ExpressionRef>,
+        initializer: Option<Box<Expression>>,
     },
 
     Assignment {
         operator: AssignmentOperator,
-        left: ExpressionRef,
-        right: ExpressionRef,
+        left: Box<Expression>,
+        right: Box<Expression>,
     },
 
     Binary {
         operator: BinaryOperator,
-        left: ExpressionRef,
-        right: ExpressionRef,
+        left: Box<Expression>,
+        right: Box<Expression>,
     },
 
     Unary {
         operator: UnaryOperator,
-        right: ExpressionRef,
+        right: Box<Expression>,
     },
 
     Logical {
         operator: LogicalOperator,
-        left: ExpressionRef,
-        right: ExpressionRef,
+        left: Box<Expression>,
+        right: Box<Expression>,
     },
 
     BooleanLiteral {
@@ -131,13 +125,13 @@ pub enum Expression {
 
     Member {
         computed: bool,
-        object: ExpressionRef,
-        property: ExpressionRef,
+        object: Box<Expression>,
+        property: Box<Expression>,
     },
 
     Call {
-        callee: ExpressionRef,
-        arguments: ExpressionList,
+        callee: Box<Expression>,
+        arguments: Vec<Expression>,
     },
 
     This {},
@@ -145,7 +139,7 @@ pub enum Expression {
     Super {},
 
     New {
-        callee: ExpressionRef,
-        arguments: ExpressionList,
+        callee: Box<Expression>,
+        arguments: Vec<Expression>,
     },
 }

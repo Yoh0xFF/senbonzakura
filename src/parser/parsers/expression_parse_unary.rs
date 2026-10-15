@@ -1,4 +1,4 @@
-use crate::ast::{Expression, ExpressionRef, UnaryOperator};
+use crate::ast::{Expression, UnaryOperator};
 use crate::lexer::TokenType;
 use crate::parser::{Parser, ParserError, ParserResult};
 
@@ -11,7 +11,7 @@ use super::expression_parse_left_hand_side::parse_left_hand_side_expression;
 ///  | LOGICAL_NOT_OPERATOR UnaryExpression
 ///  ;
 ///
-pub(super) fn parse_unary_expression(parser: &mut Parser) -> ParserResult<ExpressionRef> {
+pub(super) fn parse_unary_expression(parser: &mut Parser) -> ParserResult<Box<Expression>> {
     if parser.is_next_token_any_of_type(&[
         TokenType::AdditivePlusOperator,
         TokenType::AdditiveMinusOperator,

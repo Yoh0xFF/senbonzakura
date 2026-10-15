@@ -1,6 +1,6 @@
 use super::expression_parse_assignment::parse_assignment_expression;
 use super::type_parse_annotations::parse_type;
-use crate::ast::{Expression, ExpressionRef, Statement, StatementRef};
+use crate::ast::{Expression, Statement};
 use crate::lexer::TokenType;
 use crate::parser::{Parser, ParserResult};
 
@@ -16,7 +16,7 @@ use crate::parser::{Parser, ParserResult};
 pub(super) fn parse_variable_declaration_statement(
     parser: &mut Parser,
     consume_statement_end: bool,
-) -> ParserResult<StatementRef> {
+) -> ParserResult<Box<Statement>> {
     let mut variables: Vec<Expression> = vec![];
 
     parser.eat_token(TokenType::LetKeyword)?;
@@ -42,7 +42,7 @@ pub(super) fn parse_variable_declaration_statement(
 ///  : IDENTIFIER ':' Type ['=' Initializer]
 ///  ;
 ///
-pub(super) fn parse_variable_expression(parser: &mut Parser) -> ParserResult<ExpressionRef> {
+pub(super) fn parse_variable_expression(parser: &mut Parser) -> ParserResult<Box<Expression>> {
     let identifier_token = parser.eat_token(TokenType::Identifier)?;
     let identifier = String::from(identifier_token.text(parser.source));
 
@@ -50,7 +50,7 @@ pub(super) fn parse_variable_expression(parser: &mut Parser) -> ParserResult<Exp
     parser.eat_token(TokenType::Colon)?;
     let type_annotation = parse_type(parser)?;
 
-    let initializer: Option<ExpressionRef> =
+    let initializer: Option<Box<Expression>> =
         if parser.is_next_token_any_of_type(&[TokenType::StatementEnd, TokenType::Comma]) {
             None
         } else {
