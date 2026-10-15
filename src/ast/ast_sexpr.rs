@@ -191,10 +191,13 @@ pub fn statement_to_sexpr(statement: &Statement) -> SExpr {
         } => {
             let parameters = parameters
                 .iter()
-                .map(|(name, type_annotation)| {
+                .map(|parameter| {
                     SExpr::node(
                         "Parameter",
-                        vec![expression_to_sexpr(name), type_to_sexpr(type_annotation)],
+                        vec![
+                            SExpr::node("Identifier", vec![SExpr::atom(&parameter.name)]),
+                            type_to_sexpr(&parameter.type_annotation),
+                        ],
                     )
                 })
                 .collect();
