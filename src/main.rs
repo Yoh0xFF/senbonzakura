@@ -26,6 +26,7 @@ fn main() {
     match ast_result {
         Ok(ast) => {
             println!("Yaml:\n{}", serde_yaml::to_string(&ast).unwrap());
+            println!("S-expression:\n{}", ast::statement_to_sexpr(&ast));
         }
         Err(error) => {
             panic!("Failed to parse the source: {}", error);

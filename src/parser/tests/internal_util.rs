@@ -1,61 +1,139 @@
-use crate::ast::Statement;
+use crate::ast::{parse_sexpr, statement_to_sexpr, SExpr};
 use crate::parser::{parse_root_statement, Parser};
-// use anyhow::Result;
-use serde::Deserialize;
 use std::fs;
 
-#[derive(Debug, Deserialize)]
-pub(super) struct YamlTestCase {
+///
+/// A single parser test case loaded from a `.sexp` test file
+///
+/// Test files contain one or more cases in the following layout:
+///
+/// ```text
+/// ==========================
+/// Description of the test
+/// ==========================
+/// source code to parse;
+/// ---
+/// (Program
+///   (Expression ...))
+/// ```
+///
+/// Header rules are made of three or more `=`, the separator of three or more `-`.
+/// Inside the expected AST, `;` starts a comment that runs to the end of the line.
+///
+#[derive(Debug)]
+pub(super) struct SexpTestCase {
     description: String,
     source: String,
-    expected_ast: Statement,
+    expected_ast: SExpr,
 }
 
-pub(super) fn execute_yaml_test(test_case: &YamlTestCase) {
+fn is_rule(line: &str, ch: char) -> bool {
+    let line = line.trim_end();
+    line.len() >= 3 && line.chars().all(|c| c == ch)
+}
+
+pub(super) fn execute_sexp_test(test_case: &SexpTestCase) {
     let Ok(mut parser) = Parser::new(&test_case.source) else {
         panic!(
-            "Failed to parse the test case source:\n{}\n",
+            "Failed to tokenize the test case source:\n{}\n",
             test_case.source
         )
     };
-    let ast_result = parse_root_statement(&mut parser);
 
-    match ast_result {
+    match parse_root_statement(&mut parser) {
         Ok(ast) => {
-            // Convert Box<Statement> to Statement for comparison
-            assert_eq!(*ast, test_case.expected_ast);
+            let actual_ast = statement_to_sexpr(&ast);
+            assert!(
+                actual_ast == test_case.expected_ast,
+                "AST mismatch for test case: {}\n\nSource:\n{}\nExpected:\n{}\n\nActual:\n{}\n",
+                test_case.description,
+                test_case.source,
+                test_case.expected_ast,
+                actual_ast
+            );
         }
-        Err(_) => panic!(
-            "Failed to parse the test case source:\n{}\n",
-            test_case.source
+        Err(error) => panic!(
+            "Failed to parse the test case source: {}\n{}\n",
+            error, test_case.source
         ),
     }
 }
 
-pub(super) fn load_yaml_test_cases(path: &str) -> Vec<YamlTestCase> {
+pub(super) fn parse_sexp_test_cases(content: &str) -> Result<Vec<SexpTestCase>, String> {
+    let mut lines = content.lines().enumerate().peekable();
+    let mut test_cases = Vec::new();
+
+    // Skip anything before the first header
+    while lines.next_if(|(_, line)| !is_rule(line, '=')).is_some() {}
+
+    while let Some((header_line, _)) = lines.next() {
+        let mut description = Vec::new();
+        loop {
+            match lines.next() {
+                Some((_, line)) if is_rule(line, '=') => break,
+                Some((_, line)) => description.push(line.trim()),
+                None => return Err(format!("Unclosed header at line {}", header_line + 1)),
+            }
+        }
+
+        let mut source = String::new();
+        loop {
+            match lines.next() {
+                Some((_, line)) if is_rule(line, '-') => break,
+                Some((_, line)) => {
+                    source.push_str(line);
+                    source.push('\n');
+                }
+                None => {
+                    return Err(format!(
+                        "Missing '---' separator in test case at line {}",
+                        header_line + 1
+                    ))
+                }
+            }
+        }
+
+        let mut expected = String::new();
+        while let Some((_, line)) = lines.next_if(|(_, line)| !is_rule(line, '=')) {
+            expected.push_str(line);
+            expected.push('\n');
+        }
+
+        let expected_ast = parse_sexpr(&expected).map_err(|error| {
+            format!(
+                "Invalid expected AST in test case at line {}: {}",
+                header_line + 1,
+                error
+            )
+        })?;
+
+        test_cases.push(SexpTestCase {
+            description: description.join(" "),
+            source,
+            expected_ast,
+        });
+    }
+
+    Ok(test_cases)
+}
+
+pub(super) fn load_sexp_test_cases(path: &str) -> Vec<SexpTestCase> {
     let content = match fs::read_to_string(path) {
         Ok(content) => content,
         Err(error) => {
-            eprintln!("Failed to read the test yaml file: {}", error);
+            eprintln!("Failed to read the test file: {}", error);
             eprintln!("Path: {}", path);
             panic!("Could not read test file: {}", error);
         }
     };
 
-    // Parse multiple documents
-    let mut test_cases = Vec::new();
-
-    // Use the serde_yaml::from_reader function with a stream
-    for document in serde_yaml::Deserializer::from_str(&content) {
-        match YamlTestCase::deserialize(document) {
-            Ok(test_case) => test_cases.push(test_case),
-            Err(e) => {
-                eprintln!("Failed to parse a YAML document: {}", e);
-                eprintln!("Path: {}", path);
-                panic!("Could not parse YAML content: {}", e);
-            }
+    let test_cases = match parse_sexp_test_cases(&content) {
+        Ok(test_cases) => test_cases,
+        Err(error) => {
+            eprintln!("Path: {}", path);
+            panic!("Could not parse test file: {}", error);
         }
-    }
+    };
 
     // Verify that we found some test cases
     if test_cases.is_empty() {
@@ -66,13 +144,63 @@ pub(super) fn load_yaml_test_cases(path: &str) -> Vec<YamlTestCase> {
     test_cases
 }
 
-pub(super) fn execute_yaml_test_cases(path: &str) {
-    let test_cases = load_yaml_test_cases(path);
+pub(super) fn execute_sexp_test_cases(path: &str) {
+    let test_cases = load_sexp_test_cases(path);
 
     for (index, test_case) in test_cases.iter().enumerate() {
         println!("Testing case #{}:\n{}\n", index + 1, test_case.description);
-        execute_yaml_test(test_case);
+        execute_sexp_test(test_case);
     }
 
     println!("All {} test cases passed!", test_cases.len());
+}
+
+#[test]
+fn test_sexp_test_file_format() {
+    let content = "\
+leading notes are ignored
+=====
+First
+=====
+1;
+---
+(Program
+  ; a comment
+  (Expression (NumericLiteral 1)))
+
+======
+Second
+======
+s = \"a  b\";
+---
+(Program (Expression (Assignment Assign (Identifier s) (StringLiteral \"a  b\"))))
+";
+    let test_cases = parse_sexp_test_cases(content).unwrap();
+    assert_eq!(test_cases.len(), 2);
+    assert_eq!(test_cases[0].description, "First");
+    assert_eq!(test_cases[0].source, "1;\n");
+    assert_eq!(
+        test_cases[0].expected_ast.to_string(),
+        "(Program\n  (Expression (NumericLiteral 1)))"
+    );
+    for test_case in &test_cases {
+        execute_sexp_test(test_case);
+    }
+}
+
+#[test]
+fn test_sexp_string_escapes_round_trip() {
+    let expected = SExpr::List(vec![
+        SExpr::Atom("StringLiteral".to_string()),
+        SExpr::Str("quote \" backslash \\ newline \n tab \t".to_string()),
+    ]);
+    assert_eq!(parse_sexpr(&expected.to_string()), Ok(expected));
+}
+
+#[test]
+fn test_sexp_test_file_format_errors() {
+    assert!(parse_sexp_test_cases("===\nNo end").is_err());
+    assert!(parse_sexp_test_cases("===\nA\n===\n1;\n").is_err());
+    assert!(parse_sexp_test_cases("===\nA\n===\n1;\n---\n(Program").is_err());
+    assert!(parse_sexp_test_cases("===\nA\n===\n1;\n---\n(Program))").is_err());
 }
