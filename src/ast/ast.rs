@@ -62,7 +62,7 @@ pub enum Statement {
     },
 
     FunctionDeclaration {
-        name: ExpressionRef,
+        name: String,
         parameters: ParameterList,
         return_type: Type,
         body: StatementRef,
@@ -73,8 +73,8 @@ pub enum Statement {
     },
 
     ClassDeclaration {
-        name: ExpressionRef,
-        super_class: Option<ExpressionRef>,
+        name: String,
+        super_class: Option<String>,
         body: StatementRef,
     },
 }
@@ -83,7 +83,7 @@ pub enum Statement {
 #[serde(tag = "type", rename_all = "PascalCase")]
 pub enum Expression {
     Variable {
-        identifier: ExpressionRef,
+        identifier: String,
         type_annotation: Type,
         initializer: Option<ExpressionRef>,
     },

@@ -195,7 +195,7 @@ pub fn statement_to_sexpr(statement: &Statement) -> SExpr {
                     SExpr::node(
                         "Parameter",
                         vec![
-                            SExpr::node("Identifier", vec![SExpr::atom(&parameter.name)]),
+                            identifier(&parameter.name),
                             type_to_sexpr(&parameter.type_annotation),
                         ],
                     )
@@ -204,7 +204,7 @@ pub fn statement_to_sexpr(statement: &Statement) -> SExpr {
             SExpr::node(
                 "FunctionDeclaration",
                 vec![
-                    expression_to_sexpr(name),
+                    identifier(name),
                     SExpr::node("Parameters", parameters),
                     type_to_sexpr(return_type),
                     statement_to_sexpr(body),
@@ -226,8 +226,8 @@ pub fn statement_to_sexpr(statement: &Statement) -> SExpr {
         } => SExpr::node(
             "ClassDeclaration",
             vec![
-                expression_to_sexpr(name),
-                optional(super_class.as_deref().map(expression_to_sexpr)),
+                identifier(name),
+                optional(super_class.as_deref().map(identifier)),
                 statement_to_sexpr(body),
             ],
         ),
@@ -240,14 +240,11 @@ pub fn statement_to_sexpr(statement: &Statement) -> SExpr {
 pub fn expression_to_sexpr(expression: &Expression) -> SExpr {
     match expression {
         Expression::Variable {
-            identifier,
+            identifier: name,
             type_annotation,
             initializer,
         } => {
-            let mut children = vec![
-                expression_to_sexpr(identifier),
-                type_to_sexpr(type_annotation),
-            ];
+            let mut children = vec![identifier(name), type_to_sexpr(type_annotation)];
             children.extend(initializer.as_deref().map(expression_to_sexpr));
             SExpr::node("Variable", children)
         }
@@ -304,7 +301,7 @@ pub fn expression_to_sexpr(expression: &Expression) -> SExpr {
         Expression::NumericLiteral { value } => {
             SExpr::node("NumericLiteral", vec![SExpr::atom(value)])
         }
-        Expression::Identifier { name } => SExpr::node("Identifier", vec![SExpr::atom(name)]),
+        Expression::Identifier { name } => identifier(name),
         Expression::Member {
             computed,
             object,
@@ -369,6 +366,13 @@ fn statements(list: &[Statement]) -> Vec<SExpr> {
 
 fn expressions(list: &[Expression]) -> Vec<SExpr> {
     list.iter().map(expression_to_sexpr).collect()
+}
+
+///
+/// A name is printed the same way as an `Identifier` expression
+///
+fn identifier(name: &str) -> SExpr {
+    SExpr::node("Identifier", vec![SExpr::atom(name)])
 }
 
 fn optional(value: Option<SExpr>) -> SExpr {
