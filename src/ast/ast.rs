@@ -66,7 +66,7 @@ pub enum Statement {
         name: String,
         parameters: Vec<Parameter>,
         return_type: Type,
-        body: Box<Statement>,
+        body: Vec<Statement>,
     },
 
     Return {
@@ -76,7 +76,7 @@ pub enum Statement {
     ClassDeclaration {
         name: String,
         super_class: Option<String>,
-        body: Box<Statement>,
+        body: Vec<Statement>,
     },
 }
 

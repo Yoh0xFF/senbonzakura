@@ -1,7 +1,7 @@
 use crate::{
     ast::Statement,
     lexer::TokenType,
-    parser::{parsers::statement_parse_block::parse_block_statement, ParserResult},
+    parser::{parsers::statement_parse_block::parse_block_body, ParserResult},
     Parser,
 };
 
@@ -23,7 +23,7 @@ pub(super) fn parse_class_declaration(parser: &mut Parser) -> ParserResult<Box<S
         None
     };
 
-    let body = parse_block_statement(parser)?;
+    let body = parse_block_body(parser)?;
 
     Ok(Box::new(Statement::ClassDeclaration {
         name,

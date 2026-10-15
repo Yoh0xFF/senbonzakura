@@ -208,7 +208,7 @@ pub fn statement_to_sexpr(statement: &Statement) -> SExpr {
                     identifier(name),
                     SExpr::node("Parameters", parameters),
                     type_to_sexpr(return_type),
-                    statement_to_sexpr(body),
+                    SExpr::node("Block", statements(body)),
                 ],
             )
         }
@@ -229,7 +229,7 @@ pub fn statement_to_sexpr(statement: &Statement) -> SExpr {
             vec![
                 identifier(name),
                 optional(super_class.as_deref().map(identifier)),
-                statement_to_sexpr(body),
+                SExpr::node("Block", statements(body)),
             ],
         ),
     }

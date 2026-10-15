@@ -1,7 +1,7 @@
 use crate::ast::{Parameter, Statement, Type};
 use crate::lexer::TokenType;
 use crate::parser::parsers::parse_root_expression;
-use crate::parser::parsers::statement_parse_block::parse_block_statement;
+use crate::parser::parsers::statement_parse_block::parse_block_body;
 use crate::parser::{Parser, ParserResult};
 
 use super::type_parse_annotations::parse_type;
@@ -33,7 +33,7 @@ pub(super) fn parse_function_declaration_statement(
         Type::Void
     };
 
-    let body = parse_block_statement(parser)?;
+    let body = parse_block_body(parser)?;
 
     Ok(Box::new(Statement::FunctionDeclaration {
         name,
