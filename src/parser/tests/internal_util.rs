@@ -1,5 +1,5 @@
 use crate::ast::{parse_sexpr, statement_to_sexpr, SExpr};
-use crate::parser::{parse_root_statement, Parser};
+use crate::parser::{parse_root_statement, Parser, ParserError};
 use std::fs;
 
 ///
@@ -21,11 +21,20 @@ use std::fs;
 /// runs until the next header. Anything before the first header is ignored.
 /// Inside the expected AST, `;` starts a comment that runs to the end of the line.
 ///
+/// A case that should fail to parse gives the expected error instead of an AST:
+///
+/// ```text
+/// === Missing expression
+/// x = ;
+/// ---
+/// (Error ParserError "Unexpected token: StatementEnd, expected an expression")
+/// ```
+///
 #[derive(Debug)]
 pub(super) struct SexpTestCase {
     description: String,
     source: String,
-    expected_ast: SExpr,
+    expected: SExpr,
 }
 
 const HEADER_PREFIX: &str = "===";
@@ -39,6 +48,24 @@ fn is_separator(line: &str) -> bool {
     line.len() >= 3 && line.chars().all(|c| c == '-')
 }
 
+///
+/// Convert a parser error into the `(Error <Variant> "<message>")` form used by test files
+///
+fn parser_error_to_sexpr(error: &ParserError) -> SExpr {
+    let (variant, message) = match error {
+        ParserError::LexicalError { message } => ("LexicalError", message),
+        ParserError::ParserError { message } => ("ParserError", message),
+        ParserError::TypeError { message } => ("TypeError", message),
+        ParserError::SemanticError { message } => ("SemanticError", message),
+    };
+
+    SExpr::List(vec![
+        SExpr::Atom("Error".to_string()),
+        SExpr::Atom(variant.to_string()),
+        SExpr::Str(message.clone()),
+    ])
+}
+
 pub(super) fn execute_sexp_test(test_case: &SexpTestCase) {
     let Ok(mut parser) = Parser::new(&test_case.source) else {
         panic!(
@@ -47,20 +74,16 @@ pub(super) fn execute_sexp_test(test_case: &SexpTestCase) {
         )
     };
 
-    match parse_root_statement(&mut parser) {
-        Ok(ast) => {
-            let actual_ast = statement_to_sexpr(&ast);
-            assert_eq!(
-                actual_ast, test_case.expected_ast,
-                "AST mismatch for test case: {}\n\nSource:\n{}\nExpected:\n{}\n\nActual:\n{}\n",
-                test_case.description, test_case.source, test_case.expected_ast, actual_ast
-            );
-        }
-        Err(error) => panic!(
-            "Failed to parse the test case source: {}\n{}\n",
-            error, test_case.source
-        ),
-    }
+    let actual = match parse_root_statement(&mut parser) {
+        Ok(ast) => statement_to_sexpr(&ast),
+        Err(error) => parser_error_to_sexpr(&error),
+    };
+
+    assert_eq!(
+        actual, test_case.expected,
+        "Mismatch for test case: {}\n\nSource:\n{}\nExpected:\n{}\n\nActual:\n{}\n",
+        test_case.description, test_case.source, test_case.expected, actual
+    );
 }
 
 pub(super) fn parse_sexp_test_cases(content: &str) -> Result<Vec<SexpTestCase>, String> {
@@ -102,9 +125,9 @@ pub(super) fn parse_sexp_test_cases(content: &str) -> Result<Vec<SexpTestCase>, 
             expected.push('\n');
         }
 
-        let expected_ast = parse_sexpr(&expected).map_err(|error| {
+        let expected = parse_sexpr(&expected).map_err(|error| {
             format!(
-                "Invalid expected AST in test case at line {}: {}",
+                "Invalid expected s-expression in test case at line {}: {}",
                 header_line + 1,
                 error
             )
@@ -113,7 +136,7 @@ pub(super) fn parse_sexp_test_cases(content: &str) -> Result<Vec<SexpTestCase>, 
         test_cases.push(SexpTestCase {
             description: description.join(" "),
             source,
-            expected_ast,
+            expected,
         });
     }
 
@@ -181,7 +204,7 @@ s = \"a  b\";
     assert_eq!(test_cases[0].source, "1;\n");
     assert_eq!(test_cases[1].description, "Second case spanning two lines");
     assert_eq!(
-        test_cases[0].expected_ast.to_string(),
+        test_cases[0].expected.to_string(),
         "(Program\n  (Expression (NumericLiteral 1)))"
     );
     for test_case in &test_cases {

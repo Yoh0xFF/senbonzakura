@@ -1,11 +1,9 @@
-use super::expression_parse_left_hand_side::{
-    parse_arguments, parse_left_hand_side_expression, parse_member_expression,
-};
+use super::expression_parse_left_hand_side::{parse_arguments, parse_member_expression};
 use crate::ast::{Expression, ExpressionRef};
 use crate::lexer::TokenType;
 use crate::parser::parsers::expression_parse_literals::parse_literal_expression;
 use crate::parser::parsers::root::parse_root_expression;
-use crate::parser::{Parser, ParserResult};
+use crate::parser::{Parser, ParserError, ParserResult};
 
 ///
 /// PrimaryExpression
@@ -26,7 +24,12 @@ pub(super) fn parse_primary_expression(parser: &mut Parser) -> ParserResult<Expr
         TokenType::ThisKeyword => parse_this_expression(parser),
         TokenType::SuperKeyword => parse_super_expression(parser),
         TokenType::NewKeyword => parse_new_expression(parser),
-        _ => parse_left_hand_side_expression(parser),
+        _ => Err(ParserError::ParserError {
+            message: format!(
+                "Unexpected token: {}, expected an expression",
+                parser.lookahead.token_type
+            ),
+        }),
     }
 }
 
