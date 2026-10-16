@@ -4,6 +4,12 @@ let x: number = 42;
 (Program
   (VariableDeclaration (Variable (Identifier x) Number (NumericLiteral 42))))
 
+=== Parse variable declaration with float initialization
+let x: number = 1.5;
+---
+(Program
+  (VariableDeclaration (Variable (Identifier x) Number (NumericLiteral 1.5))))
+
 === Parse variable declaration without initialization
 let x: string;
 ---

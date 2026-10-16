@@ -58,7 +58,11 @@ pub(super) fn parse_numeric_literal_expression(
 ) -> ParserResult<Box<Expression>> {
     let token = parser.eat_token(TokenType::Number)?;
     let token_value = token.text(parser.source);
-    let token_value = token_value.trim().parse().unwrap();
+    let token_value = token_value
+        .parse::<f64>()
+        .map_err(|_| ParserError::ParserError {
+            message: format!("Invalid numeric literal: {token_value}"),
+        })?;
 
     Ok(Box::new(Expression::NumericLiteral { value: token_value }))
 }

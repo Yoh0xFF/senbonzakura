@@ -9,20 +9,20 @@ pub struct Parameter {
     pub type_annotation: Type,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct VariableDeclarator {
     pub name: String,
     pub type_annotation: Type,
     pub initializer: Option<Box<Expression>>,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum MemberProperty {
     Named(String),
     Computed(Box<Expression>),
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum Statement {
     Program {
         body: Vec<Statement>,
@@ -83,7 +83,7 @@ pub enum Statement {
     },
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum Expression {
     Assignment {
         operator: AssignmentOperator,
@@ -119,7 +119,7 @@ pub enum Expression {
     },
 
     NumericLiteral {
-        value: i32,
+        value: f64,
     },
 
     Identifier {
