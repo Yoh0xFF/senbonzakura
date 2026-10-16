@@ -16,20 +16,32 @@ pub struct Parser<'a> {
 impl<'a> Parser<'a> {
     pub fn new(source: &'a str) -> ParserResult<Self> {
         let mut lexer = Lexer::new(&source);
-        let lookahead = match lexer.next_token() {
-            Ok(token) => token,
-            Err(error) => {
-                return Err(ParserError::LexicalError {
-                    message: format!("Could not parse token: {:?}", error),
-                })
-            }
-        };
+        let lookahead = Self::next_token(&mut lexer)?;
 
         Ok(Parser {
             source,
             lexer,
             lookahead,
         })
+    }
+
+    ///
+    /// Reads the next token from the lexer
+    ///
+    fn next_token(lexer: &mut Lexer<'a>) -> ParserResult<Token> {
+        lexer
+            .next_token()
+            .map_err(|error| ParserError::LexicalError {
+                message: format!("Could not parse token: {:?}", error),
+            })
+    }
+
+    ///
+    /// Advances to the next token, returning the current one
+    ///
+    fn advance(&mut self) -> ParserResult<Token> {
+        let next = Self::next_token(&mut self.lexer)?;
+        Ok(std::mem::replace(&mut self.lookahead, next))
     }
 
     ///
@@ -45,43 +57,23 @@ impl<'a> Parser<'a> {
             });
         }
 
-        let pre_token = self.lookahead;
-        self.lookahead = match self.lexer.next_token() {
-            Ok(token) => token,
-            Err(error) => {
-                return Err(ParserError::LexicalError {
-                    message: format!("Could not parse token: {:?}", error),
-                });
-            }
-        };
-        Ok(pre_token)
+        self.advance()
     }
 
     ///
     /// Expects a token of a given types
     ///
     pub(super) fn eat_any_of_token(&mut self, token_types: &[TokenType]) -> ParserResult<Token> {
-        for token_type in token_types {
-            if self.lookahead.token_type == *token_type {
-                let pre_token = self.lookahead;
-                self.lookahead = match self.lexer.next_token() {
-                    Ok(token) => token,
-                    Err(error) => {
-                        return Err(ParserError::LexicalError {
-                            message: format!("Could not parse token: {:?}", error),
-                        });
-                    }
-                };
-                return Ok(pre_token);
-            }
+        if self.is_next_token_any_of_type(token_types) {
+            return self.advance();
         }
 
-        return Err(ParserError::LexicalError {
+        Err(ParserError::LexicalError {
             message: format!(
                 "Unexpected token: {}, expected tokens: '{:?}'",
                 self.lookahead.token_type, token_types
             ),
-        });
+        })
     }
 
     ///
@@ -118,25 +110,13 @@ impl<'a> Parser<'a> {
     /// Check if the current token is literal
     ///
     pub(super) fn is_next_token_literal(&self) -> bool {
-        self.is_next_token_any_of_type(&[
-            TokenType::BooleanTrue,
-            TokenType::BooleanFalse,
-            TokenType::Nil,
-            TokenType::Number,
-            TokenType::String,
-        ])
+        self.lookahead.is_literal()
     }
 
     ///
     /// Check if the current token is assignment operator
     ///
     pub(super) fn is_next_token_assignment_operator(&self) -> bool {
-        self.is_next_token_any_of_type(&[
-            TokenType::SimpleAssignmentOperator,
-            TokenType::ComplexPlusAssignmentOperator,
-            TokenType::ComplexMinusAssignmentOperator,
-            TokenType::ComplexMultiplyAssignmentOperator,
-            TokenType::ComplexDivideAssignmentOperator,
-        ])
+        self.lookahead.is_assignment_operator()
     }
 }
