@@ -301,31 +301,33 @@ impl<'a> Lexer<'a> {
             }
 
             if ch == '\\' {
+                let escape_pos = self.position;
+                let invalid_escape = LexerError::InvalidEscape {
+                    line: escape_pos.line,
+                    column: escape_pos.column,
+                };
                 self.advance(); // Skip escape character
-                if let Some(escaped_char) = self.peek_char() {
-                    // Validate common escape sequences
-                    match escaped_char {
-                        'n' | 't' | 'r' | '\\' | '\'' | '"' | '0' => {
-                            self.advance(); // Valid escape sequence
-                        }
-                        'x' => {
-                            // Hex escape sequence \xNN
+
+                match self.peek_char() {
+                    Some('n' | 't' | 'r' | '\\' | '\'' | '"' | '0') => self.advance(),
+                    Some('x') => {
+                        // Hex escape sequence \xNN, limited to ASCII (\x00 to \x7F)
+                        self.advance();
+                        let mut code = 0;
+                        for _ in 0..2 {
+                            let Some(digit) = self.peek_char().and_then(|c| c.to_digit(16)) else {
+                                return Err(invalid_escape);
+                            };
+                            code = code * 16 + digit;
                             self.advance();
-                            if self.peek_char().map_or(false, |c| c.is_ascii_hexdigit()) {
-                                self.advance();
-                                if self.peek_char().map_or(false, |c| c.is_ascii_hexdigit()) {
-                                    self.advance();
-                                }
-                            }
                         }
-                        _ => {
-                            // Unknown escape sequence, but continue parsing
-                            self.advance();
+                        if code > 0x7F {
+                            return Err(invalid_escape);
                         }
                     }
-                } else {
+                    Some(_) => return Err(invalid_escape),
                     // Escape at end of file
-                    break;
+                    None => break,
                 }
             } else {
                 self.advance();

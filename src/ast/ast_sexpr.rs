@@ -129,6 +129,8 @@ fn write_quoted(value: &str, out: &mut String) {
             '\\' => out.push_str("\\\\"),
             '\n' => out.push_str("\\n"),
             '\t' => out.push_str("\\t"),
+            '\r' => out.push_str("\\r"),
+            '\0' => out.push_str("\\0"),
             _ => out.push(ch),
         }
     }
@@ -444,6 +446,8 @@ fn parse_next(
                     Some('\\') => match chars.next() {
                         Some('n') => value.push('\n'),
                         Some('t') => value.push('\t'),
+                        Some('r') => value.push('\r'),
+                        Some('0') => value.push('\0'),
                         Some(ch @ ('"' | '\\')) => value.push(ch),
                         other => return Err(format!("Invalid string escape: {:?}", other)),
                     },

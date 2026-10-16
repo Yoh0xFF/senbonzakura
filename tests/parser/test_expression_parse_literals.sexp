@@ -35,6 +35,26 @@ nil;
   (Expression (StringLiteral "Hello"))
   (Expression (StringLiteral "World")))
 
+=== Parse string literal with whitespace escape sequences
+"a\nb\tc\rd\0e";
+---
+(Program
+  (Expression (StringLiteral "a\nb\tc\rd\0e")))
+
+=== Parse string literals with escaped quotes and backslash
+"say \"hi\""; 'it\'s'; "back\\slash";
+---
+(Program
+  (Expression (StringLiteral "say \"hi\""))
+  (Expression (StringLiteral "it's"))
+  (Expression (StringLiteral "back\\slash")))
+
+=== Parse string literal with hex escape sequences
+"\x41\x7a";
+---
+(Program
+  (Expression (StringLiteral "Az")))
+
 === Parse numeric literal
 17;
 ---
