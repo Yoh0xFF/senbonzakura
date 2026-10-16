@@ -23,49 +23,24 @@ pub(super) fn parse_left_hand_side_expression(
 
 ///
 /// CallMemberExpression
-///  : MemberExpression
-///  | CallExpression
+///  : PrimaryExpression
+///  | CallMemberExpression Arguments
+///  | CallMemberExpression MemberAccess
 /// ;
 ///
 pub(super) fn parse_call_member_expression(parser: &mut Parser) -> ParserResult<Box<Expression>> {
-    // Member part might be part of a call
-    let member = parse_member_expression(parser)?;
+    let mut expression = parse_primary_expression(parser)?;
 
-    // See if we have a call expression
-    if parser.is_next_token_of_type(TokenType::OpeningParenthesis) {
-        return parse_call_expression(parser, member);
+    loop {
+        expression = match parser.lookahead.token_type {
+            TokenType::OpeningParenthesis => Box::new(Expression::Call {
+                callee: expression,
+                arguments: parse_arguments(parser)?,
+            }),
+            TokenType::Dot | TokenType::OpeningBracket => parse_member_access(parser, expression)?,
+            _ => return Ok(expression),
+        };
     }
-
-    // Simple member expression
-    Ok(member)
-}
-
-///
-/// Generic call expression helper
-///
-/// CallExpression
-///  : Callee Arguments
-/// ;
-///
-/// Callee
-///  : MemberExpression
-///  | CallExpression
-/// ;
-///
-pub(super) fn parse_call_expression(
-    parser: &mut Parser,
-    callee: Box<Expression>,
-) -> ParserResult<Box<Expression>> {
-    let mut call_expression = Box::new(Expression::Call {
-        callee: callee.clone(),
-        arguments: parse_arguments(parser)?,
-    });
-
-    if parser.is_next_token_of_type(TokenType::OpeningParenthesis) {
-        call_expression = parse_call_expression(parser, call_expression)?;
-    }
-
-    Ok(call_expression)
 }
 
 ///
@@ -111,36 +86,39 @@ pub(super) fn parse_arguments_list(parser: &mut Parser) -> ParserResult<Vec<Expr
 ///
 /// MemberExpression
 ///  : PrimaryExpression
-///  | MemberExpression '.' Identifier
-///  | MemberExpression '[' Expression ']'
+///  | MemberExpression MemberAccess
 ///  ;
 ///
 pub(super) fn parse_member_expression(parser: &mut Parser) -> ParserResult<Box<Expression>> {
     let mut object = parse_primary_expression(parser)?;
 
     while parser.is_next_token_any_of_type(&[TokenType::Dot, TokenType::OpeningBracket]) {
-        if parser.is_next_token_of_type(TokenType::Dot) {
-            parser.eat_token(TokenType::Dot)?;
-            let property_token = parser.eat_token(TokenType::Identifier)?;
-            let property = String::from(property_token.text(parser.source));
-
-            object = Box::new(Expression::Member {
-                object,
-                property: MemberProperty::Named(property),
-            });
-        }
-
-        if parser.is_next_token_of_type(TokenType::OpeningBracket) {
-            parser.eat_token(TokenType::OpeningBracket)?;
-            let property = parse_root_expression(parser)?;
-            parser.eat_token(TokenType::ClosingBracket)?;
-
-            object = Box::new(Expression::Member {
-                object,
-                property: MemberProperty::Computed(property),
-            });
-        }
+        object = parse_member_access(parser, object)?;
     }
 
     Ok(object)
+}
+
+///
+/// MemberAccess
+///  : '.' Identifier
+///  | '[' Expression ']'
+///  ;
+///
+fn parse_member_access(
+    parser: &mut Parser,
+    object: Box<Expression>,
+) -> ParserResult<Box<Expression>> {
+    let property = if parser.is_next_token_of_type(TokenType::Dot) {
+        parser.eat_token(TokenType::Dot)?;
+        let property_token = parser.eat_token(TokenType::Identifier)?;
+        MemberProperty::Named(String::from(property_token.text(parser.source)))
+    } else {
+        parser.eat_token(TokenType::OpeningBracket)?;
+        let property = parse_root_expression(parser)?;
+        parser.eat_token(TokenType::ClosingBracket)?;
+        MemberProperty::Computed(property)
+    };
+
+    Ok(Box::new(Expression::Member { object, property }))
 }

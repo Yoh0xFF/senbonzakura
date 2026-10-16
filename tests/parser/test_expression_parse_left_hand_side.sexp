@@ -284,8 +284,46 @@ log("Hello, world!");
 (Program
   (Expression (Call (Identifier log) (StringLiteral "Hello, world!"))))
 
-; TODO: member access on call results is not supported yet
-;   foo().property;
-;   foo()[index];
-;   obj.getInner().property;
-;   a().b().c();
+=== Parse member access on call result
+foo().bar;
+---
+(Program
+  (Expression (Member (Call (Identifier foo)) (Identifier bar))))
+
+=== Parse computed member access on call result
+foo()[index];
+---
+(Program
+  (Expression (ComputedMember (Call (Identifier foo)) (Identifier index))))
+
+=== Parse member access on method call result
+obj.getInner().property;
+---
+(Program
+  (Expression
+    (Member
+      (Call (Member (Identifier obj) (Identifier getInner)))
+      (Identifier property))))
+
+=== Parse chained method calls
+a.b().c();
+---
+(Program
+  (Expression
+    (Call (Member (Call (Member (Identifier a) (Identifier b))) (Identifier c)))))
+
+=== Parse chained calls and member access
+a().b().c();
+---
+(Program
+  (Expression
+    (Call (Member (Call (Member (Call (Identifier a)) (Identifier b))) (Identifier c)))))
+
+=== Parse assignment to member of call result
+foo().bar = 1;
+---
+(Program
+  (Expression
+    (Assignment Assign
+      (Member (Call (Identifier foo)) (Identifier bar))
+      (NumericLiteral 1))))
