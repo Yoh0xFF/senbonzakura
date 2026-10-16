@@ -73,43 +73,18 @@ Each input was run through the parser to confirm the behavior.
 - [ ] Add spans to AST nodes and to all errors.
 - [ ] Add a diagnostics crate (`ariadne` or `codespan-reporting`) so errors show the source line with
       the problem underlined.
-- [ ] Store names as `Ident`, and add a separate `VarDecl` node and class field declarations.
+- [ ] Replace `number` with `int` / `float`, add class field declarations, `break` / `continue` and
+      array literals.
 - [ ] Replace the hard-coded program in `main.rs` with a CLI:
-      `senbonzakura file.sb --emit=tokens|ast|ir`.
+      `senbonzakura build file.sb -o file`, plus `--emit=tokens|ast|ll`.
 
-### Phase 2: Semantic analysis, the new middle layer
+### Phase 2 onward
 
-- [ ] Name resolution: a scope stack that catches undefined variables and duplicate declarations.
-- [ ] Type checking for operands, call arguments, return types, and missing returns
-      (`def f(): number {}` currently passes).
-- [ ] Output a **typed AST**, with every expression annotated with its resolved `Type`. Code
-      generation should work only from this.
-
-### Phase 3: Code generation for a minimal subset (textual `.ll`)
-
-- [ ] Support `number`, `boolean`, `let`, arithmetic, comparisons, `&&`/`||` (with short-circuit
-      branching), `if`/`while`/`for`/`do-while`, functions, calls and `return`.
-- [ ] Store local variables with `alloca`, `load` and `store`, and let LLVM's `mem2reg` pass convert
-      them to SSA. Don't build phi nodes by hand.
-- [ ] Add a built-in `print` that calls `printf`.
-- [ ] Add **end-to-end tests**: compile `.sb` → `.ll` → run with `clang`, and compare stdout to
-      expected output.
-- [ ] Milestone: a recursive `fib(30)` compiles and runs.
-
-### Phase 4: Runtime features, one at a time
-
-- [ ] Strings: a small runtime in C or Rust, linked in, representing strings as a pointer plus
-      length.
-- [ ] Arrays.
-- [ ] Classes: structs plus constructor functions, then a vtable for `extends` and method
-      overriding.
-- [ ] `nil`: limit it to class types (null pointers) or add optional types.
-- [ ] Memory: leak at first, then use the Boehm GC (a single library, close to drop-in) or reference
-      counting.
-- [ ] Optionally switch to `inkwell` once you want to run optimizations or a JIT from inside the
-      compiler.
+The open questions this review raised (what `number` means, class fields, `nil`, memory, the runtime
+language) were settled on 2026-10-17. See `language-design.md`, whose **Milestones** section replaces
+the rest of this roadmap: the checker skeleton, then codegen M1 (`fib(30)`), strings, arrays,
+classes, and inheritance.
 
 ## Where to start
 
-Finish Phase 0, then decide what `number` means, add field declarations to classes, and build
-Phase 2. Those three decisions shape everything after them.
+Finish Phase 0 and Phase 1, then build the checker skeleton described in `language-design.md`.
