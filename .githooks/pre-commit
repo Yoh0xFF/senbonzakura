@@ -1,0 +1,18 @@
+#!/bin/sh
+# Format staged Java files with Spotless, then re-stage them.
+# Installed into .git/hooks by git-build-hook-maven-plugin (see pom.xml).
+set -e
+
+root=$(git rev-parse --show-toplevel)
+cd "$root"
+
+files=$(git diff --cached --name-only --diff-filter=ACMR -- '*.java')
+[ -z "$files" ] && exit 0
+
+# spotlessFiles: comma-separated regexes matched against absolute paths.
+pattern=$(printf '%s\n' "$files" | sed "s|^|$root/|" | paste -sd, -)
+
+echo "pre-commit: formatting staged Java files with Spotless..."
+./mvnw -q spotless:apply -DspotlessFiles="$pattern"
+
+printf '%s\n' "$files" | while IFS= read -r f; do git add -- "$f"; done

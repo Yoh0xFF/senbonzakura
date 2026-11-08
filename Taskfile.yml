@@ -1,0 +1,25 @@
+version: '3'
+
+vars:
+  MVNW: '{{if eq OS "windows"}}.\mvnw.cmd{{else}}./mvnw{{end}}'
+
+tasks:
+  default:
+    desc: List all available tasks
+    cmds:
+      - task --list
+
+  build:
+    desc: Build all modules (without tests)
+    cmds:
+      - '{{.MVNW}} clean package -DskipTests'
+
+  clean:
+    desc: Clean all build artifacts
+    cmds:
+      - '{{.MVNW}} clean'
+
+  test:
+    desc: Run tests for all modules
+    cmds:
+      - '{{.MVNW}} test'
