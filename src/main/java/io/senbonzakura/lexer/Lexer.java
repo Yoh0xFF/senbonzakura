@@ -4,17 +4,17 @@ public class Lexer {
 
   private static final char EOF = '\uFFFF';
   private final String source;
-  private int current;
-  private int lookahead;
+  private final int length;
+  private int cursor;
 
   public Lexer(String source) {
     this.source = source;
-    this.current = 0;
-    this.lookahead = source.isEmpty() ? 0 : 1;
+    this.length = source.length();
+    this.cursor = 0;
   }
 
   public Token nextToken() {
-    var currentChar = this.currentChar();
+    var currentChar = this.peek();
 
     switch (currentChar) {
       case '\'':
@@ -25,19 +25,16 @@ public class Lexer {
         break;
     }
 
+    cursor++;
+
     return Token.EndOfFile;
   }
 
-  private char currentChar() {
-    if (current == source.length()) {
-      return EOF;
-    }
-    current += 1;
-    lookahead += (lookahead == source.length() ? 0 : 1);
-    return source.charAt(current - 1);
+  private char peek() {
+    return cursor >= length ? EOF : source.charAt(cursor);
   }
 
-  private char nextChar() {
-    return lookahead == source.length() ? EOF : source.charAt(lookahead);
+  private char peekNext() {
+    return cursor + 1 >= length ? EOF : source.charAt(cursor + 1);
   }
 }
