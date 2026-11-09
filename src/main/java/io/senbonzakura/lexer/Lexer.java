@@ -2,7 +2,7 @@ package io.senbonzakura.lexer;
 
 public class Lexer {
 
-  private static final char END_OF_FILE = '.';
+  private static final char EOF = '\uFFFF';
   private final String source;
   private int current;
   private int lookahead;
@@ -30,7 +30,7 @@ public class Lexer {
 
   private char currentChar() {
     if (current == source.length()) {
-      return END_OF_FILE;
+      return EOF;
     }
     current += 1;
     lookahead += (lookahead == source.length() ? 0 : 1);
@@ -38,9 +38,6 @@ public class Lexer {
   }
 
   private char nextChar() {
-    if (lookahead == source.length()) {
-      return END_OF_FILE;
-    }
-    return source.charAt(lookahead);
+    return lookahead == source.length() ? EOF : source.charAt(lookahead);
   }
 }
