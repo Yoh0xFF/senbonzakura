@@ -1,3 +1,5 @@
 package io.senbonzakura.lexer;
 
-public class Token {}
+public enum Token {
+  EndOfFile,
+}
