@@ -32,6 +32,8 @@ public record Token(Kind kind, int start, int end, int flags) {
     return (flags & flag) != 0;
   }
 
+  public record Diagnostic(int start, int end, String message) {}
+
   public enum Kind {
     // Names and literals
     IDENTIFIER,
