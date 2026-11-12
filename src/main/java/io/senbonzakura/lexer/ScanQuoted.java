@@ -3,12 +3,15 @@ package io.senbonzakura.lexer;
 import static io.senbonzakura.lexer.CharClass.digitValue;
 import static io.senbonzakura.lexer.Cursor.EOF;
 
-// Literals between quotes: "...", `...` and '...', and the escapes they share.
+/**
+ * Scans literals between quotes, {@code "..."}, {@code `...`} and {@code '...'}, and the escapes
+ * they share.
+ */
 final class ScanQuoted {
 
   private ScanQuoted() {}
 
-  // Strings: "...", on one line, with the escapes handled by escape().
+  /** Scans a {@code "..."} string, which must end on the line it starts. */
   static Token string(Cursor c) {
     int start = c.pos();
     c.bump(); // opening '"'
@@ -34,8 +37,10 @@ final class ScanQuoted {
     return c.token(Token.Kind.STRING_LITERAL, start, flags);
   }
 
-  // Multi-line strings: `...`, which may span lines. Same escapes as "...", plus a backslash at the
-  // end of a line, which joins it to the next one. `${` is plain text: there is no interpolation.
+  /**
+   * Scans a {@code `...`} string, which may span lines. A backslash before a line break joins the
+   * two lines. There is no {@code ${...}} interpolation; it is plain text.
+   */
   static Token multiline(Cursor c) {
     int start = c.pos();
     c.bump(); // opening '`'
@@ -62,7 +67,7 @@ final class ScanQuoted {
     return c.token(Token.Kind.STRING_LITERAL, start, flags);
   }
 
-  // Characters: 'a', '\n', or a unicode escape. Exactly one character between the quotes.
+  /** Scans a {@code '...'} literal, which must hold exactly one character or escape. */
   static Token character(Cursor c) {
     int start = c.pos();
     c.bump(); // opening '\''
@@ -95,9 +100,11 @@ final class ScanQuoted {
     return c.token(Token.Kind.CHAR_LITERAL, start, flags);
   }
 
-  // Escapes: \n \t \r \0 \\ \" \' \` and a unicode escape: backslash, 'u', then 1 to 6 hex digits
-  // in braces, e.g. u{1F600}. In multi-line strings a backslash before a line break continues the
-  // line.
+  /**
+   * Consumes one escape, starting at the backslash: {@code \n \t \r \0 \\ \" \' \`}, or a unicode
+   * escape of 1 to 6 hex digits in braces. With {@code multiline}, a backslash before a line break
+   * continues the line.
+   */
   private static void escape(Cursor c, boolean multiline) {
     int start = c.pos();
     c.bump(); // '\\'

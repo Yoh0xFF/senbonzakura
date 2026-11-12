@@ -2,15 +2,28 @@ package io.senbonzakura.lexer;
 
 import java.util.Objects;
 
+/**
+ * A token: its kind, the source range it covers, and flags.
+ *
+ * <p>Tokens hold offsets, not text. {@link SourceFile#text(Token)} and {@link
+ * SourceFile#locate(int)} turn them into text and positions.
+ *
+ * @param start offset of the first character
+ * @param end offset just past the last character; equal to {@code start} for {@link Kind#EOF}
+ * @param flags the flag constants below, combined with {@code |}
+ */
 public record Token(Kind kind, int start, int end, int flags) {
 
-  // A line break appears between the previous token and this one.
+  /** A line break appears between the previous token and this one. */
   public static final int NEWLINE_BEFORE = 1;
-  // Whitespace or a comment appears between the previous token and this one.
+
+  /** Whitespace or a comment appears between the previous token and this one. */
   public static final int SPACE_BEFORE = 1 << 1;
-  // A string, char literal or block comment that never closes before the end of input.
+
+  /** The literal has no closing quote; a diagnostic has already been reported. */
   public static final int UNTERMINATED = 1 << 2;
-  // A string or char literal containing escape sequences, so it must be unescaped before use.
+
+  /** The literal contains escape sequences, so its value differs from its source text. */
   public static final int HAS_ESCAPES = 1 << 3;
 
   public Token {
@@ -32,8 +45,15 @@ public record Token(Kind kind, int start, int end, int flags) {
     return (flags & flag) != 0;
   }
 
+  /**
+   * A problem found while lexing, covering offsets {@code start} up to (not including) {@code end}.
+   */
   public record Diagnostic(int start, int end, String message) {}
 
+  /**
+   * What a token is. Keywords and operators each get their own kind, so the parser never compares
+   * strings.
+   */
   public enum Kind {
     // Names and literals
     IDENTIFIER,
@@ -46,10 +66,10 @@ public record Token(Kind kind, int start, int end, int flags) {
 
     // Punctuation and operators
 
-    // Characters the lexer could not make sense of. A diagnostic is recorded separately.
+    /** A character that starts no token; a diagnostic has already been reported. */
     ERROR,
 
-    // Zero-width token at the end of the input.
+    /** The zero-width token at the end of the input. */
     EOF,
   }
 }

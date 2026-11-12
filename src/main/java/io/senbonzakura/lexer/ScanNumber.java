@@ -2,13 +2,18 @@ package io.senbonzakura.lexer;
 
 import static io.senbonzakura.lexer.CharClass.digitValue;
 
-// Numbers: 123, 1_000, 0x1F, 0o17, 0b1010, 1.5, 1e10, 1.5e-3.
-// A '.' only starts a fraction when a digit follows, so `1.foo` and `1..2` leave the '.' alone.
+/**
+ * Scans number literals: {@code 123}, {@code 1_000}, {@code 0x1F}, {@code 0o17}, {@code 0b1010},
+ * {@code 1.5}, {@code 1e10}, {@code 1.5e-3}.
+ *
+ * <p>A {@code .} only starts a fraction when a digit follows, so {@code 1.foo} and {@code 1..2}
+ * leave it for the next token.
+ */
 final class ScanNumber {
 
   private ScanNumber() {}
 
-  // The cursor is on a decimal digit.
+  /** Scans the number at the cursor, which must be on a decimal digit. */
   static Token literal(Cursor c) {
     int start = c.pos();
     if (c.peek() == '0') {
@@ -68,7 +73,7 @@ final class ScanNumber {
     return c.token(Token.Kind.INT_LITERAL, start, 0);
   }
 
-  // Consumes digits of the given radix and '_' separators. Returns how many digits it saw.
+  /** Consumes digits of {@code radix} and {@code _} separators, and returns how many digits. */
   private static int digits(Cursor c, int radix) {
     int count = 0;
     while (true) {

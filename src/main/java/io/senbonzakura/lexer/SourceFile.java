@@ -3,6 +3,7 @@ package io.senbonzakura.lexer;
 import java.util.Arrays;
 import java.util.Objects;
 
+/** The text being lexed, with its path and the line starts that {@link #locate(int)} uses. */
 public final class SourceFile {
 
   private final String path;
@@ -27,6 +28,7 @@ public final class SourceFile {
     return text.length();
   }
 
+  /** Returns the number of lines. Text that ends in a line break has an empty last line. */
   public int lineCount() {
     return lineStarts.length;
   }
@@ -35,6 +37,13 @@ public final class SourceFile {
     return text.substring(token.start(), token.end());
   }
 
+  /**
+   * Converts an offset into a 1-based line and column. Columns count UTF-16 units, and {@code \r\n}
+   * counts as one line break.
+   *
+   * @param offset from {@code 0} to {@link #length()}, inclusive
+   * @throws IndexOutOfBoundsException if {@code offset} is outside that range
+   */
   public LineCol locate(int offset) {
     if (offset < 0 || offset > text.length()) {
       throw new IndexOutOfBoundsException(
@@ -72,6 +81,7 @@ public final class SourceFile {
     return path;
   }
 
+  /** A 1-based line and column, printed as {@code line:column}. */
   public record LineCol(int line, int column) {
 
     public LineCol {

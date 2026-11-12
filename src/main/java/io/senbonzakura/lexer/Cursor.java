@@ -5,10 +5,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.IntPredicate;
 
-// The lexer's only mutable state: the text, the current position and the diagnostics so far.
-// Scanners move it forward and build tokens from it.
+/**
+ * The lexer's only mutable state: the text, the current position and the diagnostics so far.
+ * Scanners move it forward and build tokens from it.
+ */
 final class Cursor {
 
+  /** What {@link #peek(int)} returns past the end. No {@code char} has this value. */
   static final int EOF = -1;
 
   private final String text;
@@ -43,23 +46,24 @@ final class Cursor {
     return text.substring(start, end);
   }
 
-  // Skips n UTF-16 units. Only for characters already checked with peek() to be ASCII.
+  /** Skips {@code n} UTF-16 units. Only for characters {@link #peek(int)} has shown to be ASCII. */
   void bump(int n) {
     pos += n;
   }
 
+  /** Skips one UTF-16 unit. Only for a character {@link #peek()} has shown to be ASCII. */
   void bump() {
     pos++;
   }
 
-  // Consumes one code point, so a surrogate pair (e.g. an emoji) is never split in two.
+  /** Consumes one code point, so a surrogate pair (e.g. an emoji) is never split in two. */
   void advance() {
     if (!isAtEnd()) {
       pos += Character.charCount(text.codePointAt(pos));
     }
   }
 
-  // Consumes \n, \r\n or a lone \r as a single line break.
+  /** Consumes {@code \n}, {@code \r\n} or a lone {@code \r} as one line break, if one is next. */
   void skipLineBreak() {
     if (peek() == '\r') {
       pos++;
@@ -69,7 +73,7 @@ final class Cursor {
     }
   }
 
-  // Consumes code points while they match. Returns whether it consumed any.
+  /** Consumes code points while they match, and returns whether it consumed any. */
   boolean skipWhile(IntPredicate matches) {
     int start = pos;
     while (!isAtEnd()) {
@@ -82,11 +86,12 @@ final class Cursor {
     return pos > start;
   }
 
+  /** Returns a token from {@code start} up to the current position. */
   Token token(Token.Kind kind, int start, int flags) {
     return new Token(kind, start, pos, flags);
   }
 
-  // Reports a problem with the text from start up to the current position.
+  /** Records a diagnostic from {@code start} up to the current position. */
   void report(int start, String message) {
     report(start, pos, message);
   }

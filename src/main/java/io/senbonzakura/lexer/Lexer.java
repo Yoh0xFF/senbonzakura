@@ -5,8 +5,11 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
-// Chooses a scanner from the first character of each token. The scanners do the actual work;
-// all state lives in the Cursor.
+/**
+ * Splits a {@link SourceFile} into {@link Token}s, one {@link #nextToken()} call at a time.
+ *
+ * <p>Lexical errors never throw. They are collected in {@link #diagnostics()} and lexing continues.
+ */
 public class Lexer {
 
   private final SourceFile source;
@@ -21,10 +24,17 @@ public class Lexer {
     return source;
   }
 
+  /**
+   * Returns the problems found so far, in the order found, as a read-only view that keeps growing.
+   */
   public List<Diagnostic> diagnostics() {
     return Collections.unmodifiableList(cursor.diagnostics());
   }
 
+  /**
+   * Returns the next token. Once the input is used up, every call returns the same zero-width EOF
+   * token.
+   */
   public Token nextToken() {
     skipWhitespace();
 
