@@ -4,12 +4,12 @@ import static io.senbonzakura.lexer.CharClass.digitValue;
 
 // Numbers: 123, 1_000, 0x1F, 0o17, 0b1010, 1.5, 1e10, 1.5e-3.
 // A '.' only starts a fraction when a digit follows, so `1.foo` and `1..2` leave the '.' alone.
-final class NumberScanner {
+final class ScanNumber {
 
-  private NumberScanner() {}
+  private ScanNumber() {}
 
   // The cursor is on a decimal digit.
-  static Token scan(Cursor c) {
+  static Token literal(Cursor c) {
     int start = c.pos();
     if (c.peek() == '0') {
       switch (c.peek(1)) {

@@ -4,9 +4,9 @@ import static io.senbonzakura.lexer.CharClass.digitValue;
 import static io.senbonzakura.lexer.Cursor.EOF;
 
 // Literals between quotes: "...", `...` and '...', and the escapes they share.
-final class QuotedScanner {
+final class ScanQuoted {
 
-  private QuotedScanner() {}
+  private ScanQuoted() {}
 
   // Strings: "...", on one line, with the escapes handled by escape().
   static Token string(Cursor c) {
@@ -36,7 +36,7 @@ final class QuotedScanner {
 
   // Multi-line strings: `...`, which may span lines. Same escapes as "...", plus a backslash at the
   // end of a line, which joins it to the next one. `${` is plain text: there is no interpolation.
-  static Token multilineString(Cursor c) {
+  static Token multiline(Cursor c) {
     int start = c.pos();
     c.bump(); // opening '`'
     int flags = 0;

@@ -30,10 +30,10 @@ public class Lexer {
 
     return switch (cursor.peek()) {
       case Cursor.EOF -> Token.eof(cursor.pos(), 0);
-      case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' -> NumberScanner.scan(cursor);
-      case '"' -> QuotedScanner.string(cursor);
-      case '`' -> QuotedScanner.multilineString(cursor);
-      case '\'' -> QuotedScanner.character(cursor);
+      case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' -> ScanNumber.literal(cursor);
+      case '"' -> ScanQuoted.string(cursor);
+      case '`' -> ScanQuoted.multiline(cursor);
+      case '\'' -> ScanQuoted.character(cursor);
       default -> unknownCharacter();
     };
   }
