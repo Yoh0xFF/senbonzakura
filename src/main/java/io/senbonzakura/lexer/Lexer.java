@@ -30,7 +30,7 @@ public class Lexer {
     }
     cursor++;
 
-    return Token.EndOfFile;
+    return Token.eof(length, 0);
   }
 
   private char peek() {
