@@ -77,7 +77,47 @@ public record Token(Kind kind, int start, int end, int flags) {
     TRUE("true", true),
     FALSE("false", true),
 
-    // Punctuation and operators
+    // Punctuation
+    LEFT_PAREN("("),
+    RIGHT_PAREN(")"),
+    LEFT_BRACE("{"),
+    RIGHT_BRACE("}"),
+    LEFT_BRACKET("["),
+    RIGHT_BRACKET("]"),
+    COMMA(","),
+    SEMICOLON(";"),
+    COLON(":"),
+    DOT("."),
+    DOT_DOT(".."),
+    ARROW("->"),
+
+    // Arithmetic
+    PLUS("+"),
+    MINUS("-"),
+    STAR("*"),
+    SLASH("/"),
+    PERCENT("%"),
+
+    // Assignment
+    EQ("="),
+    PLUS_EQ("+="),
+    MINUS_EQ("-="),
+    STAR_EQ("*="),
+    SLASH_EQ("/="),
+    PERCENT_EQ("%="),
+
+    // Comparison
+    EQ_EQ("=="),
+    BANG_EQ("!="),
+    LESS("<"),
+    LESS_EQ("<="),
+    GREATER(">"),
+    GREATER_EQ(">="),
+
+    // Logical
+    AND_AND("&&"),
+    OR_OR("||"),
+    BANG("!"),
 
     /** A character that starts no token; a diagnostic has already been reported. */
     ERROR,
@@ -90,6 +130,10 @@ public record Token(Kind kind, int start, int end, int flags) {
 
     Kind() {
       this(null, false);
+    }
+
+    Kind(String spelling) {
+      this(spelling, false);
     }
 
     Kind(String spelling, boolean keyword) {

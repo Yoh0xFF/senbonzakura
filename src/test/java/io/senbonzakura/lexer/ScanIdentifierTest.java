@@ -69,7 +69,7 @@ class ScanIdentifierTest {
         List.of(
             Kind.LET,
             Kind.IDENTIFIER,
-            Kind.ERROR,
+            Kind.EQ,
             Kind.IDENTIFIER,
             Kind.STRING_LITERAL,
             Kind.CHAR_LITERAL,

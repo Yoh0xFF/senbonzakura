@@ -63,6 +63,11 @@ final class Cursor {
     return value < radix ? value : -1;
   }
 
+  /** Returns whether the text at the cursor starts with {@code s}. */
+  boolean lookingAt(String s) {
+    return text.startsWith(s, pos);
+  }
+
   String text(int start, int end) {
     return text.substring(start, end);
   }

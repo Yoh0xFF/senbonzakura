@@ -61,7 +61,7 @@ class ScanNumberTest {
   void secondDotEndsTheFloat() {
     var lexed = lex("1.5.6");
 
-    assertEquals(List.of(Kind.FLOAT_LITERAL, Kind.ERROR, Kind.INT_LITERAL), lexed.kinds());
+    assertEquals(List.of(Kind.FLOAT_LITERAL, Kind.DOT, Kind.INT_LITERAL), lexed.kinds());
     assertEquals(List.of("1.5", ".", "6"), lexed.texts());
   }
 

@@ -44,10 +44,12 @@ public class Lexer {
       case '"' -> ScanQuoted.string(cursor);
       case '`' -> ScanQuoted.multiline(cursor);
       case '\'' -> ScanQuoted.character(cursor);
-      default ->
-          cursor.atIdentifierStart()
-              ? ScanIdentifier.identifierOrKeyword(cursor)
-              : unknownCharacter();
+      default -> {
+        if (cursor.atIdentifierStart()) {
+          yield ScanIdentifier.identifierOrKeyword(cursor);
+        }
+        yield ScanOperator.operator(cursor).orElseGet(this::unknownCharacter);
+      }
     };
   }
 
