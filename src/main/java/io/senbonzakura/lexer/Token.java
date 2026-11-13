@@ -1,5 +1,8 @@
 package io.senbonzakura.lexer;
 
+import static io.senbonzakura.lexer.Token.Kind.Category.KEYWORD;
+import static io.senbonzakura.lexer.Token.Kind.Category.OPERATOR;
+
 import java.util.Objects;
 
 /**
@@ -63,61 +66,61 @@ public record Token(Kind kind, int start, int end, int flags) {
     CHAR_LITERAL,
 
     // Keywords
-    FN("fn", true),
-    LET("let", true),
-    MUT("mut", true),
-    IF("if", true),
-    ELSE("else", true),
-    WHILE("while", true),
-    FOR("for", true),
-    IN("in", true),
-    RETURN("return", true),
-    BREAK("break", true),
-    CONTINUE("continue", true),
-    TRUE("true", true),
-    FALSE("false", true),
+    FN("fn", KEYWORD),
+    LET("let", KEYWORD),
+    MUT("mut", KEYWORD),
+    IF("if", KEYWORD),
+    ELSE("else", KEYWORD),
+    WHILE("while", KEYWORD),
+    FOR("for", KEYWORD),
+    IN("in", KEYWORD),
+    RETURN("return", KEYWORD),
+    BREAK("break", KEYWORD),
+    CONTINUE("continue", KEYWORD),
+    TRUE("true", KEYWORD),
+    FALSE("false", KEYWORD),
 
     // Punctuation
-    LEFT_PAREN("("),
-    RIGHT_PAREN(")"),
-    LEFT_BRACE("{"),
-    RIGHT_BRACE("}"),
-    LEFT_BRACKET("["),
-    RIGHT_BRACKET("]"),
-    COMMA(","),
-    SEMICOLON(";"),
-    COLON(":"),
-    DOT("."),
-    DOT_DOT(".."),
-    ARROW("->"),
+    LEFT_PAREN("(", OPERATOR),
+    RIGHT_PAREN(")", OPERATOR),
+    LEFT_BRACE("{", OPERATOR),
+    RIGHT_BRACE("}", OPERATOR),
+    LEFT_BRACKET("[", OPERATOR),
+    RIGHT_BRACKET("]", OPERATOR),
+    COMMA(",", OPERATOR),
+    SEMICOLON(";", OPERATOR),
+    COLON(":", OPERATOR),
+    DOT(".", OPERATOR),
+    DOT_DOT("..", OPERATOR),
+    ARROW("->", OPERATOR),
 
     // Arithmetic
-    PLUS("+"),
-    MINUS("-"),
-    STAR("*"),
-    SLASH("/"),
-    PERCENT("%"),
+    PLUS("+", OPERATOR),
+    MINUS("-", OPERATOR),
+    STAR("*", OPERATOR),
+    SLASH("/", OPERATOR),
+    PERCENT("%", OPERATOR),
 
     // Assignment
-    EQ("="),
-    PLUS_EQ("+="),
-    MINUS_EQ("-="),
-    STAR_EQ("*="),
-    SLASH_EQ("/="),
-    PERCENT_EQ("%="),
+    EQ("=", OPERATOR),
+    PLUS_EQ("+=", OPERATOR),
+    MINUS_EQ("-=", OPERATOR),
+    STAR_EQ("*=", OPERATOR),
+    SLASH_EQ("/=", OPERATOR),
+    PERCENT_EQ("%=", OPERATOR),
 
     // Comparison
-    EQ_EQ("=="),
-    BANG_EQ("!="),
-    LESS("<"),
-    LESS_EQ("<="),
-    GREATER(">"),
-    GREATER_EQ(">="),
+    EQ_EQ("==", OPERATOR),
+    BANG_EQ("!=", OPERATOR),
+    LESS("<", OPERATOR),
+    LESS_EQ("<=", OPERATOR),
+    GREATER(">", OPERATOR),
+    GREATER_EQ(">=", OPERATOR),
 
     // Logical
-    AND_AND("&&"),
-    OR_OR("||"),
-    BANG("!"),
+    AND_AND("&&", OPERATOR),
+    OR_OR("||", OPERATOR),
+    BANG("!", OPERATOR),
 
     /** A character that starts no token; a diagnostic has already been reported. */
     ERROR,
@@ -125,20 +128,24 @@ public record Token(Kind kind, int start, int end, int flags) {
     /** The zero-width token at the end of the input. */
     EOF;
 
+    /** How a kind with a fixed spelling is scanned. */
+    enum Category {
+      /** A reserved word, scanned like an identifier. */
+      KEYWORD,
+      /** An operator or punctuation mark, scanned by longest match. */
+      OPERATOR,
+    }
+
     private final String spelling;
-    private final boolean keyword;
+    private final Category category;
 
     Kind() {
-      this(null, false);
+      this(null, null);
     }
 
-    Kind(String spelling) {
-      this(spelling, false);
-    }
-
-    Kind(String spelling, boolean keyword) {
+    Kind(String spelling, Category category) {
       this.spelling = spelling;
-      this.keyword = keyword;
+      this.category = category;
     }
 
     /**
@@ -149,9 +156,12 @@ public record Token(Kind kind, int start, int end, int flags) {
       return spelling;
     }
 
-    /** Returns whether this kind is a reserved word, scanned like an identifier. */
     boolean isKeyword() {
-      return keyword;
+      return category == KEYWORD;
+    }
+
+    boolean isOperator() {
+      return category == OPERATOR;
     }
   }
 }

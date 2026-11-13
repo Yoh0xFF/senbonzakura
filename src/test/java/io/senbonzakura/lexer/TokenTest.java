@@ -57,13 +57,29 @@ class TokenTest {
   }
 
   @Test
-  void keywordsAreWordsWithASpelling() {
+  void categories() {
     assertTrue(Kind.IF.isKeyword());
-    assertFalse(Kind.IDENTIFIER.isKeyword());
-    assertFalse(Kind.EOF.isKeyword());
+    assertFalse(Kind.IF.isOperator());
+    assertTrue(Kind.PLUS.isOperator());
+    assertFalse(Kind.PLUS.isKeyword());
+    assertFalse(Kind.IDENTIFIER.isKeyword() || Kind.IDENTIFIER.isOperator());
+    assertFalse(Kind.EOF.isKeyword() || Kind.EOF.isOperator());
+  }
+
+  @Test
+  void everyKindWithASpellingHasExactlyOneCategory() {
     for (var kind : Kind.values()) {
-      if (kind.isKeyword()) {
-        assertTrue(Character.isLetter(kind.spelling().charAt(0)), kind::name);
+      boolean hasSpelling = kind.spelling() != null;
+      assertEquals(hasSpelling, kind.isKeyword() || kind.isOperator(), kind::name);
+      assertFalse(kind.isKeyword() && kind.isOperator(), kind::name);
+    }
+  }
+
+  @Test
+  void keywordsAreWordsAndOperatorsAreNot() {
+    for (var kind : Kind.values()) {
+      if (kind.spelling() != null) {
+        assertEquals(kind.isKeyword(), Character.isLetter(kind.spelling().charAt(0)), kind::name);
       }
     }
   }

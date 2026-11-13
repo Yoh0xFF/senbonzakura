@@ -18,8 +18,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 class ScanOperatorTest {
 
   static Stream<Kind> operators() {
-    return Arrays.stream(Kind.values())
-        .filter(kind -> kind.spelling() != null && !kind.isKeyword());
+    return Arrays.stream(Kind.values()).filter(Kind::isOperator);
   }
 
   @ParameterizedTest

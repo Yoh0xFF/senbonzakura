@@ -9,8 +9,7 @@ import java.util.stream.Collectors;
 
 /**
  * Scans operators and punctuation by longest match, so {@code <=} is one token rather than {@code
- * <} then {@code =}. The candidates are every {@link Token.Kind} with a spelling that isn't a
- * keyword.
+ * <} then {@code =}. The candidates are the {@link Token.Kind#isOperator() operator} kinds.
  */
 final class ScanOperator {
 
@@ -19,7 +18,7 @@ final class ScanOperator {
   private static final Map<Character, List<Token.Kind>> BY_FIRST_CHAR =
       Map.copyOf(
           Arrays.stream(Token.Kind.values())
-              .filter(kind -> kind.spelling() != null && !kind.isKeyword())
+              .filter(Token.Kind::isOperator)
               .sorted(
                   Comparator.comparingInt((Token.Kind kind) -> kind.spelling().length()).reversed())
               .collect(
