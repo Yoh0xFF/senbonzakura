@@ -15,8 +15,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 class ScanIdentifierTest {
 
   static Stream<Kind> keywords() {
-    return Arrays.stream(Kind.values())
-        .filter(kind -> kind.spelling() != null && Character.isLetter(kind.spelling().charAt(0)));
+    return Arrays.stream(Kind.values()).filter(Kind::isKeyword);
   }
 
   @ParameterizedTest

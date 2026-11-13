@@ -7,14 +7,14 @@ import java.util.stream.Collectors;
 /**
  * Scans identifiers and keywords. An identifier starts with a letter or {@code _} and continues
  * with letters, digits and {@code _}, from any script. A keyword is an identifier whose text is the
- * {@link Token.Kind#spelling() spelling} of a keyword kind; matching is case-sensitive.
+ * {@link Token.Kind#spelling() spelling} of a {@link Token.Kind#isKeyword() keyword} kind; matching
+ * is case-sensitive.
  */
 final class ScanIdentifier {
 
-  // Operators will have spellings too, but they never start with a letter.
   private static final Map<String, Token.Kind> KEYWORDS =
       Arrays.stream(Token.Kind.values())
-          .filter(kind -> kind.spelling() != null && Character.isLetter(kind.spelling().charAt(0)))
+          .filter(Token.Kind::isKeyword)
           .collect(Collectors.toUnmodifiableMap(Token.Kind::spelling, kind -> kind));
 
   private ScanIdentifier() {}

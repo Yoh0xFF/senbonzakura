@@ -57,6 +57,18 @@ class TokenTest {
   }
 
   @Test
+  void keywordsAreWordsWithASpelling() {
+    assertTrue(Kind.IF.isKeyword());
+    assertFalse(Kind.IDENTIFIER.isKeyword());
+    assertFalse(Kind.EOF.isKeyword());
+    for (var kind : Kind.values()) {
+      if (kind.isKeyword()) {
+        assertTrue(Character.isLetter(kind.spelling().charAt(0)), kind::name);
+      }
+    }
+  }
+
+  @Test
   void spellingsAreUnique() {
     var spellings =
         Arrays.stream(Kind.values()).map(Kind::spelling).filter(Objects::nonNull).toList();

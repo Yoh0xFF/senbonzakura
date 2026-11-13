@@ -63,19 +63,19 @@ public record Token(Kind kind, int start, int end, int flags) {
     CHAR_LITERAL,
 
     // Keywords
-    FN("fn"),
-    LET("let"),
-    MUT("mut"),
-    IF("if"),
-    ELSE("else"),
-    WHILE("while"),
-    FOR("for"),
-    IN("in"),
-    RETURN("return"),
-    BREAK("break"),
-    CONTINUE("continue"),
-    TRUE("true"),
-    FALSE("false"),
+    FN("fn", true),
+    LET("let", true),
+    MUT("mut", true),
+    IF("if", true),
+    ELSE("else", true),
+    WHILE("while", true),
+    FOR("for", true),
+    IN("in", true),
+    RETURN("return", true),
+    BREAK("break", true),
+    CONTINUE("continue", true),
+    TRUE("true", true),
+    FALSE("false", true),
 
     // Punctuation and operators
 
@@ -86,13 +86,15 @@ public record Token(Kind kind, int start, int end, int flags) {
     EOF;
 
     private final String spelling;
+    private final boolean keyword;
 
     Kind() {
-      this(null);
+      this(null, false);
     }
 
-    Kind(String spelling) {
+    Kind(String spelling, boolean keyword) {
       this.spelling = spelling;
+      this.keyword = keyword;
     }
 
     /**
@@ -101,6 +103,11 @@ public record Token(Kind kind, int start, int end, int flags) {
      */
     public String spelling() {
       return spelling;
+    }
+
+    /** Returns whether this kind is a reserved word, scanned like an identifier. */
+    boolean isKeyword() {
+      return keyword;
     }
   }
 }
