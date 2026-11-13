@@ -1,6 +1,5 @@
 package io.senbonzakura.lexer;
 
-import static io.senbonzakura.lexer.CharClass.digitValue;
 import static io.senbonzakura.lexer.Cursor.EOF;
 
 /**
@@ -134,9 +133,10 @@ final class ScanQuoted {
 
     int value = 0;
     int count = 0;
-    while (digitValue(c.peek()) < 16) {
+    int digit;
+    while ((digit = c.peekDigit(16)) >= 0) {
       if (count < 6) {
-        value = value * 16 + digitValue(c.peek());
+        value = value * 16 + digit;
       }
       count++;
       c.bump();

@@ -3,7 +3,6 @@ package io.senbonzakura.lexer;
 import io.senbonzakura.lexer.Token.Diagnostic;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.IntPredicate;
 
 /**
  * The lexer's only mutable state: the text, the current position and the diagnostics so far.
@@ -42,6 +41,31 @@ final class Cursor {
     return i < length ? text.charAt(i) : EOF;
   }
 
+  int peekDigit(int radix) {
+    return peekDigit(0, radix);
+  }
+
+  /**
+   * Returns the value of the digit {@code ahead} chars past the cursor in {@code radix}, or -1 if
+   * there is none. Digits above 9 are the letters {@code a}-{@code z} in either case.
+   *
+   * <p>ASCII only: {@link Character#digit(int, int)} would also accept digits from other scripts.
+   */
+  int peekDigit(int ahead, int radix) {
+    int ch = peek(ahead);
+    int value;
+    if (ch >= '0' && ch <= '9') {
+      value = ch - '0';
+    } else if (ch >= 'a' && ch <= 'z') {
+      value = ch - 'a' + 10;
+    } else if (ch >= 'A' && ch <= 'Z') {
+      value = ch - 'A' + 10;
+    } else {
+      return -1;
+    }
+    return value < radix ? value : -1;
+  }
+
   String text(int start, int end) {
     return text.substring(start, end);
   }
@@ -73,12 +97,12 @@ final class Cursor {
     }
   }
 
-  /** Consumes code points while they match, and returns whether it consumed any. */
-  boolean skipWhile(IntPredicate matches) {
+  /** Consumes letters, digits and {@code _}, and returns whether there were any. */
+  boolean skipIdentifierChars() {
     int start = pos;
     while (!isAtEnd()) {
       int c = text.codePointAt(pos);
-      if (!matches.test(c)) {
+      if (c != '_' && !Character.isLetterOrDigit(c)) {
         break;
       }
       pos += Character.charCount(c);

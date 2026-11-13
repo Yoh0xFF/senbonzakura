@@ -1,7 +1,5 @@
 package io.senbonzakura.lexer;
 
-import static io.senbonzakura.lexer.CharClass.digitValue;
-
 /**
  * Scans number literals: {@code 123}, {@code 1_000}, {@code 0x1F}, {@code 0o17}, {@code 0b1010},
  * {@code 1.5}, {@code 1e10}, {@code 1.5e-3}.
@@ -34,7 +32,7 @@ final class ScanNumber {
     var kind = Token.Kind.INT_LITERAL;
     digits(c, 10);
 
-    if (c.peek() == '.' && digitValue(c.peek(1)) < 10) {
+    if (c.peek() == '.' && c.peekDigit(1, 10) >= 0) {
       kind = Token.Kind.FLOAT_LITERAL;
       c.bump(); // '.'
       digits(c, 10);
@@ -51,7 +49,7 @@ final class ScanNumber {
     }
 
     int suffixStart = c.pos();
-    if (c.skipWhile(CharClass::isIdentifierPart)) {
+    if (c.skipIdentifierChars()) {
       c.report(suffixStart, "invalid suffix on number literal");
     } else if (missingExponentDigits) {
       c.report(start, "expected digits in exponent");
@@ -64,7 +62,7 @@ final class ScanNumber {
     int count = digits(c, radix);
 
     int suffixStart = c.pos();
-    boolean hasSuffix = c.skipWhile(CharClass::isIdentifierPart);
+    boolean hasSuffix = c.skipIdentifierChars();
     if (count == 0) {
       c.report(start, "expected " + name + " digits after '" + c.text(start, start + 2) + "'");
     } else if (hasSuffix) {
@@ -77,10 +75,9 @@ final class ScanNumber {
   private static int digits(Cursor c, int radix) {
     int count = 0;
     while (true) {
-      int ch = c.peek();
-      if (ch == '_') {
+      if (c.peek() == '_') {
         c.bump();
-      } else if (digitValue(ch) < radix) {
+      } else if (c.peekDigit(radix) >= 0) {
         c.bump();
         count++;
       } else {
