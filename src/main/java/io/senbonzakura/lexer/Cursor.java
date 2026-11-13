@@ -53,16 +53,13 @@ final class Cursor {
    */
   int peekDigit(int ahead, int radix) {
     int ch = peek(ahead);
+
     int value;
-    if (ch >= '0' && ch <= '9') {
-      value = ch - '0';
-    } else if (ch >= 'a' && ch <= 'z') {
-      value = ch - 'a' + 10;
-    } else if (ch >= 'A' && ch <= 'Z') {
-      value = ch - 'A' + 10;
-    } else {
-      return -1;
-    }
+    if (ch >= '0' && ch <= '9') value = ch - '0';
+    else if (ch >= 'a' && ch <= 'z') value = ch - 'a' + 10;
+    else if (ch >= 'A' && ch <= 'Z') value = ch - 'A' + 10;
+    else return -1;
+
     return value < radix ? value : -1;
   }
 
