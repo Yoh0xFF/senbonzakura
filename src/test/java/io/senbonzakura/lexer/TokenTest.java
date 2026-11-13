@@ -2,10 +2,14 @@ package io.senbonzakura.lexer;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import io.senbonzakura.lexer.Token.Kind;
+import java.util.Arrays;
+import java.util.Objects;
+import java.util.Set;
 import org.junit.jupiter.api.Test;
 
 class TokenTest {
@@ -42,6 +46,22 @@ class TokenTest {
       assertEquals(0, seen & flag);
       seen |= flag;
     }
+  }
+
+  @Test
+  void onlyFixedTextKindsHaveASpelling() {
+    assertEquals("if", Kind.IF.spelling());
+    assertNull(Kind.IDENTIFIER.spelling());
+    assertNull(Kind.STRING_LITERAL.spelling());
+    assertNull(Kind.EOF.spelling());
+  }
+
+  @Test
+  void spellingsAreUnique() {
+    var spellings =
+        Arrays.stream(Kind.values()).map(Kind::spelling).filter(Objects::nonNull).toList();
+
+    assertEquals(spellings.size(), Set.copyOf(spellings).size(), spellings::toString);
   }
 
   @Test

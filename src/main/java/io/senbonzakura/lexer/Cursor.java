@@ -94,6 +94,15 @@ final class Cursor {
     }
   }
 
+  /** Returns whether the cursor is on a letter or {@code _}, which can start an identifier. */
+  boolean atIdentifierStart() {
+    if (isAtEnd()) {
+      return false;
+    }
+    int c = text.codePointAt(pos);
+    return c == '_' || Character.isLetter(c);
+  }
+
   /** Consumes letters, digits and {@code _}, and returns whether there were any. */
   boolean skipIdentifierChars() {
     int start = pos;

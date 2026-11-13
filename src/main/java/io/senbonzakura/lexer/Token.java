@@ -63,6 +63,19 @@ public record Token(Kind kind, int start, int end, int flags) {
     CHAR_LITERAL,
 
     // Keywords
+    FN("fn"),
+    LET("let"),
+    MUT("mut"),
+    IF("if"),
+    ELSE("else"),
+    WHILE("while"),
+    FOR("for"),
+    IN("in"),
+    RETURN("return"),
+    BREAK("break"),
+    CONTINUE("continue"),
+    TRUE("true"),
+    FALSE("false"),
 
     // Punctuation and operators
 
@@ -70,6 +83,24 @@ public record Token(Kind kind, int start, int end, int flags) {
     ERROR,
 
     /** The zero-width token at the end of the input. */
-    EOF,
+    EOF;
+
+    private final String spelling;
+
+    Kind() {
+      this(null);
+    }
+
+    Kind(String spelling) {
+      this.spelling = spelling;
+    }
+
+    /**
+     * Returns the source text every token of this kind has, like {@code "if"}, or {@code null} when
+     * it varies, as for identifiers and literals.
+     */
+    public String spelling() {
+      return spelling;
+    }
   }
 }
