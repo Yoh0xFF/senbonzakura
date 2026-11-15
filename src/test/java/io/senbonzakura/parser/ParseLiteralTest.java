@@ -207,10 +207,10 @@ class ParseLiteralTest {
 
   @Test
   void nonLiteralIsReportedAndBecomesAnErrorNode() {
-    var parsed = parse(")");
+    var parsed = parse(",");
 
     assertEquals(new Expr.Error(0, 1), parsed.expr());
-    assertEquals(List.of("expected expression, found ')'"), parsed.parserMessages());
+    assertEquals(List.of("expected expression, found ','"), parsed.parserMessages());
   }
 
   @Test

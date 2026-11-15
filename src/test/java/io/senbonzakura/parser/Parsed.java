@@ -18,11 +18,22 @@ record Parsed(
     List<Diagnostic> parserDiagnostics) {
 
   static Parsed parse(String text) {
+    return parse(text, true);
+  }
+
+  // Parses the first expression and ignores anything left after it.
+  static Parsed parseFirst(String text) {
+    return parse(text, false);
+  }
+
+  private static Parsed parse(String text, boolean wholeInput) {
     var source = new SourceFile("test", text);
     var lexer = new Lexer(source);
     var parser = new Parser(lexer);
     var expr = parser.parseExpression();
-    assertTrue(parser.atEnd(), () -> "input left after the expression in: " + text);
+    if (wholeInput) {
+      assertTrue(parser.atEnd(), () -> "input left after the expression in: " + text);
+    }
     return new Parsed(
         source, expr, List.copyOf(lexer.diagnostics()), List.copyOf(parser.diagnostics()));
   }
@@ -39,12 +50,24 @@ record Parsed(
     return assertInstanceOf(type, expr);
   }
 
-  // The source text the node covers.
+  // The source text the top node covers.
   String exprText() {
-    return source.text().substring(expr.start(), expr.end());
+    return text(expr);
+  }
+
+  // The source text a node covers.
+  String text(Expr node) {
+    return source.text().substring(node.start(), node.end());
   }
 
   List<String> parserMessages() {
     return parserDiagnostics.stream().map(Diagnostic::message).toList();
+  }
+
+  // The source text each parser diagnostic points at.
+  List<String> parserTexts() {
+    return parserDiagnostics.stream()
+        .map(d -> source.text().substring(d.start(), d.end()))
+        .toList();
   }
 }

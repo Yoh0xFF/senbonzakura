@@ -54,6 +54,83 @@ public sealed interface Expr {
     }
   }
 
+  /** A prefix operator applied to one operand, like {@code -x} or {@code !done}. */
+  record Unary(UnaryOp op, Expr operand, int start, int end) implements Expr {
+    public Unary {
+      Objects.requireNonNull(op, "op");
+      Objects.requireNonNull(operand, "operand");
+      checkRange(start, end);
+    }
+  }
+
+  /** An infix operator applied to two operands, like {@code a + b} or {@code a && b}. */
+  record Binary(BinaryOp op, Expr left, Expr right, int start, int end) implements Expr {
+    public Binary {
+      Objects.requireNonNull(op, "op");
+      Objects.requireNonNull(left, "left");
+      Objects.requireNonNull(right, "right");
+      checkRange(start, end);
+    }
+  }
+
+  /**
+   * An expression in parentheses. Kept as its own node so the tree still says where the parentheses
+   * were, for diagnostics and formatting.
+   */
+  record Group(Expr inner, int start, int end) implements Expr {
+    public Group {
+      Objects.requireNonNull(inner, "inner");
+      checkRange(start, end);
+    }
+  }
+
+  /** The prefix operators. */
+  enum UnaryOp {
+    /** {@code -}, arithmetic negation. */
+    NEG("-"),
+    /** {@code !}, logical not. */
+    NOT("!");
+
+    private final String spelling;
+
+    UnaryOp(String spelling) {
+      this.spelling = spelling;
+    }
+
+    public String spelling() {
+      return spelling;
+    }
+  }
+
+  /** The infix operators. */
+  enum BinaryOp {
+    ADD("+"),
+    SUB("-"),
+    MUL("*"),
+    DIV("/"),
+    REM("%"),
+    EQ("=="),
+    NE("!="),
+    LT("<"),
+    LE("<="),
+    GT(">"),
+    GE(">="),
+    /** {@code &&}, which skips the right operand when the left is false. */
+    AND("&&"),
+    /** {@code ||}, which skips the right operand when the left is true. */
+    OR("||");
+
+    private final String spelling;
+
+    BinaryOp(String spelling) {
+      this.spelling = spelling;
+    }
+
+    public String spelling() {
+      return spelling;
+    }
+  }
+
   /**
    * Stands in for an expression that could not be parsed. A diagnostic has already been reported,
    * so later passes skip it without reporting again.
