@@ -133,4 +133,72 @@ class ParseStatementTest {
     assertEquals(List.of("a;", "{b;}", "(= c 1);"), trees);
     assertTrue(parser.diagnostics().isEmpty());
   }
+
+  @ParameterizedTest
+  @CsvSource(
+      delimiterString = "=>",
+      value = {
+        "let x = 1;              => (let x 1)",
+        "let mut x = 1;          => (let mut x 1)",
+        "let x;                  => (let x)",
+        "let mut x;              => (let mut x)",
+        "let x = a + f(b);       => (let x (+ a (call f b)))",
+        "let r = 0..n;           => (let r (.. 0 n))",
+        "{ let x = 1; x += 2; }  => {(let x 1) (+= x 2);}",
+      })
+  void letStatements(String input, String tree) {
+    assertEquals(tree, parseClean(input).tree());
+  }
+
+  @Test
+  void letCoversItsSource() {
+    var parsed = parseClean("let mut x = 1 + 2;");
+    var let = parsed.as(Stmt.Let.class);
+
+    assertTrue(let.mutable());
+    assertEquals("x", let.name());
+    assertEquals("let mut x = 1 + 2;", parsed.text(let));
+  }
+
+  @ParameterizedTest
+  @CsvSource(
+      delimiterString = "=>",
+      value = {
+        "let = 1;      => (let <error> 1)      => expected variable name, found '='",
+        "let;          => (let <error>)        => expected variable name, found ';'",
+        "let mut;      => (let mut <error>)    => expected variable name, found ';'",
+        "let fn = 1;   => (let <error> 1)      => expected variable name, found 'fn'",
+        "let 1 = 2;    => (let <error> 2)      => expected variable name, found '1'",
+        "let x = ;     => (let x <error>)      => expected expression, found ';'",
+      })
+  void malformedLetIsReportedOnce(String input, String tree, String message) {
+    var parsed = parse(input);
+
+    assertEquals(tree, parsed.tree());
+    assertEquals(List.of(message), parsed.parserMessages());
+  }
+
+  @ParameterizedTest
+  @CsvSource(
+      delimiterString = "=>",
+      value = {
+        "let x = 1     => (let x 1)      => 9",
+        "let x         => (let x)        => 5",
+        "{ let x 1; }  => {(let x) 1;}   => 7",
+      })
+  void missingSemicolonAfterLetIsReported(String input, String tree, int offset) {
+    var parsed = parse(input);
+
+    assertEquals(tree, parsed.tree());
+    assertEquals(
+        List.of(new Diagnostic(offset, offset, "expected ';' after let statement")),
+        parsed.parserDiagnostics());
+  }
+
+  @Test
+  void letIsNotAnExpression() {
+    var parsed = parse("{ x = let y; }");
+
+    assertEquals(List.of("expected expression, found 'let'"), parsed.parserMessages());
+  }
 }

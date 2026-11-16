@@ -40,6 +40,12 @@ final class Sexpr {
   static String print(Stmt stmt) {
     return switch (stmt) {
       case Stmt.Expression s -> print(s.expr()) + ";";
+      case Stmt.Let s ->
+          "(let"
+              + (s.mutable() ? " mut " : " ")
+              + (s.name().isEmpty() ? "<error>" : s.name())
+              + (s.initializer() == null ? "" : " " + print(s.initializer()))
+              + ")";
       case Stmt.Block s ->
           s.statements().stream().map(Sexpr::print).collect(Collectors.joining(" ", "{", "}"));
     };

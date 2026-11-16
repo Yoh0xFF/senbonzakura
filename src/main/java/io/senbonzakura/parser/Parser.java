@@ -59,6 +59,7 @@ public class Parser {
   static Stmt statement(TokenCursor c) {
     return switch (c.peek().kind()) {
       case LEFT_BRACE -> ParseStatement.block(c);
+      case LET -> ParseStatement.let(c);
       default -> ParseStatement.expression(c);
     };
   }
