@@ -17,20 +17,20 @@ public sealed interface Expr {
 
   record IntLiteral(long value, int start, int end) implements Expr {
     public IntLiteral {
-      checkRange(start, end);
+      NodeRange.check(start, end);
     }
   }
 
   record FloatLiteral(double value, int start, int end) implements Expr {
     public FloatLiteral {
-      checkRange(start, end);
+      NodeRange.check(start, end);
     }
   }
 
   record StringLiteral(String value, int start, int end) implements Expr {
     public StringLiteral {
       Objects.requireNonNull(value, "value");
-      checkRange(start, end);
+      NodeRange.check(start, end);
     }
   }
 
@@ -39,20 +39,20 @@ public sealed interface Expr {
       if (!Character.isValidCodePoint(codePoint)) {
         throw new IllegalArgumentException("invalid code point " + codePoint);
       }
-      checkRange(start, end);
+      NodeRange.check(start, end);
     }
   }
 
   record BoolLiteral(boolean value, int start, int end) implements Expr {
     public BoolLiteral {
-      checkRange(start, end);
+      NodeRange.check(start, end);
     }
   }
 
   record Identifier(String name, int start, int end) implements Expr {
     public Identifier {
       Objects.requireNonNull(name, "name");
-      checkRange(start, end);
+      NodeRange.check(start, end);
     }
   }
 
@@ -60,7 +60,7 @@ public sealed interface Expr {
     public Unary {
       Objects.requireNonNull(op, "op");
       Objects.requireNonNull(operand, "operand");
-      checkRange(start, end);
+      NodeRange.check(start, end);
     }
   }
 
@@ -69,7 +69,7 @@ public sealed interface Expr {
       Objects.requireNonNull(op, "op");
       Objects.requireNonNull(left, "left");
       Objects.requireNonNull(right, "right");
-      checkRange(start, end);
+      NodeRange.check(start, end);
     }
   }
 
@@ -78,7 +78,7 @@ public sealed interface Expr {
     public Range {
       Objects.requireNonNull(lower, "lower");
       Objects.requireNonNull(upper, "upper");
-      checkRange(start, end);
+      NodeRange.check(start, end);
     }
   }
 
@@ -91,7 +91,7 @@ public sealed interface Expr {
       Objects.requireNonNull(op, "op");
       Objects.requireNonNull(target, "target");
       Objects.requireNonNull(value, "value");
-      checkRange(start, end);
+      NodeRange.check(start, end);
     }
   }
 
@@ -102,7 +102,7 @@ public sealed interface Expr {
   record Group(Expr inner, int start, int end) implements Expr {
     public Group {
       Objects.requireNonNull(inner, "inner");
-      checkRange(start, end);
+      NodeRange.check(start, end);
     }
   }
 
@@ -174,13 +174,7 @@ public sealed interface Expr {
    */
   record Error(int start, int end) implements Expr {
     public Error {
-      checkRange(start, end);
-    }
-  }
-
-  private static void checkRange(int start, int end) {
-    if (start < 0 || end < start) {
-      throw new IllegalArgumentException("invalid node range " + start + ".." + end);
+      NodeRange.check(start, end);
     }
   }
 }

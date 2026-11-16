@@ -1,5 +1,5 @@
 /**
- * The syntax tree the parser builds.
+ * The syntax tree the parser builds: {@link Stmt} nodes holding {@link Expr} nodes.
  *
  * <ul>
  *   <li>Nodes are immutable records grouped under sealed interfaces, so a {@code switch} over them

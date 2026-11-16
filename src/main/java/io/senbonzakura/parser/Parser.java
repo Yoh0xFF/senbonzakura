@@ -1,6 +1,7 @@
 package io.senbonzakura.parser;
 
 import io.senbonzakura.ast.Expr;
+import io.senbonzakura.ast.Stmt;
 import io.senbonzakura.lexer.Lexer;
 import io.senbonzakura.lexer.Token;
 import io.senbonzakura.lexer.Token.Diagnostic;
@@ -9,8 +10,8 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * Builds {@link Expr} trees from the tokens of a {@link Lexer}, one {@link #parseExpression()} call
- * at a time.
+ * Builds {@link Stmt} and {@link Expr} trees from the tokens of a {@link Lexer}, one {@link
+ * #parseStatement()} or {@link #parseExpression()} call at a time.
  *
  * <p>Like the lexer, the parser never throws on bad input. Problems go to {@link #diagnostics()}
  * and the part that failed becomes an {@link Expr.Error} node. Problems the lexer found stay in
@@ -36,16 +37,30 @@ public class Parser {
   }
 
   /**
-   * Parses one expression. Always consumes at least one token, unless the input is used up, so a
+   * Parses one statement. Always consumes at least one token, unless the input is used up, so a
    * loop calling it until {@link #atEnd()} always finishes.
    */
+  public Stmt parseStatement() {
+    Token first = cursor.peek();
+    Stmt stmt = statement(cursor);
+    cursor.skipIfStuck(first);
+    return stmt;
+  }
+
+  /** Like {@link #parseStatement()}, always consumes at least one token unless at the end. */
   public Expr parseExpression() {
     Token first = cursor.peek();
     Expr expr = expression(cursor);
-    if (cursor.peek() == first && !cursor.atEnd()) {
-      cursor.advance(); // a stray closing delimiter, already reported
-    }
+    cursor.skipIfStuck(first);
     return expr;
+  }
+
+  /** Picks a parser from the token that starts the statement. */
+  static Stmt statement(TokenCursor c) {
+    return switch (c.peek().kind()) {
+      case LEFT_BRACE -> ParseStatement.block(c);
+      default -> ParseStatement.expression(c);
+    };
   }
 
   static Expr expression(TokenCursor c) {
@@ -67,7 +82,7 @@ public class Parser {
       case LEFT_PAREN -> ParseGroup.parenthesized(c);
       case MINUS, BANG -> ParseOperator.prefix(c);
       case ERROR -> lexerError(c);
-      case RIGHT_PAREN, RIGHT_BRACKET, RIGHT_BRACE, EOF -> missingOperand(c);
+      case RIGHT_PAREN, RIGHT_BRACKET, RIGHT_BRACE, SEMICOLON, EOF -> missingOperand(c);
       default -> unexpectedToken(c);
     };
   }
@@ -79,7 +94,7 @@ public class Parser {
   }
 
   private static Expr missingOperand(TokenCursor c) {
-    // Leaves the token in place, so an enclosing group can still match it.
+    // Leaves the token in place, so an enclosing group or statement can still match it.
     Token token = c.peek();
     c.report(token, "expected expression, found " + c.describe(token));
     return new Expr.Error(token.start(), token.start());

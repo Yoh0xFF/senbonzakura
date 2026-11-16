@@ -44,6 +44,16 @@ final class TokenCursor {
     return token;
   }
 
+  /**
+   * Consumes {@code start} if it is still the next token, so a loop whose last step parsed nothing
+   * moves on. Whatever left the token in place has already reported it.
+   */
+  void skipIfStuck(Token start) {
+    if (current == start && !atEnd()) {
+      advance();
+    }
+  }
+
   String text(Token token) {
     return source.text(token);
   }

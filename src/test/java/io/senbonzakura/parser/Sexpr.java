@@ -1,8 +1,11 @@
 package io.senbonzakura.parser;
 
 import io.senbonzakura.ast.Expr;
+import io.senbonzakura.ast.Stmt;
+import java.util.stream.Collectors;
 
 // Prints a tree as an S-expression, like (+ 1 (* 2 3)), so tests can check its shape in one line.
+// Statements print as {(= x 1); y;}.
 final class Sexpr {
 
   private Sexpr() {}
@@ -23,6 +26,14 @@ final class Sexpr {
           "(" + e.op().spelling() + " " + print(e.target()) + " " + print(e.value()) + ")";
       case Expr.Group e -> "(group " + print(e.inner()) + ")";
       case Expr.Error e -> "<error>";
+    };
+  }
+
+  static String print(Stmt stmt) {
+    return switch (stmt) {
+      case Stmt.Expression s -> print(s.expr()) + ";";
+      case Stmt.Block s ->
+          s.statements().stream().map(Sexpr::print).collect(Collectors.joining(" ", "{", "}"));
     };
   }
 }
