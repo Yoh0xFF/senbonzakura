@@ -63,6 +63,7 @@ public class Parser {
       case STRING_LITERAL -> ParseLiteral.string(c);
       case CHAR_LITERAL -> ParseLiteral.character(c);
       case TRUE, FALSE -> ParseLiteral.bool(c);
+      case IDENTIFIER -> ParseIdentifier.identifier(c);
       case LEFT_PAREN -> ParseGroup.parenthesized(c);
       case MINUS, BANG -> ParseOperator.prefix(c);
       case ERROR -> lexerError(c);

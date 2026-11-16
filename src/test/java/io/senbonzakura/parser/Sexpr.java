@@ -14,9 +14,13 @@ final class Sexpr {
       case Expr.StringLiteral e -> '"' + e.value() + '"';
       case Expr.CharLiteral e -> "'" + Character.toString(e.codePoint()) + "'";
       case Expr.BoolLiteral e -> Boolean.toString(e.value());
+      case Expr.Identifier e -> e.name();
       case Expr.Unary e -> "(" + e.op().spelling() + " " + print(e.operand()) + ")";
       case Expr.Binary e ->
           "(" + e.op().spelling() + " " + print(e.left()) + " " + print(e.right()) + ")";
+      case Expr.Range e -> "(.. " + print(e.lower()) + " " + print(e.upper()) + ")";
+      case Expr.Assign e ->
+          "(" + e.op().spelling() + " " + print(e.target()) + " " + print(e.value()) + ")";
       case Expr.Group e -> "(group " + print(e.inner()) + ")";
       case Expr.Error e -> "<error>";
     };

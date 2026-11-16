@@ -49,6 +49,13 @@ public sealed interface Expr {
     }
   }
 
+  record Identifier(String name, int start, int end) implements Expr {
+    public Identifier {
+      Objects.requireNonNull(name, "name");
+      checkRange(start, end);
+    }
+  }
+
   record Unary(UnaryOp op, Expr operand, int start, int end) implements Expr {
     public Unary {
       Objects.requireNonNull(op, "op");
@@ -62,6 +69,28 @@ public sealed interface Expr {
       Objects.requireNonNull(op, "op");
       Objects.requireNonNull(left, "left");
       Objects.requireNonNull(right, "right");
+      checkRange(start, end);
+    }
+  }
+
+  /** {@code lower..upper}, which excludes {@code upper}. */
+  record Range(Expr lower, Expr upper, int start, int end) implements Expr {
+    public Range {
+      Objects.requireNonNull(lower, "lower");
+      Objects.requireNonNull(upper, "upper");
+      checkRange(start, end);
+    }
+  }
+
+  /**
+   * {@code target = value}, or a compound form like {@code target += value}. The parser has
+   * reported a target that cannot be assigned to, but still builds the node.
+   */
+  record Assign(AssignOp op, Expr target, Expr value, int start, int end) implements Expr {
+    public Assign {
+      Objects.requireNonNull(op, "op");
+      Objects.requireNonNull(target, "target");
+      Objects.requireNonNull(value, "value");
       checkRange(start, end);
     }
   }
@@ -112,6 +141,25 @@ public sealed interface Expr {
     private final String spelling;
 
     BinaryOp(String spelling) {
+      this.spelling = spelling;
+    }
+
+    public String spelling() {
+      return spelling;
+    }
+  }
+
+  enum AssignOp {
+    ASSIGN("="),
+    ADD("+="),
+    SUB("-="),
+    MUL("*="),
+    DIV("/="),
+    REM("%=");
+
+    private final String spelling;
+
+    AssignOp(String spelling) {
       this.spelling = spelling;
     }
 

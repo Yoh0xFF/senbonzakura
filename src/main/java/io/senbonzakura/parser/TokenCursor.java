@@ -57,7 +57,11 @@ final class TokenCursor {
   }
 
   void report(Token token, String message) {
-    diagnostics.add(new Diagnostic(token.start(), token.end(), message));
+    report(token.start(), token.end(), message);
+  }
+
+  void report(int start, int end, String message) {
+    diagnostics.add(new Diagnostic(start, end, message));
   }
 
   List<Diagnostic> diagnostics() {

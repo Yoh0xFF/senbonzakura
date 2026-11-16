@@ -1,6 +1,7 @@
 package io.senbonzakura.parser;
 
 import io.senbonzakura.ast.Expr;
+import io.senbonzakura.ast.Expr.AssignOp;
 import io.senbonzakura.ast.Expr.BinaryOp;
 import io.senbonzakura.ast.Expr.UnaryOp;
 import io.senbonzakura.lexer.Token;
@@ -9,6 +10,8 @@ import io.senbonzakura.lexer.Token;
  * Parses prefix and infix operators, and owns their precedence. Infix operators, loosest first:
  *
  * <ol>
+ *   <li>{@code = += -= *= /= %=}, which are right-associative and need an identifier on the left
+ *   <li>{@code ..}, which cannot be chained: {@code a..b..c} is an error
  *   <li>{@code ||}
  *   <li>{@code &&}
  *   <li>{@code == != < <= > >=}, which cannot be chained: {@code a < b < c} is an error
@@ -16,8 +19,8 @@ import io.senbonzakura.lexer.Token;
  *   <li>{@code * / %}
  * </ol>
  *
- * <p>Prefix {@code -} and {@code !} bind tighter than all of them, and every infix operator is
- * left-associative. Operands come from {@link Parser#operand(TokenCursor)}.
+ * <p>Prefix {@code -} and {@code !} bind tighter than all of them, and the infix operators from
+ * {@code ||} down are left-associative. Operands come from {@link Parser#operand(TokenCursor)}.
  */
 final class ParseOperator {
 
@@ -26,7 +29,7 @@ final class ParseOperator {
   private ParseOperator() {}
 
   static Expr expression(TokenCursor c) {
-    return infix(c, LOOSEST);
+    return assignment(c);
   }
 
   static Expr prefix(TokenCursor c) {
@@ -39,6 +42,37 @@ final class ParseOperator {
         };
     Expr operand = Parser.operand(c);
     return new Expr.Unary(op, operand, token.start(), operand.end());
+  }
+
+  private static Expr assignment(TokenCursor c) {
+    Expr target = range(c);
+    AssignOp op = assignOp(c.peek().kind());
+    if (op == null) {
+      return target;
+    }
+    c.advance();
+    // An Error target was already reported.
+    if (!(target instanceof Expr.Identifier || target instanceof Expr.Error)) {
+      c.report(target.start(), target.end(), "invalid assignment target");
+    }
+    Expr value = assignment(c);
+    return new Expr.Assign(op, target, value, target.start(), value.end());
+  }
+
+  private static Expr range(TokenCursor c) {
+    Expr left = infix(c, LOOSEST);
+    boolean chained = false;
+    while (c.at(Token.Kind.DOT_DOT)) {
+      Token opToken = c.advance();
+      if (chained) {
+        c.report(opToken, "range operators cannot be chained");
+      }
+      chained = true;
+
+      Expr right = infix(c, LOOSEST);
+      left = new Expr.Range(left, right, left.start(), right.end());
+    }
+    return left;
   }
 
   /**
@@ -78,6 +112,19 @@ final class ParseOperator {
 
   private static boolean isComparison(BinaryOp op) {
     return precedence(op) == 3;
+  }
+
+  /** Returns {@code null} if the token is not an assignment operator. */
+  private static AssignOp assignOp(Token.Kind kind) {
+    return switch (kind) {
+      case EQ -> AssignOp.ASSIGN;
+      case PLUS_EQ -> AssignOp.ADD;
+      case MINUS_EQ -> AssignOp.SUB;
+      case STAR_EQ -> AssignOp.MUL;
+      case SLASH_EQ -> AssignOp.DIV;
+      case PERCENT_EQ -> AssignOp.REM;
+      default -> null;
+    };
   }
 
   /** Returns the infix operator a token spells, or {@code null} if it is not one. */
