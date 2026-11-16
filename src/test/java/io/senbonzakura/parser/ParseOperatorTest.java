@@ -182,10 +182,10 @@ class ParseOperatorTest {
 
   @Test
   void errorTargetIsNotReportedAgain() {
-    var parsed = parse(", = 1");
+    var parsed = parse(": = 1");
 
     assertEquals("(= <error> 1)", Sexpr.print(parsed.expr()));
-    assertEquals(List.of("expected expression, found ','"), parsed.parserMessages());
+    assertEquals(List.of("expected expression, found ':'"), parsed.parserMessages());
   }
 
   @ParameterizedTest

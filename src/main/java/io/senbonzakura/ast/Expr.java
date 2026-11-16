@@ -1,5 +1,6 @@
 package io.senbonzakura.ast;
 
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -51,6 +52,34 @@ public sealed interface Expr {
 
   record Identifier(String name, int start, int end) implements Expr {
     public Identifier {
+      Objects.requireNonNull(name, "name");
+      NodeRange.check(start, end);
+    }
+  }
+
+  record Call(Expr callee, List<Expr> arguments, int start, int end) implements Expr {
+    public Call {
+      Objects.requireNonNull(callee, "callee");
+      arguments = List.copyOf(arguments);
+      NodeRange.check(start, end);
+    }
+  }
+
+  record Index(Expr target, Expr index, int start, int end) implements Expr {
+    public Index {
+      Objects.requireNonNull(target, "target");
+      Objects.requireNonNull(index, "index");
+      NodeRange.check(start, end);
+    }
+  }
+
+  /**
+   * {@code target.name}. The name is empty when it was missing, which the parser has already
+   * reported.
+   */
+  record Field(Expr target, String name, int start, int end) implements Expr {
+    public Field {
+      Objects.requireNonNull(target, "target");
       Objects.requireNonNull(name, "name");
       NodeRange.check(start, end);
     }

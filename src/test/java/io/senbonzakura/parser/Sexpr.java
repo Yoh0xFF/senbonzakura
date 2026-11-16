@@ -3,6 +3,7 @@ package io.senbonzakura.parser;
 import io.senbonzakura.ast.Expr;
 import io.senbonzakura.ast.Stmt;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 // Prints a tree as an S-expression, like (+ 1 (* 2 3)), so tests can check its shape in one line.
 // Statements print as {(= x 1); y;}.
@@ -18,6 +19,13 @@ final class Sexpr {
       case Expr.CharLiteral e -> "'" + Character.toString(e.codePoint()) + "'";
       case Expr.BoolLiteral e -> Boolean.toString(e.value());
       case Expr.Identifier e -> e.name();
+      case Expr.Call e ->
+          Stream.concat(
+                  Stream.of("call", print(e.callee())), e.arguments().stream().map(Sexpr::print))
+              .collect(Collectors.joining(" ", "(", ")"));
+      case Expr.Index e -> "(index " + print(e.target()) + " " + print(e.index()) + ")";
+      case Expr.Field e ->
+          "(. " + print(e.target()) + " " + (e.name().isEmpty() ? "<error>" : e.name()) + ")";
       case Expr.Unary e -> "(" + e.op().spelling() + " " + print(e.operand()) + ")";
       case Expr.Binary e ->
           "(" + e.op().spelling() + " " + print(e.left()) + " " + print(e.right()) + ")";

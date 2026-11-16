@@ -67,11 +67,16 @@ public class Parser {
     return ParseOperator.expression(c);
   }
 
-  /**
-   * Parses one operand: the part of an expression between infix operators. Picks a parser from the
-   * token at the cursor.
-   */
+  /** Parses the part of an expression between infix operators: prefix operators, then a postfix. */
   static Expr operand(TokenCursor c) {
+    return switch (c.peek().kind()) {
+      case MINUS, BANG -> ParseOperator.prefix(c);
+      default -> ParsePostfix.postfix(c);
+    };
+  }
+
+  /** Picks a parser from the token that starts the primary: a literal, a name or a group. */
+  static Expr primary(TokenCursor c) {
     return switch (c.peek().kind()) {
       case INT_LITERAL -> ParseLiteral.integer(c);
       case FLOAT_LITERAL -> ParseLiteral.floating(c);
@@ -80,9 +85,8 @@ public class Parser {
       case TRUE, FALSE -> ParseLiteral.bool(c);
       case IDENTIFIER -> ParseIdentifier.identifier(c);
       case LEFT_PAREN -> ParseGroup.parenthesized(c);
-      case MINUS, BANG -> ParseOperator.prefix(c);
       case ERROR -> lexerError(c);
-      case RIGHT_PAREN, RIGHT_BRACKET, RIGHT_BRACE, SEMICOLON, EOF -> missingOperand(c);
+      case RIGHT_PAREN, RIGHT_BRACKET, RIGHT_BRACE, COMMA, SEMICOLON, EOF -> missingOperand(c);
       default -> unexpectedToken(c);
     };
   }
@@ -94,7 +98,7 @@ public class Parser {
   }
 
   private static Expr missingOperand(TokenCursor c) {
-    // Leaves the token in place, so an enclosing group or statement can still match it.
+    // Leaves the token in place, so an enclosing group, argument list or statement can match it.
     Token token = c.peek();
     c.report(token, "expected expression, found " + c.describe(token));
     return new Expr.Error(token.start(), token.start());
