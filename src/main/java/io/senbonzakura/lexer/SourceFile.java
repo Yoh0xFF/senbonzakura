@@ -64,7 +64,7 @@ public final class SourceFile {
     for (int i = 0; i < length; i++) {
       char c = text.charAt(i);
       if (c == '\r' && i + 1 < length && text.charAt(i + 1) == '\n') {
-        i++; // treat \r\n as a single line break
+        i++;
       } else if (c != '\n' && c != '\r') {
         continue;
       }
