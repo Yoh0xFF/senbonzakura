@@ -31,7 +31,6 @@ public class Parser {
     return Collections.unmodifiableList(cursor.diagnostics());
   }
 
-  /** Returns whether every token has been parsed. */
   public boolean atEnd() {
     return cursor.atEnd();
   }
@@ -49,7 +48,6 @@ public class Parser {
     return expr;
   }
 
-  /** Parses a whole expression. The entry point parsers use for nested expressions. */
   static Expr expression(TokenCursor c) {
     return ParseOperator.expression(c);
   }

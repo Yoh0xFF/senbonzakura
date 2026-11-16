@@ -17,7 +17,6 @@ final class TokenCursor {
   private final SourceFile source;
   private final List<Diagnostic> diagnostics = new ArrayList<>();
 
-  /** The next token to parse. */
   private Token current;
 
   TokenCursor(Lexer lexer) {
@@ -26,7 +25,6 @@ final class TokenCursor {
     this.current = lexer.nextToken();
   }
 
-  /** Returns the next token without consuming it. */
   Token peek() {
     return current;
   }
@@ -58,7 +56,6 @@ final class TokenCursor {
     return "'" + text(token) + "'";
   }
 
-  /** Records a diagnostic covering {@code token}. */
   void report(Token token, String message) {
     diagnostics.add(new Diagnostic(token.start(), token.end(), message));
   }

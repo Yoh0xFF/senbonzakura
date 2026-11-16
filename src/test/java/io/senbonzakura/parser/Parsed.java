@@ -38,7 +38,6 @@ record Parsed(
         source, expr, List.copyOf(lexer.diagnostics()), List.copyOf(parser.diagnostics()));
   }
 
-  // Parses input that must have no lexer or parser problems.
   static Parsed parseClean(String text) {
     var parsed = parse(text);
     assertEquals(List.of(), parsed.lexerDiagnostics(), "lexer diagnostics");
@@ -50,12 +49,10 @@ record Parsed(
     return assertInstanceOf(type, expr);
   }
 
-  // The source text the top node covers.
   String exprText() {
     return text(expr);
   }
 
-  // The source text a node covers.
   String text(Expr node) {
     return source.text().substring(node.start(), node.end());
   }

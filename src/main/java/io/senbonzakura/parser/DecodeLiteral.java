@@ -12,7 +12,6 @@ import java.util.OptionalLong;
  */
 final class DecodeLiteral {
 
-  /** U+FFFD, the value of a malformed escape or character literal. */
   static final int REPLACEMENT = 0xFFFD;
 
   private DecodeLiteral() {}

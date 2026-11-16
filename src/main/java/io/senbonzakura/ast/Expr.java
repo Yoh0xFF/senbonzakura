@@ -15,21 +15,18 @@ public sealed interface Expr {
 
   int end();
 
-  /** An integer literal, like {@code 42}, {@code 1_000} or {@code 0xFF}. */
   record IntLiteral(long value, int start, int end) implements Expr {
     public IntLiteral {
       checkRange(start, end);
     }
   }
 
-  /** A float literal, like {@code 1.5} or {@code 1e-3}. */
   record FloatLiteral(double value, int start, int end) implements Expr {
     public FloatLiteral {
       checkRange(start, end);
     }
   }
 
-  /** A string literal, {@code "..."} or {@code `...`}, with its escapes already applied. */
   record StringLiteral(String value, int start, int end) implements Expr {
     public StringLiteral {
       Objects.requireNonNull(value, "value");
@@ -37,7 +34,6 @@ public sealed interface Expr {
     }
   }
 
-  /** A character literal, like {@code 'a'} or {@code '\n'}, as one code point. */
   record CharLiteral(int codePoint, int start, int end) implements Expr {
     public CharLiteral {
       if (!Character.isValidCodePoint(codePoint)) {
@@ -47,14 +43,12 @@ public sealed interface Expr {
     }
   }
 
-  /** {@code true} or {@code false}. */
   record BoolLiteral(boolean value, int start, int end) implements Expr {
     public BoolLiteral {
       checkRange(start, end);
     }
   }
 
-  /** A prefix operator applied to one operand, like {@code -x} or {@code !done}. */
   record Unary(UnaryOp op, Expr operand, int start, int end) implements Expr {
     public Unary {
       Objects.requireNonNull(op, "op");
@@ -63,7 +57,6 @@ public sealed interface Expr {
     }
   }
 
-  /** An infix operator applied to two operands, like {@code a + b} or {@code a && b}. */
   record Binary(BinaryOp op, Expr left, Expr right, int start, int end) implements Expr {
     public Binary {
       Objects.requireNonNull(op, "op");
@@ -84,11 +77,8 @@ public sealed interface Expr {
     }
   }
 
-  /** The prefix operators. */
   enum UnaryOp {
-    /** {@code -}, arithmetic negation. */
     NEG("-"),
-    /** {@code !}, logical not. */
     NOT("!");
 
     private final String spelling;
@@ -102,7 +92,6 @@ public sealed interface Expr {
     }
   }
 
-  /** The infix operators. */
   enum BinaryOp {
     ADD("+"),
     SUB("-"),

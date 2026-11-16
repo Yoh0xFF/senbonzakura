@@ -13,7 +13,6 @@ final class ParseLiteral {
 
   private ParseLiteral() {}
 
-  /** Parses the {@code INT_LITERAL} at the cursor. */
   static Expr integer(TokenCursor c) {
     Token token = c.advance();
     var value = DecodeLiteral.integer(c.text(token));
@@ -24,7 +23,6 @@ final class ParseLiteral {
     return new Expr.IntLiteral(value.getAsLong(), token.start(), token.end());
   }
 
-  /** Parses the {@code FLOAT_LITERAL} at the cursor. */
   static Expr floating(TokenCursor c) {
     Token token = c.advance();
     double value = DecodeLiteral.floating(c.text(token));
@@ -35,21 +33,18 @@ final class ParseLiteral {
     return new Expr.FloatLiteral(value, token.start(), token.end());
   }
 
-  /** Parses the {@code STRING_LITERAL} at the cursor. */
   static Expr string(TokenCursor c) {
     Token token = c.advance();
     String value = DecodeLiteral.string(c.text(token), !token.has(Token.UNTERMINATED));
     return new Expr.StringLiteral(value, token.start(), token.end());
   }
 
-  /** Parses the {@code CHAR_LITERAL} at the cursor. */
   static Expr character(TokenCursor c) {
     Token token = c.advance();
     int codePoint = DecodeLiteral.character(c.text(token), !token.has(Token.UNTERMINATED));
     return new Expr.CharLiteral(codePoint, token.start(), token.end());
   }
 
-  /** Parses the {@code true} or {@code false} at the cursor. */
   static Expr bool(TokenCursor c) {
     Token token = c.advance();
     return new Expr.BoolLiteral(token.kind() == Token.Kind.TRUE, token.start(), token.end());

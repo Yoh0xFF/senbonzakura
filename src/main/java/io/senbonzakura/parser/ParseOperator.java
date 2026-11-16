@@ -21,17 +21,14 @@ import io.senbonzakura.lexer.Token;
  */
 final class ParseOperator {
 
-  /** The precedence of {@code ||}, the loosest infix operator. */
   private static final int LOOSEST = 1;
 
   private ParseOperator() {}
 
-  /** Parses a whole expression: operands joined by any infix operators. */
   static Expr expression(TokenCursor c) {
     return infix(c, LOOSEST);
   }
 
-  /** Parses the prefix {@code -} or {@code !} at the cursor and its operand. */
   static Expr prefix(TokenCursor c) {
     Token token = c.advance();
     UnaryOp op =
@@ -68,7 +65,7 @@ final class ParseOperator {
     }
   }
 
-  /** Returns how tightly {@code op} binds its operands; higher binds tighter. */
+  /** Higher binds tighter. */
   private static int precedence(BinaryOp op) {
     return switch (op) {
       case OR -> 1;
