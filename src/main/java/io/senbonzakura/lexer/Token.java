@@ -78,6 +78,23 @@ public record Token(Kind kind, int start, int end, int flags) {
     TRUE("true", KEYWORD),
     FALSE("false", KEYWORD),
 
+    // Primitive types
+    BYTE("byte", KEYWORD),
+    SHORT("short", KEYWORD),
+    INT("int", KEYWORD),
+    SIZE("size", KEYWORD),
+    LONG("long", KEYWORD),
+    UBYTE("ubyte", KEYWORD),
+    USHORT("ushort", KEYWORD),
+    UINT("uint", KEYWORD),
+    USIZE("usize", KEYWORD),
+    ULONG("ulong", KEYWORD),
+    FLOAT("float", KEYWORD),
+    DOUBLE("double", KEYWORD),
+    CHAR("char", KEYWORD),
+    BOOL("bool", KEYWORD),
+    STRING("string", KEYWORD),
+
     // Punctuation
     LEFT_PAREN("(", OPERATOR),
     RIGHT_PAREN(")", OPERATOR),

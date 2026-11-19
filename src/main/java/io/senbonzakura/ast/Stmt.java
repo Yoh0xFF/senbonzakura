@@ -22,12 +22,26 @@ public sealed interface Stmt {
   }
 
   /**
-   * {@code var name = initializer;}, where {@code = initializer} is optional. {@code initializer}
-   * is {@code null} when there is none, and {@code name} is empty when it was missing, which the
-   * parser has already reported.
+   * {@code var a: int = 1, b = 2;}, which declares one or more variables. Covers the semicolon too,
+   * unless it was missing.
    */
-  record Var(String name, Expr initializer, int start, int end) implements Stmt {
+  record Var(List<Declarator> declarators, int start, int end) implements Stmt {
     public Var {
+      declarators = List.copyOf(declarators);
+      if (declarators.isEmpty()) {
+        throw new IllegalArgumentException("a var declares at least one variable");
+      }
+      NodeRange.check(start, end);
+    }
+  }
+
+  /**
+   * One variable of a {@link Var}: {@code name: type = initializer}, where {@code : type} and
+   * {@code = initializer} are optional, and each is {@code null} when absent. {@code name} is empty
+   * when it was missing, which the parser has already reported. Not a statement on its own.
+   */
+  record Declarator(String name, Type type, Expr initializer, int start, int end) {
+    public Declarator {
       Objects.requireNonNull(name, "name");
       NodeRange.check(start, end);
     }
@@ -63,10 +77,12 @@ public sealed interface Stmt {
   }
 
   /**
-   * {@code loop var name in iterable { ... }}. {@code name} is empty when it was missing, which the
-   * parser has already reported.
+   * {@code loop var name: type in iterable { ... }}, where {@code : type} is optional and {@code
+   * type} is {@code null} without it. {@code name} is empty when it was missing, which the parser
+   * has already reported.
    */
-  record LoopIn(String name, Expr iterable, Block body, int start, int end) implements Stmt {
+  record LoopIn(String name, Type type, Expr iterable, Block body, int start, int end)
+      implements Stmt {
     public LoopIn {
       Objects.requireNonNull(name, "name");
       Objects.requireNonNull(iterable, "iterable");

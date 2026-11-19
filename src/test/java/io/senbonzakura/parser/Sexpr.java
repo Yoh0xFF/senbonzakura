@@ -2,11 +2,12 @@ package io.senbonzakura.parser;
 
 import io.senbonzakura.ast.Expr;
 import io.senbonzakura.ast.Stmt;
+import io.senbonzakura.ast.Type;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 // Prints a tree as an S-expression, like (+ 1 (* 2 3)), so tests can check its shape in one line.
-// Statements print as {(= x 1); y;}.
+// Statements print as {(= x 1); y;}, and declarations as (var a: int 1, b).
 final class Sexpr {
 
   private Sexpr() {}
@@ -42,10 +43,9 @@ final class Sexpr {
     return switch (stmt) {
       case Stmt.Expression s -> print(s.expr()) + ";";
       case Stmt.Var s ->
-          "(var "
-              + (s.name().isEmpty() ? "<error>" : s.name())
-              + (s.initializer() == null ? "" : " " + print(s.initializer()))
-              + ")";
+          s.declarators().stream()
+              .map(Sexpr::declarator)
+              .collect(Collectors.joining(", ", "(var ", ")"));
       case Stmt.If s ->
           "(if "
               + print(s.condition())
@@ -60,7 +60,8 @@ final class Sexpr {
               + ")";
       case Stmt.LoopIn s ->
           "(loop var "
-              + (s.name().isEmpty() ? "<error>" : s.name())
+              + name(s.name())
+              + typeAnnotation(s.type())
               + " in "
               + print(s.iterable())
               + " "
@@ -88,5 +89,26 @@ final class Sexpr {
       case Stmt.Block s ->
           s.statements().stream().map(Sexpr::print).collect(Collectors.joining(" ", "{", "}"));
     };
+  }
+
+  static String print(Type type) {
+    return switch (type) {
+      case Type.Primitive t -> t.kind().spelling();
+      case Type.Error t -> "<error>";
+    };
+  }
+
+  private static String declarator(Stmt.Declarator d) {
+    return name(d.name())
+        + typeAnnotation(d.type())
+        + (d.initializer() == null ? "" : " " + print(d.initializer()));
+  }
+
+  private static String name(String name) {
+    return name.isEmpty() ? "<error>" : name;
+  }
+
+  private static String typeAnnotation(Type type) {
+    return type == null ? "" : ": " + print(type);
   }
 }

@@ -2,6 +2,7 @@ package io.senbonzakura.parser;
 
 import io.senbonzakura.ast.Expr;
 import io.senbonzakura.ast.Stmt;
+import io.senbonzakura.ast.Type;
 import io.senbonzakura.lexer.Token;
 import java.util.ArrayList;
 import java.util.List;
@@ -29,52 +30,82 @@ final class ParseStatement {
 
   /** The cursor must be on {@code var}. */
   static Stmt varStatement(TokenCursor c) {
+    assert c.at(Token.Kind.VAR) : c.peek();
     int problemsBefore = c.diagnostics().size();
-    return varRest(c, problemsBefore, binding(c, false));
+    Token keyword = c.advance();
+    return varRest(c, problemsBefore, keyword, binding(c, false));
   }
 
-  /** {@code var name}, the part a {@code var} statement shares with {@code loop var}. */
-  private record Binding(String name, int start, int end) {}
+  /**
+   * {@code name: type}, the part of a declarator before its initializer, and all of a {@code loop
+   * var x in} variable. {@code type} is {@code null} when there is none.
+   */
+  private record Binding(String name, Type type, int start, int end) {}
 
   /**
-   * Parses {@code var} and the name. A keyword or literal where the name should be is consumed,
-   * unless it can follow the name; {@code inLoop} adds {@code in} to those.
+   * Parses a name and an optional {@code : type}. A keyword or literal where the name should be is
+   * consumed, unless it can follow the name; {@code inLoop} adds {@code in} to those.
    */
   private static Binding binding(TokenCursor c, boolean inLoop) {
-    assert c.at(Token.Kind.VAR) : c.peek();
-    Token keyword = c.advance();
-
+    int start = c.peek().start();
+    String name = "";
+    int end = start;
     if (c.at(Token.Kind.IDENTIFIER)) {
       Token token = c.advance();
-      return new Binding(c.text(token), keyword.start(), token.end());
+      name = c.text(token);
+      end = token.end();
+    } else {
+      c.report(c.peek(), "expected variable name, found " + c.describe(c.peek()));
+      if (!canFollowName(c) && !(inLoop && c.at(Token.Kind.IN))) {
+        end = c.advance().end();
+      }
     }
-    c.report(c.peek(), "expected variable name, found " + c.describe(c.peek()));
-    int end = keyword.end();
-    if (!canFollowName(c) && !(inLoop && c.at(Token.Kind.IN))) {
-      end = c.advance().end();
+
+    Type type = null;
+    if (c.at(Token.Kind.COLON)) {
+      c.advance();
+      type = Parser.type(c);
+      end = type.end();
     }
-    return new Binding("", keyword.start(), end);
+    return new Binding(name, type, start, end);
   }
 
   private static boolean canFollowName(TokenCursor c) {
     return switch (c.peek().kind()) {
-      case EQ, SEMICOLON, RIGHT_BRACE, EOF -> true;
+      case COLON, EQ, COMMA, SEMICOLON, RIGHT_BRACE, EOF -> true;
       default -> false;
     };
   }
 
-  /** Parses what follows the name of a {@code var}: an optional {@code = initializer}, then ;. */
-  private static Stmt.Var varRest(TokenCursor c, int problemsBefore, Binding binding) {
-    int end = binding.end();
-    Expr initializer = null;
-    if (c.at(Token.Kind.EQ)) {
+  /**
+   * Parses the rest of a {@code var} after its first name and type: that declarator's optional
+   * {@code = initializer}, any more declarators after commas, then {@code ;}.
+   */
+  private static Stmt.Var varRest(TokenCursor c, int problemsBefore, Token keyword, Binding first) {
+    var declarators = new ArrayList<Stmt.Declarator>();
+    Binding binding = first;
+    while (true) {
+      Expr initializer = null;
+      int end = binding.end();
+      if (c.at(Token.Kind.EQ)) {
+        c.advance();
+        initializer = Parser.expression(c);
+        end = initializer.end();
+      }
+      declarators.add(
+          new Stmt.Declarator(binding.name(), binding.type(), initializer, binding.start(), end));
+
+      if (!c.at(Token.Kind.COMMA)) {
+        break;
+      }
       c.advance();
-      initializer = Parser.expression(c);
-      end = initializer.end();
+      binding = binding(c, false);
     }
 
-    end = semicolon(c, problemsBefore, end, "expected ';' after var statement");
-    return new Stmt.Var(binding.name(), initializer, binding.start(), end);
+    int end =
+        semicolon(
+            c, problemsBefore, declarators.getLast().end(), "expected ';' after var statement");
+    return new Stmt.Var(declarators, keyword.start(), end);
   }
 
   /**
@@ -152,13 +183,16 @@ final class ParseStatement {
   }
 
   /**
-   * Tells {@code loop var x in} from {@code loop var i = 0;} by what follows the name. Anything
-   * else is reported as a missing {@code in}, and the loop is parsed as one over what follows.
+   * Tells {@code loop var x in} from {@code loop var i = 0;} by what follows the name and type.
+   * Anything else is reported as a missing {@code in}, and the loop is parsed as one over what
+   * follows.
    */
   private static Stmt varLoop(TokenCursor c, Token loop, int problemsBefore) {
+    assert c.at(Token.Kind.VAR) : c.peek();
+    Token keyword = c.advance();
     Binding binding = binding(c, true);
-    if (c.at(Token.Kind.EQ) || c.at(Token.Kind.SEMICOLON)) {
-      return stepLoop(c, loop, problemsBefore, varRest(c, problemsBefore, binding));
+    if (c.at(Token.Kind.EQ) || c.at(Token.Kind.COMMA) || c.at(Token.Kind.SEMICOLON)) {
+      return stepLoop(c, loop, problemsBefore, varRest(c, problemsBefore, keyword, binding));
     }
 
     if (c.at(Token.Kind.IN)) {
@@ -172,7 +206,8 @@ final class ParseStatement {
             ? new Expr.Error(c.peek().start(), c.peek().start())
             : Parser.expression(c);
     Stmt.Block body = body(c, problemsBefore, iterable.end(), "after loop iterable");
-    return new Stmt.LoopIn(binding.name(), iterable, body, loop.start(), body.end());
+    return new Stmt.LoopIn(
+        binding.name(), binding.type(), iterable, body, loop.start(), body.end());
   }
 
   private static Stmt stepLoop(TokenCursor c, Token loop, int problemsBefore, Stmt.Var init) {

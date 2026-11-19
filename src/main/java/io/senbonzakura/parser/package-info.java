@@ -9,8 +9,9 @@
  *       primary. {@code TokenCursor} holds all mutable state, and the {@code Parse*} classes are
  *       stateless.
  *   <li>Parsers call back into {@code Parser.statement}, {@code Parser.expression}, {@code
- *       Parser.operand} and {@code Parser.primary} for nested parts, so they never depend on one
- *       another directly. {@code ParseOperator} alone knows operator precedence.
+ *       Parser.operand}, {@code Parser.primary} and {@code Parser.type} for nested parts, so they
+ *       never depend on one another directly. {@code ParseOperator} alone knows operator
+ *       precedence.
  * </ul>
  */
 package io.senbonzakura.parser;

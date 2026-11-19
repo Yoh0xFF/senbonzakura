@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import io.senbonzakura.ast.Expr;
 import io.senbonzakura.ast.Stmt;
+import io.senbonzakura.ast.Type;
 import io.senbonzakura.lexer.Lexer;
 import io.senbonzakura.lexer.SourceFile;
 import io.senbonzakura.lexer.Token.Diagnostic;
@@ -43,6 +44,14 @@ record ParsedStmt(SourceFile source, Stmt stmt, List<Diagnostic> parserDiagnosti
   }
 
   String text(Expr node) {
+    return source.text().substring(node.start(), node.end());
+  }
+
+  String text(Type node) {
+    return source.text().substring(node.start(), node.end());
+  }
+
+  String text(Stmt.Declarator node) {
     return source.text().substring(node.start(), node.end());
   }
 

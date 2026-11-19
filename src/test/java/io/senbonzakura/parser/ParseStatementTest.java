@@ -4,6 +4,7 @@ import static io.senbonzakura.parser.ParsedStmt.parse;
 import static io.senbonzakura.parser.ParsedStmt.parseClean;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import io.senbonzakura.ast.Stmt;
@@ -159,8 +160,69 @@ class ParseStatementTest {
     var parsed = parseClean("var x = 1 + 2;");
     var decl = parsed.as(Stmt.Var.class);
 
-    assertEquals("x", decl.name());
+    assertEquals("x", decl.declarators().getFirst().name());
     assertEquals("var x = 1 + 2;", parsed.text(decl));
+  }
+
+  @ParameterizedTest
+  @CsvSource(
+      delimiterString = "=>",
+      value = {
+        "var i: int;                    => (var i: int)",
+        "var i = 0;                     => (var i 0)",
+        "var i: int = 0;                => (var i: int 0)",
+        "var i: int = 0, j: int = 0;    => (var i: int 0, j: int 0)",
+        "var a, b = 1, c: bool;         => (var a, b 1, c: bool)",
+        "var f: double = 1.5 * x;       => (var f: double (* 1.5 x))",
+        "{ var a: int, b: uint; a; }    => {(var a: int, b: uint) a;}",
+      })
+  void typedAndMultipleVarStatements(String input, String tree) {
+    assertEquals(tree, parseClean(input).tree());
+  }
+
+  @Test
+  void declaratorsCoverTheirSource() {
+    var parsed = parseClean("var i: int = 0, j = 1;");
+    var decl = parsed.as(Stmt.Var.class);
+    var i = decl.declarators().get(0);
+    var j = decl.declarators().get(1);
+
+    assertEquals("var i: int = 0, j = 1;", parsed.text(decl));
+    assertEquals("i: int = 0", parsed.text(i));
+    assertEquals("int", parsed.text(i.type()));
+    assertEquals("j = 1", parsed.text(j));
+    assertNull(j.type());
+  }
+
+  @ParameterizedTest
+  @CsvSource(
+      delimiterString = "=>",
+      value = {
+        "var i: = 0;      => (var i: <error> 0)        => expected type, found '='",
+        "var i:;          => (var i: <error>)          => expected type, found ';'",
+        "var i: foo = 0;  => (var i: <error> 0)        => expected type, found 'foo'",
+        "var i: 1 = 0;    => (var i: <error> 0)        => expected type, found '1'",
+        "var i: int, j:;  => (var i: int, j: <error>)  => expected type, found ';'",
+        "var : int = 0;   => (var <error>: int 0)      => expected variable name, found ':'",
+        "var i = 0, ;     => (var i 0, <error>)        => expected variable name, found ';'",
+        "var i = 0,, j;   => (var i 0, <error>, j)     => expected variable name, found ','",
+        "var i = , j;     => (var i <error>, j)        => expected expression, found ','",
+      })
+  void malformedTypedVarIsReportedOnce(String input, String tree, String message) {
+    var parsed = parse(input);
+
+    assertEquals(tree, parsed.tree());
+    assertEquals(List.of(message), parsed.parserMessages());
+  }
+
+  @Test
+  void missingSemicolonAfterATypeIsReportedAfterIt() {
+    var parsed = parse("var x: int");
+
+    assertEquals("(var x: int)", parsed.tree());
+    assertEquals(
+        List.of(new Diagnostic(10, 10, "expected ';' after var statement")),
+        parsed.parserDiagnostics());
   }
 
   @ParameterizedTest
@@ -390,6 +452,26 @@ class ParseStatementTest {
     assertEquals("i < 10", parsed.text(loop.condition()));
     assertEquals("i++", parsed.text(loop.step()));
     assertEquals("{ x; }", parsed.text(loop.body()));
+  }
+
+  @ParameterizedTest
+  @CsvSource(
+      delimiterString = "=>",
+      value = {
+        "loop var c: char in s {}                 => (loop var c: char in s {})",
+        "loop var i: int = 0, j = 9; i < j; i++ {} => (loop (var i: int 0, j 9) (< i j) (++ i) {})",
+        "loop var i = 0, j: int; i < 9; i++ {}     => (loop (var i 0, j: int) (< i 9) (++ i) {})",
+      })
+  void loopVariablesTakeTypes(String input, String tree) {
+    assertEquals(tree, parseClean(input).tree());
+  }
+
+  @Test
+  void loopVariableWithAMissingTypeIsReportedOnce() {
+    var parsed = parse("loop var i: in xs {}");
+
+    assertEquals("(loop var i: <error> in xs {})", parsed.tree());
+    assertEquals(List.of("expected type, found 'in'"), parsed.parserMessages());
   }
 
   @Test

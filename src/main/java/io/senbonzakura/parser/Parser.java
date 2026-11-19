@@ -2,6 +2,7 @@ package io.senbonzakura.parser;
 
 import io.senbonzakura.ast.Expr;
 import io.senbonzakura.ast.Stmt;
+import io.senbonzakura.ast.Type;
 import io.senbonzakura.lexer.Lexer;
 import io.senbonzakura.lexer.Token;
 import io.senbonzakura.lexer.Token.Diagnostic;
@@ -71,6 +72,10 @@ public class Parser {
 
   static Expr expression(TokenCursor c) {
     return ParseOperator.expression(c);
+  }
+
+  static Type type(TokenCursor c) {
+    return ParseType.type(c);
   }
 
   /** Parses the part of an expression between infix operators: prefix operators, then a postfix. */
