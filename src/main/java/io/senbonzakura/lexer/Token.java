@@ -68,11 +68,8 @@ public record Token(Kind kind, int start, int end, int flags) {
     // Keywords
     FN("fn", KEYWORD),
     LET("let", KEYWORD),
-    MUT("mut", KEYWORD),
     IF("if", KEYWORD),
     ELSE("else", KEYWORD),
-    WHILE("while", KEYWORD),
-    FOR("for", KEYWORD),
     LOOP("loop", KEYWORD),
     IN("in", KEYWORD),
     RETURN("return", KEYWORD),

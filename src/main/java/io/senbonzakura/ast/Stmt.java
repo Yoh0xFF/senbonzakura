@@ -22,11 +22,11 @@ public sealed interface Stmt {
   }
 
   /**
-   * {@code let mut name = initializer;}, where {@code mut} and {@code = initializer} are optional.
-   * {@code initializer} is {@code null} when there is none, and {@code name} is empty when it was
-   * missing, which the parser has already reported.
+   * {@code let name = initializer;}, where {@code = initializer} is optional. {@code initializer}
+   * is {@code null} when there is none, and {@code name} is empty when it was missing, which the
+   * parser has already reported.
    */
-  record Let(boolean mutable, String name, Expr initializer, int start, int end) implements Stmt {
+  record Let(String name, Expr initializer, int start, int end) implements Stmt {
     public Let {
       Objects.requireNonNull(name, "name");
       NodeRange.check(start, end);
@@ -63,11 +63,10 @@ public sealed interface Stmt {
   }
 
   /**
-   * {@code loop let mut name in iterable { ... }}, where {@code mut} is optional. {@code name} is
-   * empty when it was missing, which the parser has already reported.
+   * {@code loop let name in iterable { ... }}. {@code name} is empty when it was missing, which the
+   * parser has already reported.
    */
-  record LoopIn(boolean mutable, String name, Expr iterable, Block body, int start, int end)
-      implements Stmt {
+  record LoopIn(String name, Expr iterable, Block body, int start, int end) implements Stmt {
     public LoopIn {
       Objects.requireNonNull(name, "name");
       Objects.requireNonNull(iterable, "iterable");

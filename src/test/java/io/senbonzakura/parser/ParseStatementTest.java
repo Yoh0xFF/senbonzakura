@@ -141,9 +141,10 @@ class ParseStatementTest {
       delimiterString = "=>",
       value = {
         "let x = 1;              => (let x 1)",
-        "let mut x = 1;          => (let mut x 1)",
         "let x;                  => (let x)",
-        "let mut x;              => (let mut x)",
+        "let mut = 1;            => (let mut 1)",
+        "let while = 0;          => (let while 0)",
+        "let for;                => (let for)",
         "let x = a + f(b);       => (let x (+ a (call f b)))",
         "let r = 0..n;           => (let r (.. 0 n))",
         "{ let x = 1; x += 2; }  => {(let x 1) (+= x 2);}",
@@ -154,12 +155,11 @@ class ParseStatementTest {
 
   @Test
   void letCoversItsSource() {
-    var parsed = parseClean("let mut x = 1 + 2;");
+    var parsed = parseClean("let x = 1 + 2;");
     var let = parsed.as(Stmt.Let.class);
 
-    assertTrue(let.mutable());
     assertEquals("x", let.name());
-    assertEquals("let mut x = 1 + 2;", parsed.text(let));
+    assertEquals("let x = 1 + 2;", parsed.text(let));
   }
 
   @ParameterizedTest
@@ -168,7 +168,6 @@ class ParseStatementTest {
       value = {
         "let = 1;      => (let <error> 1)      => expected variable name, found '='",
         "let;          => (let <error>)        => expected variable name, found ';'",
-        "let mut;      => (let mut <error>)    => expected variable name, found ';'",
         "let fn = 1;   => (let <error> 1)      => expected variable name, found 'fn'",
         "let 1 = 2;    => (let <error> 2)      => expected variable name, found '1'",
         "let x = ;     => (let x <error>)      => expected expression, found ';'",
@@ -349,9 +348,9 @@ class ParseStatementTest {
         "loop a == b { x; }                      => (loop (== a b) {x;})",
         "loop !done && n < 10 {}                 => (loop (&& (! done) (< n 10)) {})",
         "loop let i in 0..10 { x; }              => (loop let i in (.. 0 10) {x;})",
-        "loop let mut c in s.chars() {}          => (loop let mut c in (call (. s chars)) {})",
+        "loop let c in s.chars() {}              => (loop let c in (call (. s chars)) {})",
         "loop let i = 0; i < 10; i++ { x; }      => (loop (let i 0) (< i 10) (++ i) {x;})",
-        "loop let mut i = 9; i >= 0; i-- {}      => (loop (let mut i 9) (>= i 0) (-- i) {})",
+        "loop let i = 9; i >= 0; i-- {}          => (loop (let i 9) (>= i 0) (-- i) {})",
         "loop let i = 0; i < n; i += 2 {}        => (loop (let i 0) (< i n) (+= i 2) {})",
         "{ loop a { b; } c; }                    => {(loop a {b;}) c;}",
         "loop a { loop let x in xs { if x {} } } => (loop a {(loop let x in xs {(if x {})})})",
@@ -372,12 +371,11 @@ class ParseStatementTest {
 
   @Test
   void loopInCoversItsSource() {
-    var parsed = parseClean("loop let mut i in 0..n { x; }");
+    var parsed = parseClean("loop let i in 0..n { x; }");
     var loop = parsed.as(Stmt.LoopIn.class);
 
-    assertTrue(loop.mutable());
     assertEquals("i", loop.name());
-    assertEquals("loop let mut i in 0..n { x; }", parsed.text(loop));
+    assertEquals("loop let i in 0..n { x; }", parsed.text(loop));
     assertEquals("0..n", parsed.text(loop.iterable()));
   }
 

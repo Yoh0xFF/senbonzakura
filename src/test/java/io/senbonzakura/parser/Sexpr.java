@@ -42,8 +42,7 @@ final class Sexpr {
     return switch (stmt) {
       case Stmt.Expression s -> print(s.expr()) + ";";
       case Stmt.Let s ->
-          "(let"
-              + (s.mutable() ? " mut " : " ")
+          "(let "
               + (s.name().isEmpty() ? "<error>" : s.name())
               + (s.initializer() == null ? "" : " " + print(s.initializer()))
               + ")";
@@ -60,8 +59,7 @@ final class Sexpr {
               + print(s.body())
               + ")";
       case Stmt.LoopIn s ->
-          "(loop let"
-              + (s.mutable() ? " mut " : " ")
+          "(loop let "
               + (s.name().isEmpty() ? "<error>" : s.name())
               + " in "
               + print(s.iterable())

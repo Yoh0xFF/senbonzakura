@@ -33,28 +33,27 @@ final class ParseStatement {
     return letRest(c, problemsBefore, binding(c, false));
   }
 
-  /** {@code let mut name}, the part a {@code let} statement shares with {@code loop let}. */
-  private record Binding(boolean mutable, String name, int start, int end) {}
+  /** {@code let name}, the part a {@code let} statement shares with {@code loop let}. */
+  private record Binding(String name, int start, int end) {}
 
   /**
-   * Parses {@code let}, an optional {@code mut} and the name. A keyword or literal where the name
-   * should be is consumed, unless it can follow the name; {@code inLoop} adds {@code in} to those.
+   * Parses {@code let} and the name. A keyword or literal where the name should be is consumed,
+   * unless it can follow the name; {@code inLoop} adds {@code in} to those.
    */
   private static Binding binding(TokenCursor c, boolean inLoop) {
     assert c.at(Token.Kind.LET) : c.peek();
     Token let = c.advance();
-    boolean mutable = c.at(Token.Kind.MUT);
-    int end = mutable ? c.advance().end() : let.end();
 
     if (c.at(Token.Kind.IDENTIFIER)) {
       Token token = c.advance();
-      return new Binding(mutable, c.text(token), let.start(), token.end());
+      return new Binding(c.text(token), let.start(), token.end());
     }
     c.report(c.peek(), "expected variable name, found " + c.describe(c.peek()));
+    int end = let.end();
     if (!canFollowName(c) && !(inLoop && c.at(Token.Kind.IN))) {
       end = c.advance().end();
     }
-    return new Binding(mutable, "", let.start(), end);
+    return new Binding("", let.start(), end);
   }
 
   private static boolean canFollowName(TokenCursor c) {
@@ -75,7 +74,7 @@ final class ParseStatement {
     }
 
     end = semicolon(c, problemsBefore, end, "expected ';' after let statement");
-    return new Stmt.Let(binding.mutable(), binding.name(), initializer, binding.start(), end);
+    return new Stmt.Let(binding.name(), initializer, binding.start(), end);
   }
 
   /**
@@ -173,8 +172,7 @@ final class ParseStatement {
             ? new Expr.Error(c.peek().start(), c.peek().start())
             : Parser.expression(c);
     Stmt.Block body = body(c, problemsBefore, iterable.end(), "after loop iterable");
-    return new Stmt.LoopIn(
-        binding.mutable(), binding.name(), iterable, body, loop.start(), body.end());
+    return new Stmt.LoopIn(binding.name(), iterable, body, loop.start(), body.end());
   }
 
   private static Stmt stepLoop(TokenCursor c, Token loop, int problemsBefore, Stmt.Let init) {
