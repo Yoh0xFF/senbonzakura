@@ -21,6 +21,7 @@ import io.senbonzakura.lexer.Token.Diagnostic;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -61,6 +62,7 @@ public final class Checker {
       new FunctionSymbol("print", List.of("value"), List.of(ANY), List.of());
 
   private final List<Diagnostic> diagnostics = new ArrayList<>();
+  private final Map<Expr, Ty> types = new IdentityHashMap<>();
   private Scope scope;
 
   /** The function whose body is being checked, or {@code null} at the top level. */
@@ -77,9 +79,45 @@ public final class Checker {
 
   /** Checks a file's statements, as {@link io.senbonzakura.parser.Parser#parseFile()} gives. */
   public static List<Diagnostic> check(List<Stmt> statements) {
+    return analyze(statements).diagnostics();
+  }
+
+  /** Like {@link #check}, and also keeps the type it worked out for each expression. */
+  public static Analysis analyze(List<Stmt> statements) {
     var checker = new Checker();
     checker.statements(statements);
-    return List.copyOf(checker.diagnostics);
+    return new Analysis(List.copyOf(checker.diagnostics), checker.types);
+  }
+
+  /** What checking a file found: its problems, and the type of every expression it checked. */
+  public static final class Analysis {
+
+    private final List<Diagnostic> diagnostics;
+    private final Map<Expr, Ty> types;
+
+    private Analysis(List<Diagnostic> diagnostics, Map<Expr, Ty> types) {
+      this.diagnostics = diagnostics;
+      this.types = types;
+    }
+
+    public List<Diagnostic> diagnostics() {
+      return diagnostics;
+    }
+
+    /**
+     * Returns the type of an expression in the checked tree. A number literal has the type it
+     * settled into, like {@code byte} in {@code var b: byte = 1}; one that nothing settled, like
+     * those in {@code 1 < 2}, keeps its constant type.
+     *
+     * @throws IllegalArgumentException if the expression was not checked, like a callee name
+     */
+    public Ty typeOf(Expr expr) {
+      Ty type = types.get(expr);
+      if (type == null) {
+        throw new IllegalArgumentException("no type recorded for " + expr);
+      }
+      return type;
+    }
   }
 
   // Statements
@@ -199,9 +237,16 @@ public final class Checker {
     }
 
     if (loop.type() == null) {
-      return element == INTEGER_CONSTANT ? INT : element;
+      if (element == INTEGER_CONSTANT) {
+        retypeRange(loop.iterable(), INT);
+        return INT;
+      }
+      return element;
     }
     Ty declared = resolve(loop.type());
+    if (element == INTEGER_CONSTANT) {
+      retypeRange(loop.iterable(), isInteger(declared) ? declared : INT);
+    }
     boolean fits =
         element == ERROR
             || declared == ERROR
@@ -290,8 +335,17 @@ public final class Checker {
 
   // Expressions
 
-  /** Checks an expression and returns its type, {@link Ty.Special#ERROR} once reported. */
+  /**
+   * Checks an expression and returns its type, {@link Ty.Special#ERROR} once reported, and records
+   * the type in {@link #types}.
+   */
   private Ty expression(Expr expr) {
+    Ty type = compute(expr);
+    types.put(expr, type);
+    return type;
+  }
+
+  private Ty compute(Expr expr) {
     return switch (expr) {
       case Expr.IntLiteral _ -> INTEGER_CONSTANT;
       case Expr.FloatLiteral _ -> FLOAT_CONSTANT;
@@ -342,14 +396,17 @@ public final class Checker {
     if (!(target instanceof Expr.Identifier name)) {
       return expression(target);
     }
-    return switch (scope.lookup(name.name())) {
-      case null -> notDefined(name);
-      case VariableSymbol variable -> variable.type();
-      case FunctionSymbol _ -> {
-        report(name, "cannot assign to function '" + name.name() + "'");
-        yield ERROR;
-      }
-    };
+    Ty type =
+        switch (scope.lookup(name.name())) {
+          case null -> notDefined(name);
+          case VariableSymbol variable -> variable.type();
+          case FunctionSymbol _ -> {
+            report(name, "cannot assign to function '" + name.name() + "'");
+            yield ERROR;
+          }
+        };
+    types.put(name, type);
+    return type;
   }
 
   private Ty call(Expr.Call call) {
@@ -646,9 +703,11 @@ public final class Checker {
       return INT;
     }
     if (type == FLOAT_CONSTANT) {
+      fit(expr, type, DOUBLE);
       return DOUBLE;
     }
     if (type instanceof Ty.Range range && range.element() == INTEGER_CONSTANT) {
+      retypeRange(expr, INT);
       return new Ty.Range(INT);
     }
     return type;
@@ -660,12 +719,52 @@ public final class Checker {
    * not worked out.
    */
   private void fit(Expr expr, Ty from, Ty to) {
+    if (!isConstant(from) || from.equals(to)) {
+      return;
+    }
+    retype(expr, to);
     if (from != INTEGER_CONSTANT || !(to instanceof Ty.Primitive(var kind)) || !isInteger(to)) {
       return;
     }
     Long value = literalValue(expr);
     if (value != null && (value < min(kind) || value > max(kind))) {
       report(expr, value + " does not fit in " + describe(to));
+    }
+  }
+
+  /**
+   * Gives a settled constant, and the constants it was computed from, the type it settled into, so
+   * {@link Analysis#typeOf} says how to compute each of them.
+   */
+  private void retype(Expr expr, Ty to) {
+    if (!isConstant(types.get(expr))) {
+      return;
+    }
+    types.put(expr, to);
+    switch (expr) {
+      case Expr.Group e -> retype(e.inner(), to);
+      case Expr.Unary e -> retype(e.operand(), to);
+      case Expr.Binary e -> {
+        retype(e.left(), to);
+        retype(e.right(), to);
+      }
+      default -> {}
+    }
+  }
+
+  /** Like {@link #retype} for a range of integer constants, such as {@code 0..3}. */
+  private void retypeRange(Expr expr, Ty element) {
+    switch (expr) {
+      case Expr.Group e -> {
+        types.put(e, new Ty.Range(element));
+        retypeRange(e.inner(), element);
+      }
+      case Expr.Range e -> {
+        types.put(e, new Ty.Range(element));
+        fit(e.lower(), INTEGER_CONSTANT, element);
+        fit(e.upper(), INTEGER_CONSTANT, element);
+      }
+      default -> {}
     }
   }
 

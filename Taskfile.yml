@@ -25,7 +25,7 @@ tasks:
       - '{{.MVNW}} test'
 
   run:
-    desc: 'Parse a file and report its problems, e.g. task run -- --tree hello.sz'
+    desc: 'Check a file and report its problems, or run it: task run -- --run hello.sz'
     cmds:
       - '{{.MVNW}} -q package -DskipTests'
       - 'java -ea -jar target/senbonzakura-1.0-SNAPSHOT.jar {{.CLI_ARGS}}'

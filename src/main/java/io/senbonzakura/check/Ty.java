@@ -8,7 +8,7 @@ import java.util.List;
  * a type as written, with a place in the source; this is what it means. It also covers what no
  * written type can say, like a number literal that has not settled on a type yet.
  */
-sealed interface Ty {
+public sealed interface Ty {
 
   Ty BOOL = new Primitive(PrimitiveKind.BOOL);
   Ty CHAR = new Primitive(PrimitiveKind.CHAR);

@@ -117,6 +117,45 @@ class CliTest {
   }
 
   @Test
+  void runOptionRunsACleanFile() throws IOException {
+    var file = write("ok.sz", "fn square(x: int): int { return x * x; }\nprint(square(7));\n");
+
+    assertEquals(Cli.OK, cli.run("--run", file));
+    assertEquals("49\n", out());
+    assertEquals("", err());
+  }
+
+  @Test
+  void runOptionDoesNotRunAFileWithProblems() throws IOException {
+    var file = write("bad.sz", "print(1);\nvar x: int = true;\n");
+
+    assertEquals(Cli.PROBLEMS, cli.run("--run", file));
+    assertEquals("", out());
+  }
+
+  @Test
+  void runtimeErrorIsPrintedAtTheFailingCode() throws IOException {
+    var file = write("crash.sz", "print(1);\nvar zero = 0;\nprint(10 / zero);\nprint(2);\n");
+
+    assertEquals(Cli.RUNTIME_ERROR, cli.run("--run", file));
+    assertEquals("1\n", out());
+    assertEquals(
+        file
+            + ":3:7: runtime error: division by zero\n"
+            + "    print(10 / zero);\n"
+            + "          ^^^^^^^^^\n",
+        err());
+  }
+
+  @Test
+  void runtimeErrorWithoutAPlaceNamesOnlyTheFile() throws IOException {
+    var file = write("deep.sz", "fn f(): int { return f() + 1; }\nf();\n");
+
+    assertEquals(Cli.RUNTIME_ERROR, cli.run("--run", file));
+    assertEquals(file + ": runtime error: stack overflow: the calls nest too deeply\n", err());
+  }
+
+  @Test
   void missingFileIsAUsageError() {
     var file = dir.resolve("missing.sz").toString();
 
@@ -127,12 +166,12 @@ class CliTest {
   @ParameterizedTest
   @CsvSource(
       delimiterString = "=>",
-      value = {"''", "'--tree'", "'--bogus a.sz'", "'a.sz b.sz'"})
+      value = {"''", "'--tree'", "'--run'", "'--bogus a.sz'", "'a.sz b.sz'"})
   void badArgumentsPrintUsage(String args) {
     String[] argv = args.isEmpty() ? new String[0] : args.split(" ");
 
     assertEquals(Cli.USAGE, cli.run(argv));
-    assertEquals("usage: senbonzakura [--tree] <file>\n", err());
+    assertEquals("usage: senbonzakura [--tree] [--run] <file>\n", err());
   }
 
   @ParameterizedTest

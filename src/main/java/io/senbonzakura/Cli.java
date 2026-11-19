@@ -3,6 +3,8 @@ package io.senbonzakura;
 import io.senbonzakura.ast.Sexpr;
 import io.senbonzakura.ast.Stmt;
 import io.senbonzakura.check.Checker;
+import io.senbonzakura.interpret.Interpreter;
+import io.senbonzakura.interpret.RuntimeError;
 import io.senbonzakura.lexer.Lexer;
 import io.senbonzakura.lexer.SourceFile;
 import io.senbonzakura.lexer.Token.Diagnostic;
@@ -20,22 +22,25 @@ import java.util.List;
 import java.util.stream.Stream;
 
 /**
- * The command line: {@code senbonzakura [--tree] <file>}. Parses and {@link Checker checks} the
- * file, and prints each problem found to the error stream, with the line it is on and a caret under
- * the part it covers. The checks run only on a file that lexed and parsed cleanly, so one syntax
- * error does not show up again as a list of undefined names. With {@code --tree} it also prints
- * each top-level statement as an {@link Sexpr S-expression}.
+ * The command line: {@code senbonzakura [--tree] [--run] <file>}. Parses and {@link Checker checks}
+ * the file, and prints each problem found to the error stream, with the line it is on and a caret
+ * under the part it covers. The checks run only on a file that lexed and parsed cleanly, so one
+ * syntax error does not show up again as a list of undefined names. With {@code --tree} it also
+ * prints each top-level statement as an {@link Sexpr S-expression}, and with {@code --run} it then
+ * runs a file that has no problems, its output going to the output stream.
  *
- * <p>Exits with {@link #OK} when the file has no problems, {@link #PROBLEMS} when it has some, and
- * {@link #USAGE} when the arguments are wrong or the file cannot be read.
+ * <p>Exits with {@link #OK} when the file has no problems and ran without failing, {@link
+ * #PROBLEMS} when it has problems, {@link #USAGE} when the arguments are wrong or the file cannot
+ * be read, and {@link #RUNTIME_ERROR} when running it failed.
  */
 public final class Cli {
 
   public static final int OK = 0;
   public static final int PROBLEMS = 1;
   public static final int USAGE = 2;
+  public static final int RUNTIME_ERROR = 3;
 
-  private static final String USAGE_TEXT = "usage: senbonzakura [--tree] <file>";
+  private static final String USAGE_TEXT = "usage: senbonzakura [--tree] [--run] <file>";
 
   private final PrintStream out;
   private final PrintStream err;
@@ -47,10 +52,13 @@ public final class Cli {
 
   public int run(String... args) {
     boolean tree = false;
+    boolean execute = false;
     String path = null;
     for (String arg : args) {
       if (arg.equals("--tree")) {
         tree = true;
+      } else if (arg.equals("--run")) {
+        execute = true;
       } else if (arg.startsWith("-") || path != null) {
         err.println(USAGE_TEXT);
         return USAGE;
@@ -87,25 +95,44 @@ public final class Cli {
         Stream.concat(lexer.diagnostics().stream(), parser.diagnostics().stream())
             .sorted(Comparator.comparingInt(Diagnostic::start))
             .toList();
+    Checker.Analysis analysis = null;
     if (diagnostics.isEmpty()) {
+      analysis = Checker.analyze(statements);
       diagnostics =
-          Checker.check(statements).stream()
+          analysis.diagnostics().stream()
               .sorted(Comparator.comparingInt(Diagnostic::start))
               .toList();
     }
     for (var diagnostic : diagnostics) {
-      print(source, diagnostic);
+      print(source, diagnostic.start(), diagnostic.end(), "error", diagnostic.message());
     }
-    return diagnostics.isEmpty() ? OK : PROBLEMS;
+    if (!diagnostics.isEmpty()) {
+      return PROBLEMS;
+    }
+
+    if (execute) {
+      try {
+        new Interpreter(analysis, out).run(statements);
+      } catch (RuntimeError e) {
+        out.flush();
+        if (e.hasLocation()) {
+          print(source, e.start(), e.end(), "runtime error", e.getMessage());
+        } else {
+          err.println(source.path() + ": runtime error: " + e.getMessage());
+        }
+        return RUNTIME_ERROR;
+      }
+    }
+    return OK;
   }
 
-  /** Prints {@code path:line:column: error: message}, then the line and a caret under it. */
-  private void print(SourceFile source, Diagnostic diagnostic) {
-    var at = source.locate(diagnostic.start());
-    err.println(source.path() + ":" + at + ": error: " + diagnostic.message());
+  /** Prints {@code path:line:column: kind: message}, then the line and a caret under it. */
+  private void print(SourceFile source, int start, int end, String kind, String message) {
+    var at = source.locate(start);
+    err.println(source.path() + ":" + at + ": " + kind + ": " + message);
     String line = source.lineText(at.line());
     err.println("    " + line);
-    err.println("    " + caret(line, at.column(), diagnostic.end() - diagnostic.start()));
+    err.println("    " + caret(line, at.column(), end - start));
   }
 
   /**

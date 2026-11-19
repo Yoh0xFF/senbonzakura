@@ -2,12 +2,15 @@ package io.senbonzakura.check;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import io.senbonzakura.ast.Expr;
 import io.senbonzakura.ast.Stmt;
+import io.senbonzakura.ast.Type.PrimitiveKind;
 import io.senbonzakura.lexer.Lexer;
 import io.senbonzakura.lexer.SourceFile;
 import io.senbonzakura.lexer.Token.Diagnostic;
 import io.senbonzakura.parser.Parser;
 import java.util.List;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -220,6 +223,40 @@ class CheckerTest {
         uses,
         messages.stream().filter(m -> m.endsWith("is not defined")).count(),
         messages::toString);
+  }
+
+  @Test
+  void literalsRecordTheTypeTheySettledInto() {
+    var statements =
+        parseIgnoringProblems(
+            "var b: byte = 1 + 2; var d: double = 1; var c = 1 < 1.5; print(7);"
+                + " loop var i: long in 0..3 {}");
+    var analysis = Checker.analyze(statements);
+    assertEquals(List.of(), analysis.diagnostics());
+
+    var sum = (Expr.Binary) initializer(statements, 0);
+    assertEquals(primitive(PrimitiveKind.BYTE), analysis.typeOf(sum));
+    assertEquals(primitive(PrimitiveKind.BYTE), analysis.typeOf(sum.left()));
+    assertEquals(primitive(PrimitiveKind.DOUBLE), analysis.typeOf(initializer(statements, 1)));
+
+    var comparison = (Expr.Binary) initializer(statements, 2);
+    assertEquals(Ty.BOOL, analysis.typeOf(comparison));
+    assertEquals(Ty.Special.FLOAT_CONSTANT, analysis.typeOf(comparison.left()));
+
+    var print = (Expr.Call) ((Stmt.Expression) statements.get(3)).expr();
+    assertEquals(Ty.INT, analysis.typeOf(print.arguments().getFirst().value()));
+
+    var range = (Expr.Range) ((Stmt.LoopIn) statements.get(4)).iterable();
+    assertEquals(new Ty.Range(primitive(PrimitiveKind.LONG)), analysis.typeOf(range));
+    assertEquals(primitive(PrimitiveKind.LONG), analysis.typeOf(range.upper()));
+  }
+
+  private static Expr initializer(List<Stmt> statements, int index) {
+    return ((Stmt.Var) statements.get(index)).declarators().getFirst().initializer();
+  }
+
+  private static Ty primitive(PrimitiveKind kind) {
+    return new Ty.Primitive(kind);
   }
 
   private static List<Stmt> parseIgnoringProblems(String source) {
