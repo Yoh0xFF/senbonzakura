@@ -80,6 +80,7 @@ public record Token(Kind kind, int start, int end, int flags) {
     CONTINUE("continue", KEYWORD),
     TRUE("true", KEYWORD),
     FALSE("false", KEYWORD),
+    AS("as", KEYWORD),
 
     // Primitive types
     BYTE("byte", KEYWORD),

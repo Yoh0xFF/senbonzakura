@@ -157,6 +157,15 @@ public sealed interface Expr {
     }
   }
 
+  /** {@code value as type}, which converts {@code value} to {@code type}. */
+  record Cast(Expr value, Type type, int start, int end) implements Expr {
+    public Cast {
+      Objects.requireNonNull(value, "value");
+      Objects.requireNonNull(type, "type");
+      NodeRange.check(start, end);
+    }
+  }
+
   /**
    * An expression in parentheses. Kept as its own node so the tree still says where the parentheses
    * were, for diagnostics and formatting.

@@ -4,6 +4,7 @@ import io.senbonzakura.ast.Expr;
 import io.senbonzakura.ast.Expr.AssignOp;
 import io.senbonzakura.ast.Expr.BinaryOp;
 import io.senbonzakura.ast.Expr.UnaryOp;
+import io.senbonzakura.ast.Type;
 import io.senbonzakura.lexer.Token;
 
 /**
@@ -18,6 +19,7 @@ import io.senbonzakura.lexer.Token;
  *   <li>{@code == != < <= > >=}, which cannot be chained: {@code a < b < c} is an error
  *   <li>{@code + -}
  *   <li>{@code * / %}
+ *   <li>{@code as}, which converts the value on its left to the type on its right
  * </ol>
  *
  * <p>Prefix {@code -} and {@code !} bind tighter than all of them, and postfix calls, indexing,
@@ -83,7 +85,7 @@ final class ParseOperator {
    * left-associative.
    */
   private static Expr infix(TokenCursor c, int minPrecedence) {
-    Expr left = Parser.operand(c);
+    Expr left = cast(c);
     boolean afterComparison = false;
     while (true) {
       BinaryOp op = binaryOp(c.peek().kind());
@@ -99,6 +101,21 @@ final class ParseOperator {
       Expr right = infix(c, precedence(op) + 1);
       left = new Expr.Binary(op, left, right, left.start(), right.end());
     }
+  }
+
+  /**
+   * Parses an operand followed by any number of {@code as type}. A cast binds tighter than every
+   * infix operator but looser than prefix ones, so {@code -x as long} converts {@code -x}, as in
+   * Rust.
+   */
+  private static Expr cast(TokenCursor c) {
+    Expr expr = Parser.operand(c);
+    while (c.at(Token.Kind.AS)) {
+      c.advance();
+      Type type = Parser.type(c);
+      expr = new Expr.Cast(expr, type, expr.start(), Math.max(expr.end(), type.end()));
+    }
+    return expr;
   }
 
   /** Higher binds tighter. */

@@ -44,6 +44,40 @@ class ParseOperatorTest {
   @CsvSource(
       delimiterString = "=>",
       value = {
+        "x as long               => (as x long)",
+        "-x as long              => (as (- x) long)",
+        "!b as int               => (as (! b) int)",
+        "a + b as int            => (+ a (as b int))",
+        "a * b as int            => (* a (as b int))",
+        "x as int as long        => (as (as x int) long)",
+        "f(x).y[0] as double     => (as (index (. (call f x) y) 0) double)",
+        "x as int < y            => (< (as x int) y)",
+        "(a + b) as ulong        => (as (group (+ a b)) ulong)",
+        "x = y as byte           => (= x (as y byte))",
+      })
+  void casts(String input, String tree) {
+    assertEquals(tree, Sexpr.print(parseClean(input).expr()));
+  }
+
+  @ParameterizedTest
+  @CsvSource(
+      delimiterString = "=>",
+      value = {
+        "x as        => (as x <error>)       => expected type, found end of input",
+        "x as foo    => (as x <error>)       => expected type, found 'foo'",
+        "x as 1 + 2  => (+ (as x <error>) 2) => expected type, found '1'",
+      })
+  void malformedCastIsReportedOnce(String input, String tree, String message) {
+    var parsed = parse(input);
+
+    assertEquals(tree, Sexpr.print(parsed.expr()));
+    assertEquals(List.of(message), parsed.parserMessages());
+  }
+
+  @ParameterizedTest
+  @CsvSource(
+      delimiterString = "=>",
+      value = {
         // Tighter levels group first.
         "1 + 2 * 3            => (+ 1 (* 2 3))",
         "1 * 2 + 3            => (+ (* 1 2) 3)",

@@ -37,6 +37,7 @@ public final class Sexpr {
           "(" + e.op().spelling() + " " + print(e.target()) + " " + print(e.value()) + ")";
       case Expr.Update e -> "(" + e.op().spelling() + " " + print(e.target()) + ")";
       case Expr.Group e -> "(group " + print(e.inner()) + ")";
+      case Expr.Cast e -> "(as " + print(e.value()) + " " + print(e.type()) + ")";
       case Expr.Error e -> "<error>";
     };
   }
