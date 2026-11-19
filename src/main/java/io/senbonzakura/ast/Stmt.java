@@ -102,6 +102,17 @@ public sealed interface Stmt {
     }
   }
 
+  /**
+   * {@code break;} or {@code break if condition;}, which leaves the loop only when {@code
+   * condition} holds. {@code condition} is {@code null} when there is no {@code if}. Covers the
+   * semicolon too, unless it was missing.
+   */
+  record Break(Expr condition, int start, int end) implements Stmt {
+    public Break {
+      NodeRange.check(start, end);
+    }
+  }
+
   /** {@code { ... }}. Covers both braces, unless the closing one was missing. */
   record Block(List<Stmt> statements, int start, int end) implements Stmt {
     public Block {

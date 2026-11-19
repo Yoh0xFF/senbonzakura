@@ -15,6 +15,7 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 class ParseStatementTest {
 
@@ -449,9 +450,13 @@ class ParseStatementTest {
         "continue if i >= 10;           => (continue if (>= i 10))",
         "continue if (a > b && c < d);  => (continue if (group (&& (> a b) (< c d))))",
         "continue if !f(x);             => (continue if (! (call f x)))",
-        "loop { continue if done; x; }  => (loop {(continue if done) x;})",
+        "break;                         => (break)",
+        "break if a == b;               => (break if (== a b))",
+        "break if i >= 10;              => (break if (>= i 10))",
+        "break if (a > b && c < d);     => (break if (group (&& (> a b) (< c d))))",
+        "loop { continue if a; break if b; x; } => (loop {(continue if a) (break if b) x;})",
       })
-  void continueStatements(String input, String tree) {
+  void continueAndBreakStatements(String input, String tree) {
     assertEquals(tree, parseClean(input).tree());
   }
 
@@ -464,6 +469,15 @@ class ParseStatementTest {
     assertEquals("a < b", parsed.text(stmt.condition()));
   }
 
+  @Test
+  void breakCoversItsSource() {
+    var parsed = parseClean("break if a < b;");
+    var stmt = parsed.as(Stmt.Break.class);
+
+    assertEquals("break if a < b;", parsed.text(stmt));
+    assertEquals("a < b", parsed.text(stmt.condition()));
+  }
+
   @ParameterizedTest
   @CsvSource(
       delimiterString = "=>",
@@ -471,8 +485,11 @@ class ParseStatementTest {
         "continue        => (continue)               => 8  => expected ';' or 'if' after 'continue'",
         "continue if a   => (continue if a)          => 13 => expected ';' after continue condition",
         "{ continue }    => {(continue)}             => 10 => expected ';' or 'if' after 'continue'",
+        "break           => (break)                  => 5  => expected ';' or 'if' after 'break'",
+        "break if a      => (break if a)             => 10 => expected ';' after break condition",
+        "{ break }       => {(break)}                => 7  => expected ';' or 'if' after 'break'",
       })
-  void missingSemicolonAfterContinueIsReported(
+  void missingSemicolonAfterContinueOrBreakIsReported(
       String input, String tree, int offset, String message) {
     var parsed = parse(input);
 
@@ -480,27 +497,30 @@ class ParseStatementTest {
     assertEquals(List.of(new Diagnostic(offset, offset, message)), parsed.parserDiagnostics());
   }
 
-  @Test
-  void missingConditionIsReportedOnce() {
-    var parsed = parse("continue if ;");
+  @ParameterizedTest
+  @ValueSource(strings = {"continue", "break"})
+  void missingConditionIsReportedOnce(String keyword) {
+    var parsed = parse(keyword + " if ;");
 
-    assertEquals("(continue if <error>)", parsed.tree());
+    assertEquals("(" + keyword + " if <error>)", parsed.tree());
     assertEquals(List.of("expected expression, found ';'"), parsed.parserMessages());
   }
 
-  @Test
-  void continueLeavesWhatFollowsForTheNextStatement() {
-    var all = parseAll("continue x; y;");
+  @ParameterizedTest
+  @ValueSource(strings = {"continue", "break"})
+  void continueOrBreakLeavesWhatFollowsForTheNextStatement(String keyword) {
+    var all = parseAll(keyword + " x; y;");
 
-    assertEquals(List.of("(continue)", "x;", "y;"), all.trees());
-    assertEquals(List.of("expected ';' or 'if' after 'continue'"), all.messages());
+    assertEquals(List.of("(" + keyword + ")", "x;", "y;"), all.trees());
+    assertEquals(List.of("expected ';' or 'if' after '" + keyword + "'"), all.messages());
   }
 
-  @Test
-  void continueIsNotAnExpression() {
-    var parsed = parse("{ x = continue; }");
+  @ParameterizedTest
+  @ValueSource(strings = {"continue", "break"})
+  void continueAndBreakAreNotExpressions(String keyword) {
+    var parsed = parse("{ x = " + keyword + "; }");
 
-    assertEquals(List.of("expected expression, found 'continue'"), parsed.parserMessages());
+    assertEquals(List.of("expected expression, found '" + keyword + "'"), parsed.parserMessages());
   }
 
   private record ParsedAll(List<String> trees, List<String> messages) {}

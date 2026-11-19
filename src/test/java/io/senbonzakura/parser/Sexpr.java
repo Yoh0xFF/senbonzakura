@@ -80,6 +80,8 @@ final class Sexpr {
               + ")";
       case Stmt.Continue s ->
           s.condition() == null ? "(continue)" : "(continue if " + print(s.condition()) + ")";
+      case Stmt.Break s ->
+          s.condition() == null ? "(break)" : "(break if " + print(s.condition()) + ")";
       case Stmt.Block s ->
           s.statements().stream().map(Sexpr::print).collect(Collectors.joining(" ", "{", "}"));
     };
