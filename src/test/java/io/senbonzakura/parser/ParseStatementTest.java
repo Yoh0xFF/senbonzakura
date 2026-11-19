@@ -1,6 +1,7 @@
 package io.senbonzakura.parser;
 
 import static io.senbonzakura.parser.ParsedStmt.parse;
+import static io.senbonzakura.parser.ParsedStmt.parseAll;
 import static io.senbonzakura.parser.ParsedStmt.parseClean;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
@@ -619,6 +620,9 @@ class ParseStatementTest {
         "return a + f(b);               => (return (+ a (call f b)))",
         "return (x) if y;               => (return (group x) if y)",
         "return a == b if c;            => (return (== a b) if c)",
+        "return a, b;                   => (return a, b)",
+        "return a, b if c;              => (return a, b if c)",
+        "return x + 1, f(y), z;         => (return (+ x 1), (call f y), z)",
         "{ return x if a; y; }          => {(return x if a) y;}",
       })
   void returnStatements(String input, String tree) {
@@ -631,8 +635,19 @@ class ParseStatementTest {
     var stmt = parsed.as(Stmt.Return.class);
 
     assertEquals("return x + 1 if a < b;", parsed.text(stmt));
-    assertEquals("x + 1", parsed.text(stmt.value()));
+    assertEquals("x + 1", parsed.text(stmt.values().getFirst()));
     assertEquals("a < b", parsed.text(stmt.condition()));
+  }
+
+  @Test
+  void eachReturnValueCoversItsSource() {
+    var parsed = parseClean("return a + 1, f(b) if c;");
+    var stmt = parsed.as(Stmt.Return.class);
+
+    assertEquals(2, stmt.values().size());
+    assertEquals("a + 1", parsed.text(stmt.values().get(0)));
+    assertEquals("f(b)", parsed.text(stmt.values().get(1)));
+    assertEquals("return a + 1, f(b) if c;", parsed.text(stmt));
   }
 
   @ParameterizedTest
@@ -660,6 +675,9 @@ class ParseStatementTest {
         "return x if ;   => (return x if <error>)    => expected expression, found ';'",
         "return x +;     => (return (+ x <error>))   => expected expression, found ';'",
         "return x + if a; => (return (+ x <error>) if a) => expected expression, found 'if'",
+        "return a, ;      => (return a, <error>)          => expected expression, found ';'",
+        "return a, if c;  => (return a, <error> if c)     => expected expression, found 'if'",
+        "return , a;      => (return <error>, a)          => expected expression, found ','",
       })
   void malformedReturnIsReportedOnce(String input, String tree, String message) {
     var parsed = parse(input);
@@ -674,16 +692,5 @@ class ParseStatementTest {
 
     assertEquals(List.of("(return x)", "y;", "z;"), all.trees());
     assertEquals(List.of("expected ';' or 'if' after return value"), all.messages());
-  }
-
-  private record ParsedAll(List<String> trees, List<String> messages) {}
-
-  private static ParsedAll parseAll(String text) {
-    var parser = new Parser(new Lexer(new SourceFile("test", text)));
-    var trees = new ArrayList<String>();
-    while (!parser.atEnd()) {
-      trees.add(Sexpr.print(parser.parseStatement()));
-    }
-    return new ParsedAll(trees, parser.diagnostics().stream().map(Diagnostic::message).toList());
   }
 }

@@ -7,7 +7,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 // Prints a tree as an S-expression, like (+ 1 (* 2 3)), so tests can check its shape in one line.
-// Statements print as {(= x 1); y;}, and declarations as (var a: int 1, b).
+// Statements print as {(= x 1); y;}, declarations as (var a: int 1, b), and functions as
+// (fn f (a: int): bool {...}).
 final class Sexpr {
 
   private Sexpr() {}
@@ -83,8 +84,22 @@ final class Sexpr {
           s.condition() == null ? "(break)" : "(break if " + print(s.condition()) + ")";
       case Stmt.Return s ->
           "(return"
-              + (s.value() == null ? "" : " " + print(s.value()))
+              + s.values().stream().map(v -> " " + print(v)).collect(Collectors.joining(","))
               + (s.condition() == null ? "" : " if " + print(s.condition()))
+              + ")";
+      case Stmt.Function s ->
+          "(fn "
+              + name(s.name())
+              + s.parameters().stream()
+                  .map(p -> name(p.name()) + typeAnnotation(p.type()))
+                  .collect(Collectors.joining(", ", " (", ")"))
+              + (s.returnTypes().isEmpty()
+                  ? ""
+                  : s.returnTypes().stream()
+                      .map(Sexpr::print)
+                      .collect(Collectors.joining(", ", ": ", "")))
+              + " "
+              + print(s.body())
               + ")";
       case Stmt.Block s ->
           s.statements().stream().map(Sexpr::print).collect(Collectors.joining(" ", "{", "}"));

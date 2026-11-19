@@ -129,12 +129,50 @@ public sealed interface Stmt {
   }
 
   /**
-   * {@code return value if condition;}, where both {@code value} and {@code if condition} are
-   * optional, and each is {@code null} when absent. With a condition it returns only when the
-   * condition holds. Covers the semicolon too, unless it was missing.
+   * {@code return a, b if condition;}, which returns zero or more values; {@code values} is empty
+   * for a plain {@code return}. The {@code if condition} is optional and {@code null} when absent;
+   * with one it returns only when the condition holds. Covers the semicolon too, unless it was
+   * missing.
    */
-  record Return(Expr value, Expr condition, int start, int end) implements Stmt {
+  record Return(List<Expr> values, Expr condition, int start, int end) implements Stmt {
     public Return {
+      values = List.copyOf(values);
+      NodeRange.check(start, end);
+    }
+  }
+
+  /**
+   * {@code fn name(a: int, b: int): int, bool { ... }}. {@code returnTypes} is empty when there is
+   * no {@code :} after the parameters, so the function returns nothing, and holds several types
+   * when it returns several values. {@code name} is empty when it was missing, which the parser has
+   * already reported.
+   */
+  record Function(
+      String name,
+      List<Parameter> parameters,
+      List<Type> returnTypes,
+      Block body,
+      int start,
+      int end)
+      implements Stmt {
+    public Function {
+      Objects.requireNonNull(name, "name");
+      parameters = List.copyOf(parameters);
+      returnTypes = List.copyOf(returnTypes);
+      Objects.requireNonNull(body, "body");
+      NodeRange.check(start, end);
+    }
+  }
+
+  /**
+   * One parameter of a {@link Function}: {@code name: type}. The type is required; when it was
+   * missing, which the parser has already reported, it is a {@link Type.Error}. {@code name} is
+   * empty when it was missing. Not a statement on its own.
+   */
+  record Parameter(String name, Type type, int start, int end) {
+    public Parameter {
+      Objects.requireNonNull(name, "name");
+      Objects.requireNonNull(type, "type");
       NodeRange.check(start, end);
     }
   }

@@ -10,6 +10,7 @@ import io.senbonzakura.ast.Type;
 import io.senbonzakura.lexer.Lexer;
 import io.senbonzakura.lexer.SourceFile;
 import io.senbonzakura.lexer.Token.Diagnostic;
+import java.util.ArrayList;
 import java.util.List;
 
 // Like Parsed, for a whole input that is one statement.
@@ -24,6 +25,18 @@ record ParsedStmt(SourceFile source, Stmt stmt, List<Diagnostic> parserDiagnosti
     assertEquals(List.of(), lexer.diagnostics(), "lexer diagnostics");
     return new ParsedStmt(source, stmt, List.copyOf(parser.diagnostics()));
   }
+
+  // Parses statements until the input is used up, for inputs that recovery splits into several.
+  static All parseAll(String text) {
+    var parser = new Parser(new Lexer(new SourceFile("test", text)));
+    var trees = new ArrayList<String>();
+    while (!parser.atEnd()) {
+      trees.add(Sexpr.print(parser.parseStatement()));
+    }
+    return new All(trees, parser.diagnostics().stream().map(Diagnostic::message).toList());
+  }
+
+  record All(List<String> trees, List<String> messages) {}
 
   static ParsedStmt parseClean(String text) {
     var parsed = parse(text);
@@ -52,6 +65,10 @@ record ParsedStmt(SourceFile source, Stmt stmt, List<Diagnostic> parserDiagnosti
   }
 
   String text(Stmt.Declarator node) {
+    return source.text().substring(node.start(), node.end());
+  }
+
+  String text(Stmt.Parameter node) {
     return source.text().substring(node.start(), node.end());
   }
 

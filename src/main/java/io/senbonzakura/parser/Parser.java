@@ -66,6 +66,7 @@ public class Parser {
       case CONTINUE -> ParseStatement.continueStatement(c);
       case BREAK -> ParseStatement.breakStatement(c);
       case RETURN -> ParseStatement.returnStatement(c);
+      case FN -> ParseStatement.function(c);
       default -> ParseStatement.expression(c);
     };
   }
@@ -76,6 +77,10 @@ public class Parser {
 
   static Type type(TokenCursor c) {
     return ParseType.type(c);
+  }
+
+  static boolean atType(TokenCursor c) {
+    return ParseType.atType(c);
   }
 
   /** Parses the part of an expression between infix operators: prefix operators, then a postfix. */

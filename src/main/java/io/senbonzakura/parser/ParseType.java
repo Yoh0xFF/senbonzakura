@@ -29,6 +29,11 @@ final class ParseType {
     return new Type.Error(token.start(), token.end());
   }
 
+  /** Whether the cursor is on a token that starts a type. */
+  static boolean atType(TokenCursor c) {
+    return primitive(c.peek().kind()) != null;
+  }
+
   /** Returns {@code null} if the token is not a primitive type. */
   private static PrimitiveKind primitive(Token.Kind kind) {
     return switch (kind) {

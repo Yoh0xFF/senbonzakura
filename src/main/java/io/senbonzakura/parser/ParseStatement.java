@@ -219,6 +219,138 @@ final class ParseStatement {
   }
 
   /**
+   * The cursor must be on {@code fn}. Parses {@code fn name(a: int, b: int): int, bool { ... }},
+   * where the {@code :} and return types are left out for a function that returns nothing. The
+   * parameter list allows a trailing comma. A missing {@code :} before a parameter's type or the
+   * return types is reported, and the types after it still parsed.
+   */
+  static Stmt function(TokenCursor c) {
+    assert c.at(Token.Kind.FN) : c.peek();
+    int problemsBefore = c.diagnostics().size();
+    Token fn = c.advance();
+    int end = fn.end();
+
+    String name = "";
+    if (c.at(Token.Kind.IDENTIFIER)) {
+      Token token = c.advance();
+      name = c.text(token);
+      end = token.end();
+    } else {
+      c.report(c.peek(), "expected function name, found " + c.describe(c.peek()));
+      if (!canFollowFunctionName(c)) {
+        end = c.advance().end();
+      }
+    }
+
+    var parameters = new ArrayList<Stmt.Parameter>();
+    if (c.at(Token.Kind.LEFT_PAREN)) {
+      end = parameters(c, parameters);
+    } else if (c.diagnostics().size() == problemsBefore) {
+      c.report(c.peek(), "expected '(' after function name, found " + c.describe(c.peek()));
+    }
+
+    var returnTypes = new ArrayList<Type>();
+    if (c.at(Token.Kind.COLON) || Parser.atType(c)) {
+      if (c.at(Token.Kind.COLON)) {
+        c.advance();
+      } else if (c.diagnostics().size() == problemsBefore) {
+        c.report(c.peek(), "expected ':' before return type, found " + c.describe(c.peek()));
+      }
+      returnTypes.add(Parser.type(c));
+      while (c.at(Token.Kind.COMMA)) {
+        c.advance();
+        returnTypes.add(Parser.type(c));
+      }
+      end = returnTypes.getLast().end();
+    }
+
+    Stmt.Block body = body(c, problemsBefore, end, "after function signature");
+    return new Stmt.Function(name, parameters, returnTypes, body, fn.start(), body.end());
+  }
+
+  private static boolean canFollowFunctionName(TokenCursor c) {
+    return switch (c.peek().kind()) {
+      case LEFT_PAREN, COLON, LEFT_BRACE, RIGHT_BRACE, SEMICOLON, EOF -> true;
+      default -> false;
+    };
+  }
+
+  /**
+   * The cursor must be on {@code (}. Adds the parameters to {@code into} and returns where the list
+   * ends: past the {@code )}, or after the last parameter if it is missing.
+   */
+  private static int parameters(TokenCursor c, List<Stmt.Parameter> into) {
+    assert c.at(Token.Kind.LEFT_PAREN) : c.peek();
+    Token open = c.advance();
+    while (!c.at(Token.Kind.RIGHT_PAREN) && !atParametersEnd(c)) {
+      int problemsBefore = c.diagnostics().size();
+      into.add(parameter(c));
+      if (c.at(Token.Kind.COMMA)) {
+        c.advance();
+      } else if (!c.at(Token.Kind.RIGHT_PAREN)
+          && !atParametersEnd(c)
+          && c.diagnostics().size() == problemsBefore) {
+        c.report(c.peek(), "expected ',' or ')', found " + c.describe(c.peek()));
+      }
+    }
+
+    if (!c.at(Token.Kind.RIGHT_PAREN)) {
+      c.report(c.peek(), "expected ')', found " + c.describe(c.peek()));
+      return into.isEmpty() ? open.end() : into.getLast().end();
+    }
+    return c.advance().end();
+  }
+
+  /**
+   * Parses {@code name: type}. It consumes a token unless the cursor is on one {@link
+   * #canFollowParameterName} accepts, each of which the parameter loop consumes or stops at, so the
+   * loop always moves.
+   */
+  private static Stmt.Parameter parameter(TokenCursor c) {
+    int problemsBefore = c.diagnostics().size();
+    int start = c.peek().start();
+    String name = "";
+    int end = start;
+    if (c.at(Token.Kind.IDENTIFIER)) {
+      Token token = c.advance();
+      name = c.text(token);
+      end = token.end();
+    } else {
+      c.report(c.peek(), "expected parameter name, found " + c.describe(c.peek()));
+      if (!canFollowParameterName(c)) {
+        end = c.advance().end();
+      }
+    }
+
+    Type type;
+    if (c.at(Token.Kind.COLON)) {
+      c.advance();
+      type = Parser.type(c);
+    } else {
+      if (c.diagnostics().size() == problemsBefore) {
+        c.report(c.peek(), "expected ':' after parameter name, found " + c.describe(c.peek()));
+      }
+      type = Parser.atType(c) ? Parser.type(c) : new Type.Error(end, end);
+    }
+    return new Stmt.Parameter(name, type, start, type.end());
+  }
+
+  private static boolean canFollowParameterName(TokenCursor c) {
+    return c.at(Token.Kind.COLON)
+        || c.at(Token.Kind.COMMA)
+        || c.at(Token.Kind.RIGHT_PAREN)
+        || atParametersEnd(c);
+  }
+
+  /** A token a parameter list cannot go past, so a missing {@code )} does not swallow the body. */
+  private static boolean atParametersEnd(TokenCursor c) {
+    return switch (c.peek().kind()) {
+      case LEFT_BRACE, RIGHT_BRACE, SEMICOLON, EOF -> true;
+      default -> false;
+    };
+  }
+
+  /**
    * Parses the block a statement requires, or reports it missing, as {@code expected '{' <where>},
    * and stands in an empty block at {@code end}.
    */
@@ -250,18 +382,21 @@ final class ParseStatement {
   static Stmt returnStatement(TokenCursor c) {
     assert c.at(Token.Kind.RETURN) : c.peek();
     Jump jump = jump(c, "return", true);
-    return new Stmt.Return(jump.value(), jump.condition(), jump.start(), jump.end());
+    return new Stmt.Return(jump.values(), jump.condition(), jump.start(), jump.end());
   }
 
-  /** What {@code continue}, {@code break} and {@code return} share; parts left out are null. */
-  private record Jump(Expr value, Expr condition, int start, int end) {}
+  /**
+   * What {@code continue}, {@code break} and {@code return} share. {@code values} is empty and
+   * {@code condition} null when left out.
+   */
+  private record Jump(List<Expr> values, Expr condition, int start, int end) {}
 
   /**
-   * Parses the keyword spelled {@code word}, a value if {@code takesValue}, an optional {@code if
-   * condition}, then {@code ;}. The condition is a plain expression, not an {@code if} statement,
-   * so it takes no block and no {@code else}.
+   * Parses the keyword spelled {@code word}, values separated by commas if {@code takesValue}, an
+   * optional {@code if condition}, then {@code ;}. The condition is a plain expression, not an
+   * {@code if} statement, so it takes no block and no {@code else}.
    *
-   * <p>A value is optional too. None follows when the next token is {@code ;}, {@code if}, or one
+   * <p>Values are optional too. None follow when the next token is {@code ;}, {@code if}, or one
    * that closes the enclosing block, so {@code return }} reports the missing {@code ;} rather than
    * a missing expression.
    */
@@ -271,10 +406,14 @@ final class ParseStatement {
     int end = keyword.end();
     String message = "expected ';' or 'if' after '" + word + "'";
 
-    Expr value = null;
+    var values = new ArrayList<Expr>();
     if (takesValue && !endsJump(c)) {
-      value = Parser.expression(c);
-      end = value.end();
+      values.add(Parser.expression(c));
+      while (c.at(Token.Kind.COMMA)) {
+        c.advance();
+        values.add(Parser.expression(c));
+      }
+      end = values.getLast().end();
       message = "expected ';' or 'if' after " + word + " value";
     }
 
@@ -287,7 +426,7 @@ final class ParseStatement {
     }
 
     end = semicolon(c, problemsBefore, end, message);
-    return new Jump(value, condition, keyword.start(), end);
+    return new Jump(values, condition, keyword.start(), end);
   }
 
   private static boolean endsJump(TokenCursor c) {
