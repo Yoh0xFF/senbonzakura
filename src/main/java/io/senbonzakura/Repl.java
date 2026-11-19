@@ -12,9 +12,11 @@ import io.senbonzakura.parser.Parser;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.nio.file.Path;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Stream;
+import org.jline.terminal.TerminalBuilder;
 
 /**
  * The interactive prompt. It reads one entry at a time, then checks and runs it, keeping the
@@ -28,26 +30,47 @@ import java.util.stream.Stream;
  *   <li>An entry with a problem, or that fails while running, is reported and forgotten.
  * </ul>
  *
- * <p>The prompt ends when the input does, as with Ctrl-D.
+ * <p>The prompt ends when the input does, as with Ctrl-D. On a terminal, {@link #onTerminal} reads
+ * with line editing and history; see {@link ReplInput.Terminal}.
  */
-public final class Repl {
+public final class Repl implements AutoCloseable {
 
   static final String PROMPT = "> ";
   static final String MORE = "... ";
   static final String BANNER =
       "Senbonzakura. End an expression without ';' to see its value. Ctrl-D quits.";
 
-  private final BufferedReader in;
+  private final ReplInput input;
   private final PrintStream out;
   private final PrintStream err;
   private final Checker.Session checker = new Checker.Session();
   private final Interpreter.Session interpreter;
 
+  /** A REPL reading plain lines, as from a pipe. */
   public Repl(BufferedReader in, PrintStream out, PrintStream err) {
-    this.in = in;
+    this(new ReplInput.Plain(in, out), out, err);
+  }
+
+  Repl(ReplInput input, PrintStream out, PrintStream err) {
+    this.input = input;
     this.out = out;
     this.err = err;
     this.interpreter = new Interpreter.Session(out);
+  }
+
+  /**
+   * A REPL reading from the terminal with line editing, keeping its history in {@code
+   * ~/.senbonzakura_history}.
+   */
+  public static Repl onTerminal(PrintStream out, PrintStream err) throws IOException {
+    var terminal = TerminalBuilder.builder().system(true).build();
+    var history = Path.of(System.getProperty("user.home"), ".senbonzakura_history");
+    return new Repl(new ReplInput.Terminal(terminal, history), out, err);
+  }
+
+  @Override
+  public void close() throws IOException {
+    input.close();
   }
 
   /** Reads and runs entries until the input ends, and returns the exit code. */
@@ -55,7 +78,7 @@ public final class Repl {
     out.println(BANNER);
     try {
       while (true) {
-        String entry = read();
+        String entry = input.next();
         if (entry == null) {
           out.println();
           return Cli.OK;
@@ -67,28 +90,6 @@ public final class Repl {
     } catch (IOException e) {
       err.println("senbonzakura: cannot read input: " + e.getMessage());
       return Cli.USAGE;
-    }
-  }
-
-  /** Reads one entry, or returns {@code null} when the input has ended. */
-  private String read() throws IOException {
-    out.print(PROMPT);
-    out.flush();
-    var text = new StringBuilder();
-    while (true) {
-      String line = in.readLine();
-      if (line == null) {
-        return text.isEmpty() ? null : text.toString();
-      }
-      if (!text.isEmpty() && line.isBlank()) {
-        return text.toString();
-      }
-      text.append(line).append('\n');
-      if (!unfinished(text.toString())) {
-        return text.toString();
-      }
-      out.print(MORE);
-      out.flush();
     }
   }
 

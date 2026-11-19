@@ -6,6 +6,8 @@ public final class App {
   private App() {}
 
   public static void main(String[] args) {
-    System.exit(new Cli(System.in, System.out, System.err).run(args));
+    var console = System.console();
+    boolean terminal = console != null && console.isTerminal();
+    System.exit(new Cli(System.in, System.out, System.err, terminal).run(args));
   }
 }

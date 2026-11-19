@@ -51,11 +51,22 @@ public final class Cli {
   private final InputStream in;
   private final PrintStream out;
   private final PrintStream err;
+  private final boolean terminal;
 
-  public Cli(InputStream in, PrintStream out, PrintStream err) {
+  /**
+   * @param terminal whether the program runs in a terminal, so the REPL reads with line editing
+   *     from it instead of plain lines from {@code in}
+   */
+  public Cli(InputStream in, PrintStream out, PrintStream err, boolean terminal) {
     this.in = in;
     this.out = out;
     this.err = err;
+    this.terminal = terminal;
+  }
+
+  /** A command line that reads plain input, as from a pipe. */
+  public Cli(InputStream in, PrintStream out, PrintStream err) {
+    this(in, out, err, false);
   }
 
   /** A command line with no input, for running files. */
@@ -87,8 +98,7 @@ public final class Cli {
         err.println(USAGE_TEXT);
         return USAGE;
       }
-      var reader = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8));
-      return new Repl(reader, out, err).run();
+      return repl();
     }
     if (path == null) {
       err.println(USAGE_TEXT);
@@ -149,6 +159,19 @@ public final class Cli {
       }
     }
     return OK;
+  }
+
+  private int repl() {
+    if (!terminal) {
+      var reader = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8));
+      return new Repl(reader, out, err).run();
+    }
+    try (var repl = Repl.onTerminal(out, err)) {
+      return repl.run();
+    } catch (IOException e) {
+      err.println("senbonzakura: cannot use the terminal: " + e.getMessage());
+      return USAGE;
+    }
   }
 
   private static String reason(Exception e) {

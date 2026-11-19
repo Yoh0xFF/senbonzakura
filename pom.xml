@@ -17,6 +17,8 @@
     <git-build-hook-maven-plugin.version>3.6.0</git-build-hook-maven-plugin.version>
     <maven-surefire-plugin.version>3.6.1</maven-surefire-plugin.version>
     <maven-jar-plugin.version>3.4.2</maven-jar-plugin.version>
+    <maven-shade-plugin.version>3.6.2</maven-shade-plugin.version>
+    <jline.version>3.30.17</jline.version>
     <junit.version>6.1.3</junit.version>
   </properties>
 
@@ -33,6 +35,13 @@
   </dependencyManagement>
 
   <dependencies>
+    <!-- Line editing and history for the REPL. -->
+    <dependency>
+      <groupId>org.jline</groupId>
+      <artifactId>jline</artifactId>
+      <version>${jline.version}</version>
+    </dependency>
+
     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter</artifactId>
@@ -48,7 +57,8 @@
         <version>${maven-surefire-plugin.version}</version>
       </plugin>
 
-      <!-- Makes the jar runnable: java -jar target/senbonzakura-1.0-SNAPSHOT.jar <file> -->
+      <!-- Makes the jar runnable: java -jar target/senbonzakura-1.0-SNAPSHOT.jar <file>.
+           JLine reaches the terminal through the FFM API, which needs native access. -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jar-plugin</artifactId>
@@ -58,8 +68,42 @@
             <manifest>
               <mainClass>io.senbonzakura.App</mainClass>
             </manifest>
+            <manifestEntries>
+              <Enable-Native-Access>ALL-UNNAMED</Enable-Native-Access>
+            </manifestEntries>
           </archive>
         </configuration>
+      </plugin>
+
+      <!-- Bundles JLine into the jar, so java -jar needs nothing else on the class path. -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-shade-plugin</artifactId>
+        <version>${maven-shade-plugin.version}</version>
+        <executions>
+          <execution>
+            <phase>package</phase>
+            <goals>
+              <goal>shade</goal>
+            </goals>
+            <configuration>
+              <createDependencyReducedPom>false</createDependencyReducedPom>
+              <transformers>
+                <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
+              </transformers>
+              <filters>
+                <filter>
+                  <artifact>*:*</artifact>
+                  <excludes>
+                    <exclude>META-INF/*.SF</exclude>
+                    <exclude>META-INF/*.DSA</exclude>
+                    <exclude>META-INF/*.RSA</exclude>
+                  </excludes>
+                </filter>
+              </filters>
+            </configuration>
+          </execution>
+        </executions>
       </plugin>
 
       <plugin>
