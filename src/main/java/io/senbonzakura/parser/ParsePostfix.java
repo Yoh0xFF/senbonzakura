@@ -88,13 +88,13 @@ final class ParsePostfix {
   }
 
   /**
-   * A token an argument list cannot go past: one that ends an enclosing construct, or a {@code {}
-   * that starts a block. It must cover every token {@link Parser#primary(TokenCursor)} leaves in
+   * A token an argument list cannot go past: one that ends an enclosing construct, a {@code {}
+   * that starts a block, or the {@code if} of a trailing condition. It must cover every token {@link Parser#primary(TokenCursor)} leaves in
    * place, or the argument loop would never move.
    */
   private static boolean atCloser(TokenCursor c) {
     return switch (c.peek().kind()) {
-      case RIGHT_BRACKET, LEFT_BRACE, RIGHT_BRACE, SEMICOLON, EOF -> true;
+      case RIGHT_BRACKET, LEFT_BRACE, RIGHT_BRACE, SEMICOLON, IF, EOF -> true;
       default -> false;
     };
   }

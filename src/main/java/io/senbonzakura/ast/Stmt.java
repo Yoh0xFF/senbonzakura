@@ -113,6 +113,17 @@ public sealed interface Stmt {
     }
   }
 
+  /**
+   * {@code return value if condition;}, where both {@code value} and {@code if condition} are
+   * optional, and each is {@code null} when absent. With a condition it returns only when the
+   * condition holds. Covers the semicolon too, unless it was missing.
+   */
+  record Return(Expr value, Expr condition, int start, int end) implements Stmt {
+    public Return {
+      NodeRange.check(start, end);
+    }
+  }
+
   /** {@code { ... }}. Covers both braces, unless the closing one was missing. */
   record Block(List<Stmt> statements, int start, int end) implements Stmt {
     public Block {

@@ -498,7 +498,7 @@ class ParseStatementTest {
   }
 
   @ParameterizedTest
-  @ValueSource(strings = {"continue", "break"})
+  @ValueSource(strings = {"continue", "break", "return"})
   void missingConditionIsReportedOnce(String keyword) {
     var parsed = parse(keyword + " if ;");
 
@@ -516,11 +516,83 @@ class ParseStatementTest {
   }
 
   @ParameterizedTest
-  @ValueSource(strings = {"continue", "break"})
-  void continueAndBreakAreNotExpressions(String keyword) {
+  @ValueSource(strings = {"continue", "break", "return"})
+  void continueBreakAndReturnAreNotExpressions(String keyword) {
     var parsed = parse("{ x = " + keyword + "; }");
 
     assertEquals(List.of("expected expression, found '" + keyword + "'"), parsed.parserMessages());
+  }
+
+  @ParameterizedTest
+  @CsvSource(
+      delimiterString = "=>",
+      value = {
+        "return;                        => (return)",
+        "return if a == b;              => (return if (== a b))",
+        "return if i >= 10;             => (return if (>= i 10))",
+        "return if (a > b && c < d);    => (return if (group (&& (> a b) (< c d))))",
+        "return x;                      => (return x)",
+        "return x if a == b;            => (return x if (== a b))",
+        "return x if i >= 10;           => (return x if (>= i 10))",
+        "return x if (a > b && c < d);  => (return x if (group (&& (> a b) (< c d))))",
+        "return a + f(b);               => (return (+ a (call f b)))",
+        "return (x) if y;               => (return (group x) if y)",
+        "return a == b if c;            => (return (== a b) if c)",
+        "{ return x if a; y; }          => {(return x if a) y;}",
+      })
+  void returnStatements(String input, String tree) {
+    assertEquals(tree, parseClean(input).tree());
+  }
+
+  @Test
+  void returnCoversItsSource() {
+    var parsed = parseClean("return x + 1 if a < b;");
+    var stmt = parsed.as(Stmt.Return.class);
+
+    assertEquals("return x + 1 if a < b;", parsed.text(stmt));
+    assertEquals("x + 1", parsed.text(stmt.value()));
+    assertEquals("a < b", parsed.text(stmt.condition()));
+  }
+
+  @ParameterizedTest
+  @CsvSource(
+      delimiterString = "=>",
+      value = {
+        "return          => (return)                 => 6  => expected ';' or 'if' after 'return'",
+        "{ return }      => {(return)}               => 8  => expected ';' or 'if' after 'return'",
+        "return x        => (return x)               => 8  => expected ';' or 'if' after return value",
+        "return if a     => (return if a)            => 11 => expected ';' after return condition",
+        "return x if a   => (return x if a)          => 13 => expected ';' after return condition",
+      })
+  void missingSemicolonAfterReturnIsReported(
+      String input, String tree, int offset, String message) {
+    var parsed = parse(input);
+
+    assertEquals(tree, parsed.tree());
+    assertEquals(List.of(new Diagnostic(offset, offset, message)), parsed.parserDiagnostics());
+  }
+
+  @ParameterizedTest
+  @CsvSource(
+      delimiterString = "=>",
+      value = {
+        "return x if ;   => (return x if <error>)    => expected expression, found ';'",
+        "return x +;     => (return (+ x <error>))   => expected expression, found ';'",
+        "return x + if a; => (return (+ x <error>) if a) => expected expression, found 'if'",
+      })
+  void malformedReturnIsReportedOnce(String input, String tree, String message) {
+    var parsed = parse(input);
+
+    assertEquals(tree, parsed.tree());
+    assertEquals(List.of(message), parsed.parserMessages());
+  }
+
+  @Test
+  void returnLeavesWhatFollowsItsValueForTheNextStatement() {
+    var all = parseAll("return x y; z;");
+
+    assertEquals(List.of("(return x)", "y;", "z;"), all.trees());
+    assertEquals(List.of("expected ';' or 'if' after return value"), all.messages());
   }
 
   private record ParsedAll(List<String> trees, List<String> messages) {}

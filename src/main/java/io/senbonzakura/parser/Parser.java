@@ -64,6 +64,7 @@ public class Parser {
       case LOOP -> ParseStatement.loop(c);
       case CONTINUE -> ParseStatement.continueStatement(c);
       case BREAK -> ParseStatement.breakStatement(c);
+      case RETURN -> ParseStatement.returnStatement(c);
       default -> ParseStatement.expression(c);
     };
   }
@@ -91,7 +92,7 @@ public class Parser {
       case IDENTIFIER -> ParseIdentifier.identifier(c);
       case LEFT_PAREN -> ParseGroup.parenthesized(c);
       case ERROR -> lexerError(c);
-      case RIGHT_PAREN, RIGHT_BRACKET, LEFT_BRACE, RIGHT_BRACE, COMMA, SEMICOLON, EOF ->
+      case RIGHT_PAREN, RIGHT_BRACKET, LEFT_BRACE, RIGHT_BRACE, COMMA, SEMICOLON, IF, EOF ->
           missingOperand(c);
       default -> unexpectedToken(c);
     };
@@ -117,7 +118,8 @@ public class Parser {
 
   private static Expr missingOperand(TokenCursor c) {
     // Leaves the token in place, so an enclosing group, argument list or statement can match it.
-    // A '{' is left for the statement it belongs to, like the body after an if condition.
+    // A '{' is left for the statement it belongs to, like the body after an if condition, and an
+    // 'if' for the condition that ends a return, break or continue.
     Token token = c.peek();
     c.report(token, "expected expression, found " + c.describe(token));
     return new Expr.Error(token.start(), token.start());

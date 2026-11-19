@@ -125,6 +125,7 @@ class ParsePostfixTest {
         "f(1;        => (call f 1)            => expected ')', found ';'",
         "a[]         => (index a <error>)     => expected expression, found ']'",
         "f(1 {       => (call f 1)            => expected ')', found '{'",
+        "f(1 if      => (call f 1)            => expected ')', found 'if'",
         "a[0         => (index a 0)           => expected ']', found end of input",
         "a.          => (. a <error>)         => expected field name, found end of input",
       })

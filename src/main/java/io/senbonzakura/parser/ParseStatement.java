@@ -8,8 +8,8 @@ import java.util.List;
 
 /**
  * Parses statements: an expression followed by {@code ;}, a {@code let}, an {@code if} with an
- * optional {@code else}, a {@code loop}, a {@code continue}, a {@code break}, or a block of
- * statements in {@code {}}. Statements inside a block come from {@link
+ * optional {@code else}, a {@code loop}, a {@code continue}, a {@code break}, a {@code return}, or
+ * a block of statements in {@code {}}. Statements inside a block come from {@link
  * Parser#statement(TokenCursor)}.
  *
  * <p>A missing {@code ;} or body is reported only when the rest of the statement had no problems,
@@ -202,37 +202,66 @@ final class ParseStatement {
   /** The cursor must be on {@code continue}. */
   static Stmt continueStatement(TokenCursor c) {
     assert c.at(Token.Kind.CONTINUE) : c.peek();
-    Jump jump = jump(c, "continue");
+    Jump jump = jump(c, "continue", false);
     return new Stmt.Continue(jump.condition(), jump.start(), jump.end());
   }
 
   /** The cursor must be on {@code break}. */
   static Stmt breakStatement(TokenCursor c) {
     assert c.at(Token.Kind.BREAK) : c.peek();
-    Jump jump = jump(c, "break");
+    Jump jump = jump(c, "break", false);
     return new Stmt.Break(jump.condition(), jump.start(), jump.end());
   }
 
-  /** What {@code continue} and {@code break} share: a condition, or {@code null} for none. */
-  private record Jump(Expr condition, int start, int end) {}
+  /** The cursor must be on {@code return}. */
+  static Stmt returnStatement(TokenCursor c) {
+    assert c.at(Token.Kind.RETURN) : c.peek();
+    Jump jump = jump(c, "return", true);
+    return new Stmt.Return(jump.value(), jump.condition(), jump.start(), jump.end());
+  }
+
+  /** What {@code continue}, {@code break} and {@code return} share; parts left out are null. */
+  private record Jump(Expr value, Expr condition, int start, int end) {}
 
   /**
-   * Parses the keyword spelled {@code word}, an optional {@code if condition}, then {@code ;}. The
-   * condition is a plain expression, not an {@code if} statement, so it takes no block and no
-   * {@code else}.
+   * Parses the keyword spelled {@code word}, a value if {@code takesValue}, an optional {@code if
+   * condition}, then {@code ;}. The condition is a plain expression, not an {@code if} statement,
+   * so it takes no block and no {@code else}.
+   *
+   * <p>A value is optional too. None follows when the next token is {@code ;}, {@code if}, or one
+   * that closes the enclosing block, so {@code return }} reports the missing {@code ;} rather than
+   * a missing expression.
    */
-  private static Jump jump(TokenCursor c, String word) {
+  private static Jump jump(TokenCursor c, String word, boolean takesValue) {
     int problemsBefore = c.diagnostics().size();
     Token keyword = c.advance();
-    if (!c.at(Token.Kind.IF)) {
-      String message = "expected ';' or 'if' after '" + word + "'";
-      return new Jump(null, keyword.start(), semicolon(c, problemsBefore, keyword.end(), message));
+    int end = keyword.end();
+    String message = "expected ';' or 'if' after '" + word + "'";
+
+    Expr value = null;
+    if (takesValue && !endsJump(c)) {
+      value = Parser.expression(c);
+      end = value.end();
+      message = "expected ';' or 'if' after " + word + " value";
     }
-    c.advance();
-    Expr condition = Parser.expression(c);
-    String message = "expected ';' after " + word + " condition";
-    int end = semicolon(c, problemsBefore, condition.end(), message);
-    return new Jump(condition, keyword.start(), end);
+
+    Expr condition = null;
+    if (c.at(Token.Kind.IF)) {
+      c.advance();
+      condition = Parser.expression(c);
+      end = condition.end();
+      message = "expected ';' after " + word + " condition";
+    }
+
+    end = semicolon(c, problemsBefore, end, message);
+    return new Jump(value, condition, keyword.start(), end);
+  }
+
+  private static boolean endsJump(TokenCursor c) {
+    return switch (c.peek().kind()) {
+      case SEMICOLON, IF, RIGHT_BRACE, EOF -> true;
+      default -> false;
+    };
   }
 
   private static Stmt.Block emptyBlockAt(int offset) {
