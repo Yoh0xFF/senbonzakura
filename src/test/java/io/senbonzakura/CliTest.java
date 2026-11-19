@@ -82,6 +82,33 @@ class CliTest {
   }
 
   @Test
+  void checkProblemsArePrintedLikeParseProblems() throws IOException {
+    var file = write("bad.sz", "fn f(i: int) {}\nf(1, 2);\nbreak;\n");
+
+    assertEquals(Cli.PROBLEMS, cli.run(file));
+    assertEquals(
+        file
+            + ":2:1: error: 'f' expects 1 argument, found 2\n"
+            + "    f(1, 2);\n"
+            + "    ^^^^^^^\n"
+            + file
+            + ":3:1: error: 'break' outside a loop\n"
+            + "    break;\n"
+            + "    ^^^^^^\n",
+        err());
+  }
+
+  @Test
+  void checksDoNotRunWhenTheFileHasParseProblems() throws IOException {
+    var file = write("bad.sz", "var = 1;\nx;\n");
+
+    assertEquals(Cli.PROBLEMS, cli.run(file));
+    assertEquals(
+        List.of(file + ":1:5: error: expected variable name, found '='"),
+        err().lines().filter(l -> l.startsWith(file)).toList());
+  }
+
+  @Test
   void treeIsStillPrintedWhenThereAreProblems() throws IOException {
     var file = write("bad.sz", "var x = ;");
 

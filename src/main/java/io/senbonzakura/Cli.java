@@ -2,6 +2,7 @@ package io.senbonzakura;
 
 import io.senbonzakura.ast.Sexpr;
 import io.senbonzakura.ast.Stmt;
+import io.senbonzakura.check.Checker;
 import io.senbonzakura.lexer.Lexer;
 import io.senbonzakura.lexer.SourceFile;
 import io.senbonzakura.lexer.Token.Diagnostic;
@@ -19,9 +20,11 @@ import java.util.List;
 import java.util.stream.Stream;
 
 /**
- * The command line: {@code senbonzakura [--tree] <file>}. Parses the file and prints each problem
- * found to the error stream, with the line it is on and a caret under the part it covers. With
- * {@code --tree} it also prints each top-level statement as an {@link Sexpr S-expression}.
+ * The command line: {@code senbonzakura [--tree] <file>}. Parses and {@link Checker checks} the
+ * file, and prints each problem found to the error stream, with the line it is on and a caret under
+ * the part it covers. The checks run only on a file that lexed and parsed cleanly, so one syntax
+ * error does not show up again as a list of undefined names. With {@code --tree} it also prints
+ * each top-level statement as an {@link Sexpr S-expression}.
  *
  * <p>Exits with {@link #OK} when the file has no problems, {@link #PROBLEMS} when it has some, and
  * {@link #USAGE} when the arguments are wrong or the file cannot be read.
@@ -84,6 +87,12 @@ public final class Cli {
         Stream.concat(lexer.diagnostics().stream(), parser.diagnostics().stream())
             .sorted(Comparator.comparingInt(Diagnostic::start))
             .toList();
+    if (diagnostics.isEmpty()) {
+      diagnostics =
+          Checker.check(statements).stream()
+              .sorted(Comparator.comparingInt(Diagnostic::start))
+              .toList();
+    }
     for (var diagnostic : diagnostics) {
       print(source, diagnostic);
     }
