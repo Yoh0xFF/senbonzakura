@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Parses statements: an expression followed by {@code ;}, a {@code let}, an {@code if} with an
+ * Parses statements: an expression followed by {@code ;}, a {@code var}, an {@code if} with an
  * optional {@code else}, a {@code loop}, a {@code continue}, a {@code break}, a {@code return}, or
  * a block of statements in {@code {}}. Statements inside a block come from {@link
  * Parser#statement(TokenCursor)}.
@@ -27,33 +27,33 @@ final class ParseStatement {
     return new Stmt.Expression(expr, expr.start(), end);
   }
 
-  /** The cursor must be on {@code let}. */
-  static Stmt let(TokenCursor c) {
+  /** The cursor must be on {@code var}. */
+  static Stmt varStatement(TokenCursor c) {
     int problemsBefore = c.diagnostics().size();
-    return letRest(c, problemsBefore, binding(c, false));
+    return varRest(c, problemsBefore, binding(c, false));
   }
 
-  /** {@code let name}, the part a {@code let} statement shares with {@code loop let}. */
+  /** {@code var name}, the part a {@code var} statement shares with {@code loop var}. */
   private record Binding(String name, int start, int end) {}
 
   /**
-   * Parses {@code let} and the name. A keyword or literal where the name should be is consumed,
+   * Parses {@code var} and the name. A keyword or literal where the name should be is consumed,
    * unless it can follow the name; {@code inLoop} adds {@code in} to those.
    */
   private static Binding binding(TokenCursor c, boolean inLoop) {
-    assert c.at(Token.Kind.LET) : c.peek();
-    Token let = c.advance();
+    assert c.at(Token.Kind.VAR) : c.peek();
+    Token keyword = c.advance();
 
     if (c.at(Token.Kind.IDENTIFIER)) {
       Token token = c.advance();
-      return new Binding(c.text(token), let.start(), token.end());
+      return new Binding(c.text(token), keyword.start(), token.end());
     }
     c.report(c.peek(), "expected variable name, found " + c.describe(c.peek()));
-    int end = let.end();
+    int end = keyword.end();
     if (!canFollowName(c) && !(inLoop && c.at(Token.Kind.IN))) {
       end = c.advance().end();
     }
-    return new Binding("", let.start(), end);
+    return new Binding("", keyword.start(), end);
   }
 
   private static boolean canFollowName(TokenCursor c) {
@@ -63,8 +63,8 @@ final class ParseStatement {
     };
   }
 
-  /** Parses what follows the name of a {@code let}: an optional {@code = initializer}, then ;. */
-  private static Stmt.Let letRest(TokenCursor c, int problemsBefore, Binding binding) {
+  /** Parses what follows the name of a {@code var}: an optional {@code = initializer}, then ;. */
+  private static Stmt.Var varRest(TokenCursor c, int problemsBefore, Binding binding) {
     int end = binding.end();
     Expr initializer = null;
     if (c.at(Token.Kind.EQ)) {
@@ -73,8 +73,8 @@ final class ParseStatement {
       end = initializer.end();
     }
 
-    end = semicolon(c, problemsBefore, end, "expected ';' after let statement");
-    return new Stmt.Let(binding.name(), initializer, binding.start(), end);
+    end = semicolon(c, problemsBefore, end, "expected ';' after var statement");
+    return new Stmt.Var(binding.name(), initializer, binding.start(), end);
   }
 
   /**
@@ -128,8 +128,8 @@ final class ParseStatement {
    *
    * <ul>
    *   <li>{@code loop { ... }} runs until something leaves it.
-   *   <li>{@code loop let x in xs { ... }} runs once for each item of {@code xs}.
-   *   <li>{@code loop let i = 0; i < n; i++ { ... }} runs the {@code let} once, then the body while
+   *   <li>{@code loop var x in xs { ... }} runs once for each item of {@code xs}.
+   *   <li>{@code loop var i = 0; i < n; i++ { ... }} runs the {@code var} once, then the body while
    *       the condition holds, running the step after each pass.
    *   <li>{@code loop condition { ... }} runs while the condition holds.
    * </ul>
@@ -143,8 +143,8 @@ final class ParseStatement {
       Stmt.Block body = block(c);
       return new Stmt.Loop(null, body, loop.start(), body.end());
     }
-    if (c.at(Token.Kind.LET)) {
-      return letLoop(c, loop, problemsBefore);
+    if (c.at(Token.Kind.VAR)) {
+      return varLoop(c, loop, problemsBefore);
     }
     Expr condition = Parser.expression(c);
     Stmt.Block body = body(c, problemsBefore, condition.end(), "after loop condition");
@@ -152,13 +152,13 @@ final class ParseStatement {
   }
 
   /**
-   * Tells {@code loop let x in} from {@code loop let i = 0;} by what follows the name. Anything
+   * Tells {@code loop var x in} from {@code loop var i = 0;} by what follows the name. Anything
    * else is reported as a missing {@code in}, and the loop is parsed as one over what follows.
    */
-  private static Stmt letLoop(TokenCursor c, Token loop, int problemsBefore) {
+  private static Stmt varLoop(TokenCursor c, Token loop, int problemsBefore) {
     Binding binding = binding(c, true);
     if (c.at(Token.Kind.EQ) || c.at(Token.Kind.SEMICOLON)) {
-      return stepLoop(c, loop, problemsBefore, letRest(c, problemsBefore, binding));
+      return stepLoop(c, loop, problemsBefore, varRest(c, problemsBefore, binding));
     }
 
     if (c.at(Token.Kind.IN)) {
@@ -175,7 +175,7 @@ final class ParseStatement {
     return new Stmt.LoopIn(binding.name(), iterable, body, loop.start(), body.end());
   }
 
-  private static Stmt stepLoop(TokenCursor c, Token loop, int problemsBefore, Stmt.Let init) {
+  private static Stmt stepLoop(TokenCursor c, Token loop, int problemsBefore, Stmt.Var init) {
     Expr condition = Parser.expression(c);
     semicolon(c, problemsBefore, condition.end(), "expected ';' after loop condition");
     Expr step = Parser.expression(c);

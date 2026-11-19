@@ -63,11 +63,11 @@ class ScanIdentifierTest {
 
   @Test
   void identifierEndsAtTheFirstCharacterThatCannotContinueIt() {
-    var lexed = lex("let x\t= y1\"s\"'c'`m`");
+    var lexed = lex("var x\t= y1\"s\"'c'`m`");
 
     assertEquals(
         List.of(
-            Kind.LET,
+            Kind.VAR,
             Kind.IDENTIFIER,
             Kind.EQ,
             Kind.IDENTIFIER,
@@ -75,7 +75,7 @@ class ScanIdentifierTest {
             Kind.CHAR_LITERAL,
             Kind.STRING_LITERAL),
         lexed.kinds());
-    assertEquals(List.of("let", "x", "=", "y1", "\"s\"", "'c'", "`m`"), lexed.texts());
+    assertEquals(List.of("var", "x", "=", "y1", "\"s\"", "'c'", "`m`"), lexed.texts());
   }
 
   @Test

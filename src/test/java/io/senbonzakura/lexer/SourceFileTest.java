@@ -67,7 +67,7 @@ class SourceFileTest {
 
   @Test
   void textOfToken() {
-    var file = new SourceFile("test", "let x = 42");
+    var file = new SourceFile("test", "var x = 42");
 
     assertEquals("42", file.text(new Token(Token.Kind.INT_LITERAL, 8, 10, 0)));
   }

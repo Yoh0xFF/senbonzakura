@@ -59,7 +59,7 @@ public class Parser {
   static Stmt statement(TokenCursor c) {
     return switch (c.peek().kind()) {
       case LEFT_BRACE -> ParseStatement.block(c);
-      case LET -> ParseStatement.let(c);
+      case VAR -> ParseStatement.varStatement(c);
       case IF -> ParseStatement.ifStatement(c);
       case LOOP -> ParseStatement.loop(c);
       case CONTINUE -> ParseStatement.continueStatement(c);

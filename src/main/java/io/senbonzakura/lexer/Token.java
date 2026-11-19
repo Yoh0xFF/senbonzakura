@@ -67,7 +67,7 @@ public record Token(Kind kind, int start, int end, int flags) {
 
     // Keywords
     FN("fn", KEYWORD),
-    LET("let", KEYWORD),
+    VAR("var", KEYWORD),
     IF("if", KEYWORD),
     ELSE("else", KEYWORD),
     LOOP("loop", KEYWORD),

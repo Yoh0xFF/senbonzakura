@@ -41,8 +41,8 @@ final class Sexpr {
   static String print(Stmt stmt) {
     return switch (stmt) {
       case Stmt.Expression s -> print(s.expr()) + ";";
-      case Stmt.Let s ->
-          "(let "
+      case Stmt.Var s ->
+          "(var "
               + (s.name().isEmpty() ? "<error>" : s.name())
               + (s.initializer() == null ? "" : " " + print(s.initializer()))
               + ")";
@@ -59,7 +59,7 @@ final class Sexpr {
               + print(s.body())
               + ")";
       case Stmt.LoopIn s ->
-          "(loop let "
+          "(loop var "
               + (s.name().isEmpty() ? "<error>" : s.name())
               + " in "
               + print(s.iterable())

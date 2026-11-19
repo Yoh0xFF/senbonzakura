@@ -22,12 +22,12 @@ public sealed interface Stmt {
   }
 
   /**
-   * {@code let name = initializer;}, where {@code = initializer} is optional. {@code initializer}
+   * {@code var name = initializer;}, where {@code = initializer} is optional. {@code initializer}
    * is {@code null} when there is none, and {@code name} is empty when it was missing, which the
    * parser has already reported.
    */
-  record Let(String name, Expr initializer, int start, int end) implements Stmt {
-    public Let {
+  record Var(String name, Expr initializer, int start, int end) implements Stmt {
+    public Var {
       Objects.requireNonNull(name, "name");
       NodeRange.check(start, end);
     }
@@ -63,7 +63,7 @@ public sealed interface Stmt {
   }
 
   /**
-   * {@code loop let name in iterable { ... }}. {@code name} is empty when it was missing, which the
+   * {@code loop var name in iterable { ... }}. {@code name} is empty when it was missing, which the
    * parser has already reported.
    */
   record LoopIn(String name, Expr iterable, Block body, int start, int end) implements Stmt {
@@ -76,10 +76,10 @@ public sealed interface Stmt {
   }
 
   /**
-   * {@code loop let i = 0; condition; step { ... }}. {@code init} runs once and covers its own
+   * {@code loop var i = 0; condition; step { ... }}. {@code init} runs once and covers its own
    * {@code ;}, and {@code step} runs after each pass through the body.
    */
-  record LoopStep(Let init, Expr condition, Expr step, Block body, int start, int end)
+  record LoopStep(Var init, Expr condition, Expr step, Block body, int start, int end)
       implements Stmt {
     public LoopStep {
       Objects.requireNonNull(init, "init");
