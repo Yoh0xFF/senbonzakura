@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 // Prints a tree as an S-expression, like (+ 1 (* 2 3)), so tests can check its shape in one line.
+// Calls print as (call f 1 2), or (call f x: 1 y: 2) with named arguments.
 // Statements print as {(= x 1); y;}, declarations as (var a: int 1, b), and functions as
 // (fn f (a: int): bool {...}).
 final class Sexpr {
@@ -23,7 +24,7 @@ final class Sexpr {
       case Expr.Identifier e -> e.name();
       case Expr.Call e ->
           Stream.concat(
-                  Stream.of("call", print(e.callee())), e.arguments().stream().map(Sexpr::print))
+                  Stream.of("call", print(e.callee())), e.arguments().stream().map(Sexpr::argument))
               .collect(Collectors.joining(" ", "(", ")"));
       case Expr.Index e -> "(index " + print(e.target()) + " " + print(e.index()) + ")";
       case Expr.Field e ->
@@ -111,6 +112,10 @@ final class Sexpr {
       case Type.Primitive t -> t.kind().spelling();
       case Type.Error t -> "<error>";
     };
+  }
+
+  private static String argument(Expr.Argument a) {
+    return a.isNamed() ? name(a.name()) + ": " + print(a.value()) : print(a.value());
   }
 
   private static String declarator(Stmt.Declarator d) {

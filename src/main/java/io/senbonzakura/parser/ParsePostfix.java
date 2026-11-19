@@ -4,12 +4,13 @@ import io.senbonzakura.ast.Expr;
 import io.senbonzakura.ast.Expr.UpdateOp;
 import io.senbonzakura.lexer.Token;
 import java.util.ArrayList;
+import java.util.HashSet;
 
 /**
- * Parses calls {@code f(a, b)}, indexing {@code a[i]}, field access {@code a.b} and {@code a++} and
- * {@code a--} after a primary, from {@link Parser#primary(TokenCursor)}. They bind tighter than
- * prefix operators, so {@code -f()} is {@code -(f())}, and chain left to right, so {@code a.b(c)}
- * calls {@code a.b}.
+ * Parses calls {@code f(a, b)} or {@code f(x: a, y: b)}, indexing {@code a[i]}, field access {@code
+ * a.b} and {@code a++} and {@code a--} after a primary, from {@link Parser#primary(TokenCursor)}.
+ * They bind tighter than prefix operators, so {@code -f()} is {@code -(f())}, and chain left to
+ * right, so {@code a.b(c)} calls {@code a.b}.
  */
 final class ParsePostfix {
 
@@ -30,13 +31,31 @@ final class ParsePostfix {
     }
   }
 
-  /** Allows a trailing comma, and treats a missing comma between arguments as one problem. */
+  /**
+   * Allows a trailing comma, and treats a missing comma between arguments as one problem. A mix of
+   * positional and named arguments is reported once, at the first argument of the other kind.
+   */
   private static Expr call(TokenCursor c, Expr callee) {
     assert c.at(Token.Kind.LEFT_PAREN) : c.peek();
     Token open = c.advance();
-    var arguments = new ArrayList<Expr>();
+    var arguments = new ArrayList<Expr.Argument>();
+    var names = new HashSet<String>();
+    boolean mixReported = false;
     while (!c.at(Token.Kind.RIGHT_PAREN) && !atCloser(c)) {
-      arguments.add(Parser.expression(c));
+      Expr.Argument argument = argument(c);
+      if (!mixReported
+          && !arguments.isEmpty()
+          && argument.isNamed() != arguments.getFirst().isNamed()) {
+        c.report(
+            argument.start(), argument.end(), "positional and named arguments cannot be mixed");
+        mixReported = true;
+      }
+      if (argument.isNamed() && !argument.name().isEmpty() && !names.add(argument.name())) {
+        c.report(
+            argument.start(), argument.end(), "argument '" + argument.name() + "' is given twice");
+      }
+      arguments.add(argument);
+
       if (c.at(Token.Kind.COMMA)) {
         c.advance();
       } else if (!c.at(Token.Kind.RIGHT_PAREN) && !atCloser(c)) {
@@ -51,6 +70,27 @@ final class ParsePostfix {
     }
     Token close = c.advance();
     return new Expr.Call(callee, arguments, callee.start(), close.end());
+  }
+
+  /**
+   * Parses {@code value} or {@code name: value}. The name is parsed as an expression and only then
+   * known to be a name, by the {@code :} after it, so the cursor never has to look past one token.
+   */
+  private static Expr.Argument argument(TokenCursor c) {
+    Expr first = Parser.expression(c);
+    if (!c.at(Token.Kind.COLON)) {
+      return new Expr.Argument(null, first, first.start(), first.end());
+    }
+
+    String name = "";
+    if (first instanceof Expr.Identifier identifier) {
+      name = identifier.name();
+    } else if (!(first instanceof Expr.Error)) {
+      c.report(first.start(), first.end(), "argument name must be an identifier");
+    }
+    c.advance();
+    Expr value = Parser.expression(c);
+    return new Expr.Argument(name, value, first.start(), value.end());
   }
 
   private static Expr index(TokenCursor c, Expr target) {

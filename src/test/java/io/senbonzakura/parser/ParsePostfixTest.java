@@ -4,6 +4,7 @@ import static io.senbonzakura.parser.Parsed.parse;
 import static io.senbonzakura.parser.Parsed.parseClean;
 import static io.senbonzakura.parser.Parsed.parseFirst;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 import io.senbonzakura.ast.Expr;
 import java.util.List;
@@ -182,6 +183,76 @@ class ParsePostfixTest {
     var parsed = parseFirst("--i");
 
     assertEquals(List.of("expected expression, found '--'"), parsed.parserMessages());
+  }
+
+  @ParameterizedTest
+  @CsvSource(
+      delimiterString = "=>",
+      value = {
+        "test(i: 1, j: 2)        => (call test i: 1 j: 2)",
+        "test(j: 4, i: 8)        => (call test j: 4 i: 8)",
+        "f(i: 1,)                => (call f i: 1)",
+        "f(i: i)                 => (call f i: i)",
+        "f(x: a + b, y: g(z: 1)) => (call f x: (+ a b) y: (call g z: 1))",
+        "f(x: g(1, 2))           => (call f x: (call g 1 2))",
+      })
+  void namedArguments(String input, String tree) {
+    assertEquals(tree, Sexpr.print(parseClean(input).expr()));
+  }
+
+  @Test
+  void namedArgumentCoversItsSource() {
+    var parsed = parseClean("f(i: 1 + 2, j: x)");
+    var call = parsed.as(Expr.Call.class);
+    var i = call.arguments().get(0);
+
+    assertEquals("i", i.name());
+    assertEquals("1 + 2", parsed.text(i.value()));
+    assertEquals("i: 1 + 2", parsed.source().text().substring(i.start(), i.end()));
+  }
+
+  @Test
+  void positionalArgumentsHaveNoName() {
+    var call = parseClean("f(1, 2)").as(Expr.Call.class);
+
+    assertFalse(call.arguments().get(0).isNamed());
+    assertFalse(call.arguments().get(1).isNamed());
+  }
+
+  @ParameterizedTest
+  @CsvSource(
+      delimiterString = "=>",
+      value = {
+        "f(1, j: 2)        => (call f 1 j: 2)          => j: 2",
+        "f(i: 1, 2)        => (call f i: 1 2)          => 2",
+        "f(1, i: 2, j: 3)  => (call f 1 i: 2 j: 3)     => i: 2",
+        "f(i: 1, 2, 3)     => (call f i: 1 2 3)        => 2",
+      })
+  void mixingPositionalAndNamedArgumentsIsReportedOnce(String input, String tree, String at) {
+    var parsed = parse(input);
+
+    assertEquals(tree, Sexpr.print(parsed.expr()));
+    assertEquals(
+        List.of("positional and named arguments cannot be mixed"), parsed.parserMessages());
+    assertEquals(List.of(at), parsed.parserTexts());
+  }
+
+  @ParameterizedTest
+  @CsvSource(
+      delimiterString = "=>",
+      value = {
+        "f(i: 1, i: 2)     => (call f i: 1 i: 2)       => argument 'i' is given twice",
+        "f(a.b: 1)         => (call f <error>: 1)      => argument name must be an identifier",
+        "f(1: 2)           => (call f <error>: 2)      => argument name must be an identifier",
+        "f(i:)             => (call f i: <error>)      => expected expression, found ')'",
+        "f(i: , j: 2)      => (call f i: <error> j: 2) => expected expression, found ','",
+        "f(i: 1 j: 2)      => (call f i: 1 j: 2)       => expected ',' or ')', found 'j'",
+      })
+  void malformedNamedArgumentIsReportedOnce(String input, String tree, String message) {
+    var parsed = parse(input);
+
+    assertEquals(tree, Sexpr.print(parsed.expr()));
+    assertEquals(List.of(message), parsed.parserMessages());
   }
 
   @Test

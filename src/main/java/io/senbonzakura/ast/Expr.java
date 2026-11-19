@@ -57,11 +57,32 @@ public sealed interface Expr {
     }
   }
 
-  record Call(Expr callee, List<Expr> arguments, int start, int end) implements Expr {
+  /**
+   * {@code callee(a, b)} with positional arguments, or {@code callee(x: a, y: b)} with named ones.
+   * A call's arguments are all one kind or all the other; the parser reports a mix, but keeps each
+   * argument as written.
+   */
+  record Call(Expr callee, List<Argument> arguments, int start, int end) implements Expr {
     public Call {
       Objects.requireNonNull(callee, "callee");
       arguments = List.copyOf(arguments);
       NodeRange.check(start, end);
+    }
+  }
+
+  /**
+   * One argument of a {@link Call}: {@code value}, or {@code name: value}. {@code name} is {@code
+   * null} for a positional argument, and empty when what came before the {@code :} was not a name,
+   * which the parser has already reported. Not an expression on its own.
+   */
+  record Argument(String name, Expr value, int start, int end) {
+    public Argument {
+      Objects.requireNonNull(value, "value");
+      NodeRange.check(start, end);
+    }
+
+    public boolean isNamed() {
+      return name != null;
     }
   }
 
