@@ -1,20 +1,20 @@
-package io.senbonzakura.parser;
+package io.senbonzakura.ast;
 
-import io.senbonzakura.ast.Expr;
-import io.senbonzakura.ast.Stmt;
-import io.senbonzakura.ast.Type;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-// Prints a tree as an S-expression, like (+ 1 (* 2 3)), so tests can check its shape in one line.
-// Calls print as (call f 1 2), or (call f x: 1 y: 2) with named arguments.
-// Statements print as {(= x 1); y;}, declarations as (var a: int 1, b), and functions as
-// (fn f (a: int): bool {...}).
-final class Sexpr {
+/**
+ * Prints a tree as an S-expression, like {@code (+ 1 (* 2 3))}, so its shape fits on one line.
+ * Calls print as {@code (call f 1 2)}, or {@code (call f x: 1 y: 2)} with named arguments.
+ * Statements print as <code>{(= x 1); y;}</code>, declarations as {@code (var a: int 1, b)}, and
+ * functions as <code>(fn f (a: int): bool {...})</code>. Parts that failed to parse print as {@code
+ * <error>}.
+ */
+public final class Sexpr {
 
   private Sexpr() {}
 
-  static String print(Expr expr) {
+  public static String print(Expr expr) {
     return switch (expr) {
       case Expr.IntLiteral e -> Long.toString(e.value());
       case Expr.FloatLiteral e -> Double.toString(e.value());
@@ -41,7 +41,7 @@ final class Sexpr {
     };
   }
 
-  static String print(Stmt stmt) {
+  public static String print(Stmt stmt) {
     return switch (stmt) {
       case Stmt.Expression s -> print(s.expr()) + ";";
       case Stmt.Var s ->
@@ -107,7 +107,7 @@ final class Sexpr {
     };
   }
 
-  static String print(Type type) {
+  public static String print(Type type) {
     return switch (type) {
       case Type.Primitive t -> t.kind().spelling();
       case Type.Error t -> "<error>";

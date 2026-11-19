@@ -6,6 +6,7 @@ import io.senbonzakura.ast.Type;
 import io.senbonzakura.lexer.Lexer;
 import io.senbonzakura.lexer.Token;
 import io.senbonzakura.lexer.Token.Diagnostic;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -46,6 +47,18 @@ public class Parser {
     Stmt stmt = statement(cursor);
     cursor.skipIfStuck(first);
     return stmt;
+  }
+
+  /**
+   * Parses statements until the input is used up, and returns them in source order. A statement
+   * with problems is still returned, as a tree with error nodes in it.
+   */
+  public List<Stmt> parseFile() {
+    var statements = new ArrayList<Stmt>();
+    while (!atEnd()) {
+      statements.add(parseStatement());
+    }
+    return List.copyOf(statements);
   }
 
   /** Like {@link #parseStatement()}, always consumes at least one token unless at the end. */

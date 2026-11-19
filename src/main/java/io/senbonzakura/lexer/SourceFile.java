@@ -38,6 +38,27 @@ public final class SourceFile {
   }
 
   /**
+   * Returns the text of a 1-based line, without its line break.
+   *
+   * @throws IndexOutOfBoundsException if {@code line} is outside {@code 1} to {@link #lineCount()}
+   */
+  public String lineText(int line) {
+    if (line < 1 || line > lineStarts.length) {
+      throw new IndexOutOfBoundsException(
+          "line " + line + " outside 1.." + lineStarts.length + " in " + path);
+    }
+    int start = lineStarts[line - 1];
+    int end = line < lineStarts.length ? lineStarts[line] : text.length();
+    if (end > start && text.charAt(end - 1) == '\n') {
+      end--;
+    }
+    if (end > start && text.charAt(end - 1) == '\r') {
+      end--;
+    }
+    return text.substring(start, end);
+  }
+
+  /**
    * Converts an offset into a 1-based line and column. Columns count UTF-16 units, and {@code \r\n}
    * counts as one line break.
    *

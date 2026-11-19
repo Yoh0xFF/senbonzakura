@@ -4,6 +4,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import io.senbonzakura.lexer.SourceFile.LineCol;
+import java.util.List;
+import java.util.stream.IntStream;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -63,6 +65,32 @@ class SourceFileTest {
 
     assertThrows(IndexOutOfBoundsException.class, () -> file.locate(-1));
     assertThrows(IndexOutOfBoundsException.class, () -> file.locate(4));
+  }
+
+  @Test
+  void lineTextLeavesOutTheLineBreak() {
+    var file = new SourceFile("test", "one\ntwo\r\nthree\rfour");
+
+    assertEquals(List.of("one", "two", "three", "four"), lines(file));
+  }
+
+  @Test
+  void lineTextKeepsEmptyLines() {
+    var file = new SourceFile("test", "\n\r\nx\n");
+
+    assertEquals(List.of("", "", "x", ""), lines(file));
+  }
+
+  @Test
+  void lineTextRejectsLinesOutsideTheText() {
+    var file = new SourceFile("test", "a\nb");
+
+    assertThrows(IndexOutOfBoundsException.class, () -> file.lineText(0));
+    assertThrows(IndexOutOfBoundsException.class, () -> file.lineText(3));
+  }
+
+  private static List<String> lines(SourceFile file) {
+    return IntStream.rangeClosed(1, file.lineCount()).mapToObj(file::lineText).toList();
   }
 
   @Test

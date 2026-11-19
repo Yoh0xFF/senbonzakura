@@ -5,12 +5,48 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import io.senbonzakura.ast.Expr;
+import io.senbonzakura.ast.Sexpr;
 import io.senbonzakura.lexer.Lexer;
 import io.senbonzakura.lexer.SourceFile;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 
 class ParserTest {
+
+  @Test
+  void parseFileReturnsEveryStatementInOrder() {
+    var parser = new Parser(new Lexer(new SourceFile("test", "var x = 1;\nfn f() {}\nf(x);")));
+
+    var statements = parser.parseFile();
+
+    assertEquals(
+        List.of("(var x 1)", "(fn f () {})", "(call f x);"),
+        statements.stream().map(Sexpr::print).toList());
+    assertTrue(parser.diagnostics().isEmpty());
+    assertTrue(parser.atEnd());
+  }
+
+  @Test
+  void parseFileOfAnEmptyOrCommentOnlyFileIsEmpty() {
+    assertEquals(List.of(), new Parser(new Lexer(new SourceFile("test", ""))).parseFile());
+    assertEquals(
+        List.of(), new Parser(new Lexer(new SourceFile("test", "// x\n/* y */"))).parseFile());
+  }
+
+  @Test
+  void parseFileKeepsGoingAfterProblems() {
+    var parser = new Parser(new Lexer(new SourceFile("test", ") x = ; } y;")));
+
+    var statements = parser.parseFile();
+
+    assertEquals("y;", Sexpr.print(statements.getLast()));
+    assertEquals(
+        List.of(
+            "expected expression, found ')'",
+            "expected expression, found ';'",
+            "expected expression, found '}'"),
+        parser.diagnostics().stream().map(d -> d.message()).toList());
+  }
 
   @Test
   void nonLiteralIsReportedAndBecomesAnErrorNode() {

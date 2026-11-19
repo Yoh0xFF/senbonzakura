@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import io.senbonzakura.ast.Sexpr;
 import io.senbonzakura.ast.Stmt;
 import io.senbonzakura.lexer.Lexer;
 import io.senbonzakura.lexer.SourceFile;

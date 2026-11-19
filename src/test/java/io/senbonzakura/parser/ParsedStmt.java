@@ -5,12 +5,12 @@ import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import io.senbonzakura.ast.Expr;
+import io.senbonzakura.ast.Sexpr;
 import io.senbonzakura.ast.Stmt;
 import io.senbonzakura.ast.Type;
 import io.senbonzakura.lexer.Lexer;
 import io.senbonzakura.lexer.SourceFile;
 import io.senbonzakura.lexer.Token.Diagnostic;
-import java.util.ArrayList;
 import java.util.List;
 
 // Like Parsed, for a whole input that is one statement.
@@ -29,10 +29,7 @@ record ParsedStmt(SourceFile source, Stmt stmt, List<Diagnostic> parserDiagnosti
   // Parses statements until the input is used up, for inputs that recovery splits into several.
   static All parseAll(String text) {
     var parser = new Parser(new Lexer(new SourceFile("test", text)));
-    var trees = new ArrayList<String>();
-    while (!parser.atEnd()) {
-      trees.add(Sexpr.print(parser.parseStatement()));
-    }
+    var trees = parser.parseFile().stream().map(Sexpr::print).toList();
     return new All(trees, parser.diagnostics().stream().map(Diagnostic::message).toList());
   }
 

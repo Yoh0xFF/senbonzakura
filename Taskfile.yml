@@ -23,3 +23,9 @@ tasks:
     desc: Run tests for all modules
     cmds:
       - '{{.MVNW}} test'
+
+  run:
+    desc: 'Parse a file and report its problems, e.g. task run -- --tree hello.sz'
+    cmds:
+      - '{{.MVNW}} -q package -DskipTests'
+      - 'java -ea -jar target/senbonzakura-1.0-SNAPSHOT.jar {{.CLI_ARGS}}'
