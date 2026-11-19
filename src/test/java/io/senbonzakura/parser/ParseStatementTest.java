@@ -3,6 +3,7 @@ package io.senbonzakura.parser;
 import static io.senbonzakura.parser.ParsedStmt.parse;
 import static io.senbonzakura.parser.ParsedStmt.parseClean;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import io.senbonzakura.ast.Stmt;
@@ -200,5 +201,152 @@ class ParseStatementTest {
     var parsed = parse("{ x = let y; }");
 
     assertEquals(List.of("expected expression, found 'let'"), parsed.parserMessages());
+  }
+
+  @ParameterizedTest
+  @CsvSource(
+      delimiterString = "=>",
+      value = {
+        "if a { x; }                     => (if a {x;})",
+        "if a {}                         => (if a {})",
+        "if a == b || c == d { x = 1; }  => (if (|| (== a b) (== c d)) {(= x 1);})",
+        "if f(x) && !y.z { }             => (if (&& (call f x) (! (. y z))) {})",
+        "if (a) { b; }                   => (if (group a) {b;})",
+        "if a { if b { c; } }            => (if a {(if b {c;})})",
+        "{ if a { b; } c; }              => {(if a {b;}) c;}",
+      })
+  void ifStatements(String input, String tree) {
+    assertEquals(tree, parseClean(input).tree());
+  }
+
+  @Test
+  void ifCoversItsSource() {
+    var parsed = parseClean("if a < b { x; }");
+    var ifStmt = parsed.as(Stmt.If.class);
+
+    assertEquals("if a < b { x; }", parsed.text(ifStmt));
+    assertEquals("a < b", parsed.text(ifStmt.condition()));
+    assertEquals("{ x; }", parsed.text(ifStmt.then()));
+  }
+
+  @Test
+  void ifNeedsNoSemicolon() {
+    var all = parseAll("if a { b; } c;");
+
+    assertEquals(List.of("(if a {b;})", "c;"), all.trees());
+    assertEquals(List.of(), all.messages());
+  }
+
+  @ParameterizedTest
+  @CsvSource(
+      delimiterString = "=>",
+      value = {
+        "if { x; }     => (if <error> {x;})        => expected expression, found '{'",
+        "if a + { }    => (if (+ a <error>) {})    => expected expression, found '{'",
+        "if a +        => (if (+ a <error>) {})    => expected expression, found end of input",
+        "if a          => (if a {})                => expected '{' after if condition, found end of input",
+        "if a { x;     => (if a {x;})              => expected '}', found end of input",
+      })
+  void malformedIfIsReportedOnce(String input, String tree, String message) {
+    var parsed = parse(input);
+
+    assertEquals(tree, parsed.tree());
+    assertEquals(List.of(message), parsed.parserMessages());
+  }
+
+  @Test
+  void missingBodyLeavesTheRestForTheNextStatement() {
+    var all = parseAll("if a b; c;");
+
+    assertEquals(List.of("(if a {})", "b;", "c;"), all.trees());
+    assertEquals(List.of("expected '{' after if condition, found 'b'"), all.messages());
+  }
+
+  @Test
+  void missingBodyIsAnEmptyBlockAtTheEndOfTheCondition() {
+    var parsed = parse("if a ");
+    var ifStmt = parsed.as(Stmt.If.class);
+
+    assertEquals("if a", parsed.text(ifStmt));
+    assertEquals(4, ifStmt.then().start());
+    assertEquals(4, ifStmt.then().end());
+  }
+
+  @ParameterizedTest
+  @CsvSource(
+      delimiterString = "=>",
+      value = {
+        "if a { x; } else { y; }         => (if a {x;} else {y;})",
+        "if a {} else {}                 => (if a {} else {})",
+        "if a {} else if b { x; }        => (if a {} else (if b {x;}))",
+        "if a {} else if b {} else {}    => (if a {} else (if b {} else {}))",
+        "if a { if b {} else {} }        => (if a {(if b {} else {})})",
+        "{ if a {} else {} b; }          => {(if a {} else {}) b;}",
+      })
+  void ifElseStatements(String input, String tree) {
+    assertEquals(tree, parseClean(input).tree());
+  }
+
+  @Test
+  void ifElseCoversItsSource() {
+    var parsed = parseClean("if a { x; } else if b { y; } else { z; }");
+    var ifStmt = parsed.as(Stmt.If.class);
+    var elseIf = assertInstanceOf(Stmt.If.class, ifStmt.otherwise());
+
+    assertEquals("if a { x; } else if b { y; } else { z; }", parsed.text(ifStmt));
+    assertEquals("if b { y; } else { z; }", parsed.text(elseIf));
+    assertEquals("{ z; }", parsed.text(elseIf.otherwise()));
+  }
+
+  @ParameterizedTest
+  @CsvSource(
+      delimiterString = "=>",
+      value = {
+        "if a {} else        => (if a {} else {})          => expected '{' or 'if' after 'else', found end of input",
+        "if a else {}        => (if a {} else {})          => expected '{' after if condition, found 'else'",
+        "if a {} else if {}  => (if a {} else (if <error> {})) => expected expression, found '{'",
+        "if a {} else { x;   => (if a {} else {x;})        => expected '}', found end of input",
+      })
+  void malformedElseIsReportedOnce(String input, String tree, String message) {
+    var parsed = parse(input);
+
+    assertEquals(tree, parsed.tree());
+    assertEquals(List.of(message), parsed.parserMessages());
+  }
+
+  @Test
+  void missingElseBodyLeavesTheRestForTheNextStatement() {
+    var all = parseAll("if a {} else b; c;");
+
+    assertEquals(List.of("(if a {} else {})", "b;", "c;"), all.trees());
+    assertEquals(List.of("expected '{' or 'if' after 'else', found 'b'"), all.messages());
+  }
+
+  @Test
+  void missingElseBodyIsAnEmptyBlockAfterTheElse() {
+    var parsed = parse("if a {} else ");
+    var ifStmt = parsed.as(Stmt.If.class);
+
+    assertEquals("if a {} else", parsed.text(ifStmt));
+    assertEquals(12, ifStmt.otherwise().start());
+    assertEquals(12, ifStmt.otherwise().end());
+  }
+
+  @Test
+  void elseWithoutIfIsReported() {
+    var all = parseAll("else { x; }");
+
+    assertEquals(List.of("expected expression, found 'else'"), all.messages());
+  }
+
+  private record ParsedAll(List<String> trees, List<String> messages) {}
+
+  private static ParsedAll parseAll(String text) {
+    var parser = new Parser(new Lexer(new SourceFile("test", text)));
+    var trees = new ArrayList<String>();
+    while (!parser.atEnd()) {
+      trees.add(Sexpr.print(parser.parseStatement()));
+    }
+    return new ParsedAll(trees, parser.diagnostics().stream().map(Diagnostic::message).toList());
   }
 }

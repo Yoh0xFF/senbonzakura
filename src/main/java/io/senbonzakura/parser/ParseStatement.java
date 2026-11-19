@@ -4,10 +4,12 @@ import io.senbonzakura.ast.Expr;
 import io.senbonzakura.ast.Stmt;
 import io.senbonzakura.lexer.Token;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
- * Parses statements: an expression followed by {@code ;}, a {@code let}, or a block of statements
- * in {@code {}}. Statements inside a block come from {@link Parser#statement(TokenCursor)}.
+ * Parses statements: an expression followed by {@code ;}, a {@code let}, an {@code if} with an
+ * optional {@code else}, or a block of statements in {@code {}}. Statements inside a block come
+ * from {@link Parser#statement(TokenCursor)}.
  *
  * <p>A missing {@code ;} is reported only when the rest of the statement had no problems, so one
  * mistake does not produce two diagnostics.
@@ -76,10 +78,59 @@ final class ParseStatement {
   }
 
   /**
+   * The cursor must be on {@code if}. There are no parentheses around the condition, and the body
+   * must be a block, optionally followed by {@code else} and a block or another {@code if}.
+   *
+   * <p>A missing body becomes an empty block, so the tokens after it start the next statement. A
+   * missing body after the condition is reported only when the condition had no problems, and an
+   * {@code else} after it is still parsed.
+   */
+  static Stmt ifStatement(TokenCursor c) {
+    assert c.at(Token.Kind.IF) : c.peek();
+    int problemsBefore = c.diagnostics().size();
+    Token ifToken = c.advance();
+    Expr condition = Parser.expression(c);
+
+    Stmt.Block then;
+    if (c.at(Token.Kind.LEFT_BRACE)) {
+      then = block(c);
+    } else {
+      if (c.diagnostics().size() == problemsBefore) {
+        c.report(c.peek(), "expected '{' after if condition, found " + c.describe(c.peek()));
+      }
+      then = emptyBlockAt(condition.end());
+    }
+
+    if (!c.at(Token.Kind.ELSE)) {
+      return new Stmt.If(condition, then, null, ifToken.start(), then.end());
+    }
+    Stmt otherwise = elseBranch(c);
+    return new Stmt.If(condition, then, otherwise, ifToken.start(), otherwise.end());
+  }
+
+  private static Stmt elseBranch(TokenCursor c) {
+    assert c.at(Token.Kind.ELSE) : c.peek();
+    Token elseToken = c.advance();
+    return switch (c.peek().kind()) {
+      case LEFT_BRACE -> block(c);
+      case IF -> ifStatement(c);
+      default -> {
+        c.report(c.peek(), "expected '{' or 'if' after 'else', found " + c.describe(c.peek()));
+        yield emptyBlockAt(elseToken.end());
+      }
+    };
+  }
+
+  /** Stands in for a body that was missing. */
+  private static Stmt.Block emptyBlockAt(int offset) {
+    return new Stmt.Block(List.of(), offset, offset);
+  }
+
+  /**
    * The cursor must be on an opening brace. A missing closing brace is reported at the end of
    * input.
    */
-  static Stmt block(TokenCursor c) {
+  static Stmt.Block block(TokenCursor c) {
     assert c.at(Token.Kind.LEFT_BRACE) : c.peek();
     Token open = c.advance();
     var statements = new ArrayList<Stmt>();

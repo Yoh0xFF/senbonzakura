@@ -33,6 +33,24 @@ public sealed interface Stmt {
     }
   }
 
+  /**
+   * {@code if condition { ... } else { ... }}, where {@code else} is optional and may be followed
+   * by another {@code if} instead of a block. The braces are required, so {@code then} is always a
+   * block, and {@code otherwise} is a block, an {@code If} for {@code else if}, or {@code null}
+   * when there is no {@code else}. A body that was missing, which the parser has already reported,
+   * is an empty block where it should have started.
+   */
+  record If(Expr condition, Block then, Stmt otherwise, int start, int end) implements Stmt {
+    public If {
+      Objects.requireNonNull(condition, "condition");
+      Objects.requireNonNull(then, "then");
+      if (otherwise != null && !(otherwise instanceof Block || otherwise instanceof If)) {
+        throw new IllegalArgumentException("else branch must be a block or an if: " + otherwise);
+      }
+      NodeRange.check(start, end);
+    }
+  }
+
   /** {@code { ... }}. Covers both braces, unless the closing one was missing. */
   record Block(List<Stmt> statements, int start, int end) implements Stmt {
     public Block {

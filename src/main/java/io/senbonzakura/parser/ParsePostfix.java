@@ -73,10 +73,14 @@ final class ParsePostfix {
     return new Expr.Field(target, c.text(name), target.start(), name.end());
   }
 
-  /** A token that ends an enclosing construct, so an argument list cannot go past it. */
+  /**
+   * A token an argument list cannot go past: one that ends an enclosing construct, or a {@code {}
+   * that starts a block. It must cover every token {@link Parser#primary(TokenCursor)} leaves in
+   * place, or the argument loop would never move.
+   */
   private static boolean atCloser(TokenCursor c) {
     return switch (c.peek().kind()) {
-      case RIGHT_BRACKET, RIGHT_BRACE, SEMICOLON, EOF -> true;
+      case RIGHT_BRACKET, LEFT_BRACE, RIGHT_BRACE, SEMICOLON, EOF -> true;
       default -> false;
     };
   }

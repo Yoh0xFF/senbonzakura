@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import io.senbonzakura.ast.Expr;
 import io.senbonzakura.ast.Stmt;
 import io.senbonzakura.lexer.Lexer;
 import io.senbonzakura.lexer.SourceFile;
@@ -38,6 +39,10 @@ record ParsedStmt(SourceFile source, Stmt stmt, List<Diagnostic> parserDiagnosti
   }
 
   String text(Stmt node) {
+    return source.text().substring(node.start(), node.end());
+  }
+
+  String text(Expr node) {
     return source.text().substring(node.start(), node.end());
   }
 

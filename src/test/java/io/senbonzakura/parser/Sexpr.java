@@ -46,6 +46,13 @@ final class Sexpr {
               + (s.name().isEmpty() ? "<error>" : s.name())
               + (s.initializer() == null ? "" : " " + print(s.initializer()))
               + ")";
+      case Stmt.If s ->
+          "(if "
+              + print(s.condition())
+              + " "
+              + print(s.then())
+              + (s.otherwise() == null ? "" : " else " + print(s.otherwise()))
+              + ")";
       case Stmt.Block s ->
           s.statements().stream().map(Sexpr::print).collect(Collectors.joining(" ", "{", "}"));
     };
