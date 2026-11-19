@@ -62,6 +62,7 @@ public class Parser {
       case LET -> ParseStatement.let(c);
       case IF -> ParseStatement.ifStatement(c);
       case LOOP -> ParseStatement.loop(c);
+      case CONTINUE -> ParseStatement.continueStatement(c);
       default -> ParseStatement.expression(c);
     };
   }

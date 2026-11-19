@@ -440,6 +440,69 @@ class ParseStatementTest {
     assertEquals(List.of("expected variable name, found 'in'"), parsed.parserMessages());
   }
 
+  @ParameterizedTest
+  @CsvSource(
+      delimiterString = "=>",
+      value = {
+        "continue;                      => (continue)",
+        "continue if a == b;            => (continue if (== a b))",
+        "continue if i >= 10;           => (continue if (>= i 10))",
+        "continue if (a > b && c < d);  => (continue if (group (&& (> a b) (< c d))))",
+        "continue if !f(x);             => (continue if (! (call f x)))",
+        "loop { continue if done; x; }  => (loop {(continue if done) x;})",
+      })
+  void continueStatements(String input, String tree) {
+    assertEquals(tree, parseClean(input).tree());
+  }
+
+  @Test
+  void continueCoversItsSource() {
+    var parsed = parseClean("continue if a < b;");
+    var stmt = parsed.as(Stmt.Continue.class);
+
+    assertEquals("continue if a < b;", parsed.text(stmt));
+    assertEquals("a < b", parsed.text(stmt.condition()));
+  }
+
+  @ParameterizedTest
+  @CsvSource(
+      delimiterString = "=>",
+      value = {
+        "continue        => (continue)               => 8  => expected ';' or 'if' after 'continue'",
+        "continue if a   => (continue if a)          => 13 => expected ';' after continue condition",
+        "{ continue }    => {(continue)}             => 10 => expected ';' or 'if' after 'continue'",
+      })
+  void missingSemicolonAfterContinueIsReported(
+      String input, String tree, int offset, String message) {
+    var parsed = parse(input);
+
+    assertEquals(tree, parsed.tree());
+    assertEquals(List.of(new Diagnostic(offset, offset, message)), parsed.parserDiagnostics());
+  }
+
+  @Test
+  void missingConditionIsReportedOnce() {
+    var parsed = parse("continue if ;");
+
+    assertEquals("(continue if <error>)", parsed.tree());
+    assertEquals(List.of("expected expression, found ';'"), parsed.parserMessages());
+  }
+
+  @Test
+  void continueLeavesWhatFollowsForTheNextStatement() {
+    var all = parseAll("continue x; y;");
+
+    assertEquals(List.of("(continue)", "x;", "y;"), all.trees());
+    assertEquals(List.of("expected ';' or 'if' after 'continue'"), all.messages());
+  }
+
+  @Test
+  void continueIsNotAnExpression() {
+    var parsed = parse("{ x = continue; }");
+
+    assertEquals(List.of("expected expression, found 'continue'"), parsed.parserMessages());
+  }
+
   private record ParsedAll(List<String> trees, List<String> messages) {}
 
   private static ParsedAll parseAll(String text) {

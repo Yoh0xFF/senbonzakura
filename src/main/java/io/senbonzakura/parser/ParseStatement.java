@@ -8,8 +8,8 @@ import java.util.List;
 
 /**
  * Parses statements: an expression followed by {@code ;}, a {@code let}, an {@code if} with an
- * optional {@code else}, a {@code loop}, or a block of statements in {@code {}}. Statements inside
- * a block come from {@link Parser#statement(TokenCursor)}.
+ * optional {@code else}, a {@code loop}, a {@code continue}, or a block of statements in {@code
+ * {}}. Statements inside a block come from {@link Parser#statement(TokenCursor)}.
  *
  * <p>A missing {@code ;} or body is reported only when the rest of the statement had no problems,
  * so one mistake does not produce two diagnostics. A missing body becomes an empty block, so the
@@ -196,6 +196,26 @@ final class ParseStatement {
       c.report(c.peek(), "expected '{' " + where + ", found " + c.describe(c.peek()));
     }
     return emptyBlockAt(end);
+  }
+
+  /**
+   * The cursor must be on {@code continue}. The optional {@code if condition} is a plain
+   * expression, not an {@code if} statement, so it takes no block and no {@code else}.
+   */
+  static Stmt continueStatement(TokenCursor c) {
+    assert c.at(Token.Kind.CONTINUE) : c.peek();
+    int problemsBefore = c.diagnostics().size();
+    Token keyword = c.advance();
+    if (!c.at(Token.Kind.IF)) {
+      int end =
+          semicolon(c, problemsBefore, keyword.end(), "expected ';' or 'if' after 'continue'");
+      return new Stmt.Continue(null, keyword.start(), end);
+    }
+    c.advance();
+    Expr condition = Parser.expression(c);
+    int end =
+        semicolon(c, problemsBefore, condition.end(), "expected ';' after continue condition");
+    return new Stmt.Continue(condition, keyword.start(), end);
   }
 
   private static Stmt.Block emptyBlockAt(int offset) {

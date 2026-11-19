@@ -91,6 +91,17 @@ public sealed interface Stmt {
     }
   }
 
+  /**
+   * {@code continue;} or {@code continue if condition;}, which skips the rest of the loop body only
+   * when {@code condition} holds. {@code condition} is {@code null} when there is no {@code if}.
+   * Covers the semicolon too, unless it was missing.
+   */
+  record Continue(Expr condition, int start, int end) implements Stmt {
+    public Continue {
+      NodeRange.check(start, end);
+    }
+  }
+
   /** {@code { ... }}. Covers both braces, unless the closing one was missing. */
   record Block(List<Stmt> statements, int start, int end) implements Stmt {
     public Block {
