@@ -1,13 +1,15 @@
 package io.senbonzakura.parser;
 
 import io.senbonzakura.ast.Expr;
+import io.senbonzakura.ast.Expr.UpdateOp;
 import io.senbonzakura.lexer.Token;
 import java.util.ArrayList;
 
 /**
- * Parses calls {@code f(a, b)}, indexing {@code a[i]} and field access {@code a.b} after a primary,
- * from {@link Parser#primary(TokenCursor)}. They bind tighter than prefix operators, so {@code
- * -f()} is {@code -(f())}, and chain left to right, so {@code a.b(c)} calls {@code a.b}.
+ * Parses calls {@code f(a, b)}, indexing {@code a[i]}, field access {@code a.b} and {@code a++} and
+ * {@code a--} after a primary, from {@link Parser#primary(TokenCursor)}. They bind tighter than
+ * prefix operators, so {@code -f()} is {@code -(f())}, and chain left to right, so {@code a.b(c)}
+ * calls {@code a.b}.
  */
 final class ParsePostfix {
 
@@ -20,6 +22,7 @@ final class ParsePostfix {
         case LEFT_PAREN -> expr = call(c, expr);
         case LEFT_BRACKET -> expr = index(c, expr);
         case DOT -> expr = field(c, expr);
+        case PLUS_PLUS, MINUS_MINUS -> expr = update(c, expr);
         default -> {
           return expr;
         }
@@ -71,6 +74,17 @@ final class ParsePostfix {
     }
     Token name = c.advance();
     return new Expr.Field(target, c.text(name), target.start(), name.end());
+  }
+
+  /** Like an assignment, reports a target that cannot be written to but still builds the node. */
+  private static Expr update(TokenCursor c, Expr target) {
+    assert c.at(Token.Kind.PLUS_PLUS) || c.at(Token.Kind.MINUS_MINUS) : c.peek();
+    Token token = c.advance();
+    UpdateOp op = token.kind() == Token.Kind.PLUS_PLUS ? UpdateOp.INCREMENT : UpdateOp.DECREMENT;
+    if (!Parser.isAssignable(target)) {
+      c.report(target.start(), target.end(), "invalid target for '" + op.spelling() + "'");
+    }
+    return new Expr.Update(op, target, target.start(), token.end());
   }
 
   /**

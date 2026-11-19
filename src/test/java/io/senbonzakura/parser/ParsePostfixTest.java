@@ -73,7 +73,7 @@ class ParsePostfixTest {
       value = {
         "-a.b            => (- (. a b))",
         "!f()            => (! (call f))",
-        "--a[0]          => (- (- (index a 0)))",
+        "- -a[0]         => (- (- (index a 0)))",
         "-a[0] * b.c     => (* (- (index a 0)) (. b c))",
         "a.b + f(c)      => (+ (. a b) (call f c))",
       })
@@ -133,6 +133,54 @@ class ParsePostfixTest {
 
     assertEquals(tree, Sexpr.print(parsed.expr()));
     assertEquals(List.of(message), parsed.parserMessages());
+  }
+
+  @ParameterizedTest
+  @CsvSource(
+      delimiterString = "=>",
+      value = {
+        "i++             => (++ i)",
+        "i--             => (-- i)",
+        "a.b++           => (++ (. a b))",
+        "a[0]--          => (-- (index a 0))",
+        "-i++            => (- (++ i))",
+        "i++ + 1         => (+ (++ i) 1)",
+        "i++ < n         => (< (++ i) n)",
+        "a+++b           => (+ (++ a) b)",
+        "a - -b          => (- a (- b))",
+      })
+  void incrementAndDecrement(String input, String tree) {
+    assertEquals(tree, Sexpr.print(parseClean(input).expr()));
+  }
+
+  @Test
+  void updateCoversItsSource() {
+    var parsed = parseClean("a.b[0]++");
+
+    assertEquals("a.b[0]++", parsed.text(parsed.expr()));
+  }
+
+  @ParameterizedTest
+  @CsvSource(
+      delimiterString = "=>",
+      value = {
+        "f()++           => (++ (call f))          => invalid target for '++'",
+        "1--             => (-- 1)                 => invalid target for '--'",
+        "i++++           => (++ (++ i))            => invalid target for '++'",
+        "(i)++           => (++ (group i))         => invalid target for '++'",
+      })
+  void updateOfSomethingNotAssignableIsReported(String input, String tree, String message) {
+    var parsed = parse(input);
+
+    assertEquals(tree, Sexpr.print(parsed.expr()));
+    assertEquals(List.of(message), parsed.parserMessages());
+  }
+
+  @Test
+  void thereIsNoPrefixIncrement() {
+    var parsed = parseFirst("--i");
+
+    assertEquals(List.of("expected expression, found '--'"), parsed.parserMessages());
   }
 
   @Test

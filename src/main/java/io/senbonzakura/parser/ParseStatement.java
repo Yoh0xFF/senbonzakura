@@ -8,11 +8,12 @@ import java.util.List;
 
 /**
  * Parses statements: an expression followed by {@code ;}, a {@code let}, an {@code if} with an
- * optional {@code else}, or a block of statements in {@code {}}. Statements inside a block come
- * from {@link Parser#statement(TokenCursor)}.
+ * optional {@code else}, a {@code loop}, or a block of statements in {@code {}}. Statements inside
+ * a block come from {@link Parser#statement(TokenCursor)}.
  *
- * <p>A missing {@code ;} is reported only when the rest of the statement had no problems, so one
- * mistake does not produce two diagnostics.
+ * <p>A missing {@code ;} or body is reported only when the rest of the statement had no problems,
+ * so one mistake does not produce two diagnostics. A missing body becomes an empty block, so the
+ * tokens after it start the next statement.
  */
 final class ParseStatement {
 
@@ -27,24 +28,44 @@ final class ParseStatement {
 
   /** The cursor must be on {@code let}. */
   static Stmt let(TokenCursor c) {
-    assert c.at(Token.Kind.LET) : c.peek();
     int problemsBefore = c.diagnostics().size();
+    return letRest(c, problemsBefore, binding(c, false));
+  }
+
+  /** {@code let mut name}, the part a {@code let} statement shares with {@code loop let}. */
+  private record Binding(boolean mutable, String name, int start, int end) {}
+
+  /**
+   * Parses {@code let}, an optional {@code mut} and the name. A keyword or literal where the name
+   * should be is consumed, unless it can follow the name; {@code inLoop} adds {@code in} to those.
+   */
+  private static Binding binding(TokenCursor c, boolean inLoop) {
+    assert c.at(Token.Kind.LET) : c.peek();
     Token let = c.advance();
     boolean mutable = c.at(Token.Kind.MUT);
     int end = mutable ? c.advance().end() : let.end();
 
-    String name = "";
     if (c.at(Token.Kind.IDENTIFIER)) {
       Token token = c.advance();
-      name = c.text(token);
-      end = token.end();
-    } else {
-      c.report(c.peek(), "expected variable name, found " + c.describe(c.peek()));
-      if (!canFollowName(c)) {
-        end = c.advance().end(); // a keyword or literal where the name should be
-      }
+      return new Binding(mutable, c.text(token), let.start(), token.end());
     }
+    c.report(c.peek(), "expected variable name, found " + c.describe(c.peek()));
+    if (!canFollowName(c) && !(inLoop && c.at(Token.Kind.IN))) {
+      end = c.advance().end();
+    }
+    return new Binding(mutable, "", let.start(), end);
+  }
 
+  private static boolean canFollowName(TokenCursor c) {
+    return switch (c.peek().kind()) {
+      case EQ, SEMICOLON, RIGHT_BRACE, EOF -> true;
+      default -> false;
+    };
+  }
+
+  /** Parses what follows the name of a {@code let}: an optional {@code = initializer}, then ;. */
+  private static Stmt.Let letRest(TokenCursor c, int problemsBefore, Binding binding) {
+    int end = binding.end();
     Expr initializer = null;
     if (c.at(Token.Kind.EQ)) {
       c.advance();
@@ -53,14 +74,7 @@ final class ParseStatement {
     }
 
     end = semicolon(c, problemsBefore, end, "expected ';' after let statement");
-    return new Stmt.Let(mutable, name, initializer, let.start(), end);
-  }
-
-  private static boolean canFollowName(TokenCursor c) {
-    return switch (c.peek().kind()) {
-      case EQ, SEMICOLON, RIGHT_BRACE, EOF -> true;
-      default -> false;
-    };
+    return new Stmt.Let(binding.mutable(), binding.name(), initializer, binding.start(), end);
   }
 
   /**
@@ -79,27 +93,15 @@ final class ParseStatement {
 
   /**
    * The cursor must be on {@code if}. There are no parentheses around the condition, and the body
-   * must be a block, optionally followed by {@code else} and a block or another {@code if}.
-   *
-   * <p>A missing body becomes an empty block, so the tokens after it start the next statement. A
-   * missing body after the condition is reported only when the condition had no problems, and an
-   * {@code else} after it is still parsed.
+   * must be a block, optionally followed by {@code else} and a block or another {@code if}. An
+   * {@code else} after a missing body is still parsed.
    */
   static Stmt ifStatement(TokenCursor c) {
     assert c.at(Token.Kind.IF) : c.peek();
     int problemsBefore = c.diagnostics().size();
     Token ifToken = c.advance();
     Expr condition = Parser.expression(c);
-
-    Stmt.Block then;
-    if (c.at(Token.Kind.LEFT_BRACE)) {
-      then = block(c);
-    } else {
-      if (c.diagnostics().size() == problemsBefore) {
-        c.report(c.peek(), "expected '{' after if condition, found " + c.describe(c.peek()));
-      }
-      then = emptyBlockAt(condition.end());
-    }
+    Stmt.Block then = body(c, problemsBefore, condition.end(), "after if condition");
 
     if (!c.at(Token.Kind.ELSE)) {
       return new Stmt.If(condition, then, null, ifToken.start(), then.end());
@@ -121,7 +123,81 @@ final class ParseStatement {
     };
   }
 
-  /** Stands in for a body that was missing. */
+  /**
+   * The cursor must be on {@code loop}. What follows it picks the form, and none has parentheses:
+   *
+   * <ul>
+   *   <li>{@code loop { ... }} runs until something leaves it.
+   *   <li>{@code loop let x in xs { ... }} runs once for each item of {@code xs}.
+   *   <li>{@code loop let i = 0; i < n; i++ { ... }} runs the {@code let} once, then the body while
+   *       the condition holds, running the step after each pass.
+   *   <li>{@code loop condition { ... }} runs while the condition holds.
+   * </ul>
+   */
+  static Stmt loop(TokenCursor c) {
+    assert c.at(Token.Kind.LOOP) : c.peek();
+    int problemsBefore = c.diagnostics().size();
+    Token loop = c.advance();
+
+    if (c.at(Token.Kind.LEFT_BRACE)) {
+      Stmt.Block body = block(c);
+      return new Stmt.Loop(null, body, loop.start(), body.end());
+    }
+    if (c.at(Token.Kind.LET)) {
+      return letLoop(c, loop, problemsBefore);
+    }
+    Expr condition = Parser.expression(c);
+    Stmt.Block body = body(c, problemsBefore, condition.end(), "after loop condition");
+    return new Stmt.Loop(condition, body, loop.start(), body.end());
+  }
+
+  /**
+   * Tells {@code loop let x in} from {@code loop let i = 0;} by what follows the name. Anything
+   * else is reported as a missing {@code in}, and the loop is parsed as one over what follows.
+   */
+  private static Stmt letLoop(TokenCursor c, Token loop, int problemsBefore) {
+    Binding binding = binding(c, true);
+    if (c.at(Token.Kind.EQ) || c.at(Token.Kind.SEMICOLON)) {
+      return stepLoop(c, loop, problemsBefore, letRest(c, problemsBefore, binding));
+    }
+
+    if (c.at(Token.Kind.IN)) {
+      c.advance();
+    } else if (c.diagnostics().size() == problemsBefore) {
+      c.report(c.peek(), "expected 'in' or '=' after loop variable, found " + c.describe(c.peek()));
+    }
+    // A '{' here is the body, so the missing 'in' or name is the only problem reported.
+    Expr iterable =
+        c.at(Token.Kind.LEFT_BRACE) && c.diagnostics().size() > problemsBefore
+            ? new Expr.Error(c.peek().start(), c.peek().start())
+            : Parser.expression(c);
+    Stmt.Block body = body(c, problemsBefore, iterable.end(), "after loop iterable");
+    return new Stmt.LoopIn(
+        binding.mutable(), binding.name(), iterable, body, loop.start(), body.end());
+  }
+
+  private static Stmt stepLoop(TokenCursor c, Token loop, int problemsBefore, Stmt.Let init) {
+    Expr condition = Parser.expression(c);
+    semicolon(c, problemsBefore, condition.end(), "expected ';' after loop condition");
+    Expr step = Parser.expression(c);
+    Stmt.Block body = body(c, problemsBefore, step.end(), "after loop step");
+    return new Stmt.LoopStep(init, condition, step, body, loop.start(), body.end());
+  }
+
+  /**
+   * Parses the block a statement requires, or reports it missing, as {@code expected '{' <where>},
+   * and stands in an empty block at {@code end}.
+   */
+  private static Stmt.Block body(TokenCursor c, int problemsBefore, int end, String where) {
+    if (c.at(Token.Kind.LEFT_BRACE)) {
+      return block(c);
+    }
+    if (c.diagnostics().size() == problemsBefore) {
+      c.report(c.peek(), "expected '{' " + where + ", found " + c.describe(c.peek()));
+    }
+    return emptyBlockAt(end);
+  }
+
   private static Stmt.Block emptyBlockAt(int offset) {
     return new Stmt.Block(List.of(), offset, offset);
   }

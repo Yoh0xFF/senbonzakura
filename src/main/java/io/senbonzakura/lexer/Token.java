@@ -73,6 +73,7 @@ public record Token(Kind kind, int start, int end, int flags) {
     ELSE("else", KEYWORD),
     WHILE("while", KEYWORD),
     FOR("for", KEYWORD),
+    LOOP("loop", KEYWORD),
     IN("in", KEYWORD),
     RETURN("return", KEYWORD),
     BREAK("break", KEYWORD),
@@ -108,6 +109,10 @@ public record Token(Kind kind, int start, int end, int flags) {
     STAR_EQ("*=", OPERATOR),
     SLASH_EQ("/=", OPERATOR),
     PERCENT_EQ("%=", OPERATOR),
+
+    // Increment and decrement, postfix only
+    PLUS_PLUS("++", OPERATOR),
+    MINUS_MINUS("--", OPERATOR),
 
     // Comparison
     EQ_EQ("==", OPERATOR),

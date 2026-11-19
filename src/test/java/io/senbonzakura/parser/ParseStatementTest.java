@@ -339,6 +339,107 @@ class ParseStatementTest {
     assertEquals(List.of("expected expression, found 'else'"), all.messages());
   }
 
+  @ParameterizedTest
+  @CsvSource(
+      delimiterString = "=>",
+      value = {
+        "loop {}                                 => (loop {})",
+        "loop { x; }                             => (loop {x;})",
+        "loop a == b { x; }                      => (loop (== a b) {x;})",
+        "loop !done && n < 10 {}                 => (loop (&& (! done) (< n 10)) {})",
+        "loop let i in 0..10 { x; }              => (loop let i in (.. 0 10) {x;})",
+        "loop let mut c in s.chars() {}          => (loop let mut c in (call (. s chars)) {})",
+        "loop let i = 0; i < 10; i++ { x; }      => (loop (let i 0) (< i 10) (++ i) {x;})",
+        "loop let mut i = 9; i >= 0; i-- {}      => (loop (let mut i 9) (>= i 0) (-- i) {})",
+        "loop let i = 0; i < n; i += 2 {}        => (loop (let i 0) (< i n) (+= i 2) {})",
+        "{ loop a { b; } c; }                    => {(loop a {b;}) c;}",
+        "loop a { loop let x in xs { if x {} } } => (loop a {(loop let x in xs {(if x {})})})",
+      })
+  void loopStatements(String input, String tree) {
+    assertEquals(tree, parseClean(input).tree());
+  }
+
+  @Test
+  void loopCoversItsSource() {
+    var parsed = parseClean("loop a < b { x; }");
+    var loop = parsed.as(Stmt.Loop.class);
+
+    assertEquals("loop a < b { x; }", parsed.text(loop));
+    assertEquals("a < b", parsed.text(loop.condition()));
+    assertEquals("{ x; }", parsed.text(loop.body()));
+  }
+
+  @Test
+  void loopInCoversItsSource() {
+    var parsed = parseClean("loop let mut i in 0..n { x; }");
+    var loop = parsed.as(Stmt.LoopIn.class);
+
+    assertTrue(loop.mutable());
+    assertEquals("i", loop.name());
+    assertEquals("loop let mut i in 0..n { x; }", parsed.text(loop));
+    assertEquals("0..n", parsed.text(loop.iterable()));
+  }
+
+  @Test
+  void loopStepCoversItsSource() {
+    var parsed = parseClean("loop let i = 0; i < 10; i++ { x; }");
+    var loop = parsed.as(Stmt.LoopStep.class);
+
+    assertEquals("loop let i = 0; i < 10; i++ { x; }", parsed.text(loop));
+    assertEquals("let i = 0;", parsed.text(loop.init()));
+    assertEquals("i < 10", parsed.text(loop.condition()));
+    assertEquals("i++", parsed.text(loop.step()));
+    assertEquals("{ x; }", parsed.text(loop.body()));
+  }
+
+  @Test
+  void loopNeedsNoSemicolon() {
+    var all = parseAll("loop a { b; } loop {} c;");
+
+    assertEquals(List.of("(loop a {b;})", "(loop {})", "c;"), all.trees());
+    assertEquals(List.of(), all.messages());
+  }
+
+  @ParameterizedTest
+  @CsvSource(
+      delimiterString = "=>",
+      value = {
+        "loop a                       => (loop a {})                               => expected '{' after loop condition, found end of input",
+        "loop a +                     => (loop (+ a <error>) {})                   => expected expression, found end of input",
+        "loop { x;                    => (loop {x;})                               => expected '}', found end of input",
+        "loop let in xs {}            => (loop let <error> in xs {})               => expected variable name, found 'in'",
+        "loop let i {}                => (loop let i in <error> {})                => expected 'in' or '=' after loop variable, found '{'",
+        "loop let i xs {}             => (loop let i in xs {})                     => expected 'in' or '=' after loop variable, found 'xs'",
+        "loop let i in {}             => (loop let i in <error> {})                => expected expression, found '{'",
+        "loop let i in xs             => (loop let i in xs {})                     => expected '{' after loop iterable, found end of input",
+        "loop let i = 0 i < 9; i++ {} => (loop (let i 0) (< i 9) (++ i) {})       => expected ';' after let statement",
+        "loop let i = 0; i < 9 i++ {} => (loop (let i 0) (< i 9) (++ i) {})       => expected ';' after loop condition",
+        "loop let i = 0; i < 9; {}    => (loop (let i 0) (< i 9) <error> {})       => expected expression, found '{'",
+        "loop let i = 0; i < 9; i++   => (loop (let i 0) (< i 9) (++ i) {})       => expected '{' after loop step, found end of input",
+      })
+  void malformedLoopIsReportedOnce(String input, String tree, String message) {
+    var parsed = parse(input);
+
+    assertEquals(tree, parsed.tree());
+    assertEquals(List.of(message), parsed.parserMessages());
+  }
+
+  @Test
+  void missingLoopBodyLeavesTheRestForTheNextStatement() {
+    var all = parseAll("loop a b; c;");
+
+    assertEquals(List.of("(loop a {})", "b;", "c;"), all.trees());
+    assertEquals(List.of("expected '{' after loop condition, found 'b'"), all.messages());
+  }
+
+  @Test
+  void plainLetSkipsAnInWhereTheNameShouldBe() {
+    var parsed = parse("let in = 1;");
+
+    assertEquals("(let <error> 1)", parsed.tree());
+    assertEquals(List.of("expected variable name, found 'in'"), parsed.parserMessages());
+  }
+
   private record ParsedAll(List<String> trees, List<String> messages) {}
 
   private static ParsedAll parseAll(String text) {

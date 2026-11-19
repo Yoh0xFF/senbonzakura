@@ -20,9 +20,9 @@ import io.senbonzakura.lexer.Token;
  *   <li>{@code * / %}
  * </ol>
  *
- * <p>Prefix {@code -} and {@code !} bind tighter than all of them, and postfix calls, indexing and
- * field access tighter still. The infix operators from {@code ||} down are left-associative.
- * Operands come from {@link Parser#operand(TokenCursor)}.
+ * <p>Prefix {@code -} and {@code !} bind tighter than all of them, and postfix calls, indexing,
+ * field access, {@code ++} and {@code --} tighter still. The infix operators from {@code ||} down
+ * are left-associative. Operands come from {@link Parser#operand(TokenCursor)}.
  */
 final class ParseOperator {
 
@@ -54,19 +54,11 @@ final class ParseOperator {
       return target;
     }
     c.advance();
-    if (!isAssignable(target)) {
+    if (!Parser.isAssignable(target)) {
       c.report(target.start(), target.end(), "invalid assignment target");
     }
     Expr value = assignment(c);
     return new Expr.Assign(op, target, value, target.start(), value.end());
-  }
-
-  private static boolean isAssignable(Expr target) {
-    return switch (target) {
-      case Expr.Identifier _, Expr.Field _, Expr.Index _ -> true;
-      case Expr.Error _ -> true; // already reported
-      default -> false;
-    };
   }
 
   private static Expr range(TokenCursor c) {

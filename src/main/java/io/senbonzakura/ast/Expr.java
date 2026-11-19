@@ -125,6 +125,18 @@ public sealed interface Expr {
   }
 
   /**
+   * {@code target++} or {@code target--}. There is no prefix form. Like {@link Assign}, the parser
+   * has reported a target that cannot be assigned to, but still builds the node.
+   */
+  record Update(UpdateOp op, Expr target, int start, int end) implements Expr {
+    public Update {
+      Objects.requireNonNull(op, "op");
+      Objects.requireNonNull(target, "target");
+      NodeRange.check(start, end);
+    }
+  }
+
+  /**
    * An expression in parentheses. Kept as its own node so the tree still says where the parentheses
    * were, for diagnostics and formatting.
    */
@@ -189,6 +201,21 @@ public sealed interface Expr {
     private final String spelling;
 
     AssignOp(String spelling) {
+      this.spelling = spelling;
+    }
+
+    public String spelling() {
+      return spelling;
+    }
+  }
+
+  enum UpdateOp {
+    INCREMENT("++"),
+    DECREMENT("--");
+
+    private final String spelling;
+
+    UpdateOp(String spelling) {
       this.spelling = spelling;
     }
 

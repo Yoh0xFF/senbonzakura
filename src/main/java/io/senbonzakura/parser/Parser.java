@@ -61,6 +61,7 @@ public class Parser {
       case LEFT_BRACE -> ParseStatement.block(c);
       case LET -> ParseStatement.let(c);
       case IF -> ParseStatement.ifStatement(c);
+      case LOOP -> ParseStatement.loop(c);
       default -> ParseStatement.expression(c);
     };
   }
@@ -91,6 +92,17 @@ public class Parser {
       case RIGHT_PAREN, RIGHT_BRACKET, LEFT_BRACE, RIGHT_BRACE, COMMA, SEMICOLON, EOF ->
           missingOperand(c);
       default -> unexpectedToken(c);
+    };
+  }
+
+  /**
+   * Whether {@code =}, {@code +=}, {@code ++} and the like can write to {@code target}: a name, a
+   * field or an index. An error node counts, since it was already reported.
+   */
+  static boolean isAssignable(Expr target) {
+    return switch (target) {
+      case Expr.Identifier _, Expr.Field _, Expr.Index _, Expr.Error _ -> true;
+      default -> false;
     };
   }
 

@@ -53,7 +53,7 @@ class ParseOperatorTest {
         // Prefix operators bind tightest.
         "-1 * 2               => (* (- 1) 2)",
         "!true && false       => (&& (! true) false)",
-        "--1                  => (- (- 1))",
+        "- -1                 => (- (- 1))",
         "!-1 == 2             => (== (! (- 1)) 2)",
         "1 - -2               => (- 1 (- 2))",
       })

@@ -51,6 +51,46 @@ public sealed interface Stmt {
     }
   }
 
+  /**
+   * {@code loop condition { ... }}, which runs while {@code condition} holds, or {@code loop { ...
+   * }}, which runs until something leaves it, with a {@code null} condition.
+   */
+  record Loop(Expr condition, Block body, int start, int end) implements Stmt {
+    public Loop {
+      Objects.requireNonNull(body, "body");
+      NodeRange.check(start, end);
+    }
+  }
+
+  /**
+   * {@code loop let mut name in iterable { ... }}, where {@code mut} is optional. {@code name} is
+   * empty when it was missing, which the parser has already reported.
+   */
+  record LoopIn(boolean mutable, String name, Expr iterable, Block body, int start, int end)
+      implements Stmt {
+    public LoopIn {
+      Objects.requireNonNull(name, "name");
+      Objects.requireNonNull(iterable, "iterable");
+      Objects.requireNonNull(body, "body");
+      NodeRange.check(start, end);
+    }
+  }
+
+  /**
+   * {@code loop let i = 0; condition; step { ... }}. {@code init} runs once and covers its own
+   * {@code ;}, and {@code step} runs after each pass through the body.
+   */
+  record LoopStep(Let init, Expr condition, Expr step, Block body, int start, int end)
+      implements Stmt {
+    public LoopStep {
+      Objects.requireNonNull(init, "init");
+      Objects.requireNonNull(condition, "condition");
+      Objects.requireNonNull(step, "step");
+      Objects.requireNonNull(body, "body");
+      NodeRange.check(start, end);
+    }
+  }
+
   /** {@code { ... }}. Covers both braces, unless the closing one was missing. */
   record Block(List<Stmt> statements, int start, int end) implements Stmt {
     public Block {

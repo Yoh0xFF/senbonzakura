@@ -32,6 +32,7 @@ final class Sexpr {
       case Expr.Range e -> "(.. " + print(e.lower()) + " " + print(e.upper()) + ")";
       case Expr.Assign e ->
           "(" + e.op().spelling() + " " + print(e.target()) + " " + print(e.value()) + ")";
+      case Expr.Update e -> "(" + e.op().spelling() + " " + print(e.target()) + ")";
       case Expr.Group e -> "(group " + print(e.inner()) + ")";
       case Expr.Error e -> "<error>";
     };
@@ -52,6 +53,30 @@ final class Sexpr {
               + " "
               + print(s.then())
               + (s.otherwise() == null ? "" : " else " + print(s.otherwise()))
+              + ")";
+      case Stmt.Loop s ->
+          "(loop "
+              + (s.condition() == null ? "" : print(s.condition()) + " ")
+              + print(s.body())
+              + ")";
+      case Stmt.LoopIn s ->
+          "(loop let"
+              + (s.mutable() ? " mut " : " ")
+              + (s.name().isEmpty() ? "<error>" : s.name())
+              + " in "
+              + print(s.iterable())
+              + " "
+              + print(s.body())
+              + ")";
+      case Stmt.LoopStep s ->
+          "(loop "
+              + print(s.init())
+              + " "
+              + print(s.condition())
+              + " "
+              + print(s.step())
+              + " "
+              + print(s.body())
               + ")";
       case Stmt.Block s ->
           s.statements().stream().map(Sexpr::print).collect(Collectors.joining(" ", "{", "}"));
