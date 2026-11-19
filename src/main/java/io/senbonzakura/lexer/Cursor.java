@@ -73,12 +73,24 @@ final class Cursor {
 
   /** Skips {@code n} UTF-16 units. Only for characters {@link #peek(int)} has shown to be ASCII. */
   void bump(int n) {
+    assert isAscii(n) : "bump(" + n + ") over non-ASCII or past the end at " + pos;
     pos += n;
   }
 
   /** Skips one UTF-16 unit. Only for a character {@link #peek()} has shown to be ASCII. */
   void bump() {
+    assert isAscii(1) : "bump() over non-ASCII or past the end at " + pos;
     pos++;
+  }
+
+  private boolean isAscii(int n) {
+    for (int i = 0; i < n; i++) {
+      int ch = peek(i);
+      if (ch == EOF || ch > 0x7F) {
+        return false;
+      }
+    }
+    return true;
   }
 
   /** Consumes one code point, so a surrogate pair (e.g. an emoji) is never split in two. */

@@ -55,6 +55,7 @@ public class Lexer {
 
   private Token unknownCharacter() {
     // Consumes one character nothing else recognized, so lexing always makes progress.
+    assert !cursor.isAtEnd() : "no character to consume at " + cursor.pos();
     int start = cursor.pos();
     cursor.advance();
     cursor.report(start, "unexpected character");

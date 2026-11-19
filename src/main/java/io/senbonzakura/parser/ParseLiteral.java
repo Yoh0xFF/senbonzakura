@@ -14,6 +14,7 @@ final class ParseLiteral {
   private ParseLiteral() {}
 
   static Expr integer(TokenCursor c) {
+    assert c.at(Token.Kind.INT_LITERAL) : c.peek();
     Token token = c.advance();
     var value = DecodeLiteral.integer(c.text(token));
     if (value.isEmpty()) {
@@ -24,6 +25,7 @@ final class ParseLiteral {
   }
 
   static Expr floating(TokenCursor c) {
+    assert c.at(Token.Kind.FLOAT_LITERAL) : c.peek();
     Token token = c.advance();
     double value = DecodeLiteral.floating(c.text(token));
     if (Double.isInfinite(value)) {
@@ -34,18 +36,21 @@ final class ParseLiteral {
   }
 
   static Expr string(TokenCursor c) {
+    assert c.at(Token.Kind.STRING_LITERAL) : c.peek();
     Token token = c.advance();
     String value = DecodeLiteral.string(c.text(token), !token.has(Token.UNTERMINATED));
     return new Expr.StringLiteral(value, token.start(), token.end());
   }
 
   static Expr character(TokenCursor c) {
+    assert c.at(Token.Kind.CHAR_LITERAL) : c.peek();
     Token token = c.advance();
     int codePoint = DecodeLiteral.character(c.text(token), !token.has(Token.UNTERMINATED));
     return new Expr.CharLiteral(codePoint, token.start(), token.end());
   }
 
   static Expr bool(TokenCursor c) {
+    assert c.at(Token.Kind.TRUE) || c.at(Token.Kind.FALSE) : c.peek();
     Token token = c.advance();
     return new Expr.BoolLiteral(token.kind() == Token.Kind.TRUE, token.start(), token.end());
   }

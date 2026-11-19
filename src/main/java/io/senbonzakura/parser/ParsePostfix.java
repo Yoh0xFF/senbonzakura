@@ -29,6 +29,7 @@ final class ParsePostfix {
 
   /** Allows a trailing comma, and treats a missing comma between arguments as one problem. */
   private static Expr call(TokenCursor c, Expr callee) {
+    assert c.at(Token.Kind.LEFT_PAREN) : c.peek();
     Token open = c.advance();
     var arguments = new ArrayList<Expr>();
     while (!c.at(Token.Kind.RIGHT_PAREN) && !atCloser(c)) {
@@ -50,6 +51,7 @@ final class ParsePostfix {
   }
 
   private static Expr index(TokenCursor c, Expr target) {
+    assert c.at(Token.Kind.LEFT_BRACKET) : c.peek();
     c.advance();
     Expr index = Parser.expression(c);
     if (!c.at(Token.Kind.RIGHT_BRACKET)) {
@@ -61,6 +63,7 @@ final class ParsePostfix {
   }
 
   private static Expr field(TokenCursor c, Expr target) {
+    assert c.at(Token.Kind.DOT) : c.peek();
     Token dot = c.advance();
     if (!c.at(Token.Kind.IDENTIFIER)) {
       c.report(c.peek(), "expected field name, found " + c.describe(c.peek()));

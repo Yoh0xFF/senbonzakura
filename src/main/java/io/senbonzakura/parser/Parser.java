@@ -94,6 +94,7 @@ public class Parser {
 
   private static Expr lexerError(TokenCursor c) {
     // The lexer already reported this character.
+    assert c.at(Token.Kind.ERROR) : c.peek();
     Token token = c.advance();
     return new Expr.Error(token.start(), token.end());
   }
@@ -107,6 +108,7 @@ public class Parser {
 
   private static Expr unexpectedToken(TokenCursor c) {
     // Consumes a token nothing else recognized, so parsing always makes progress.
+    assert !c.atEnd() : c.peek();
     Token token = c.advance();
     c.report(token, "expected expression, found " + c.describe(token));
     return new Expr.Error(token.start(), token.end());

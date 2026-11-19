@@ -86,6 +86,9 @@ final class DecodeLiteral {
    * @param terminated whether the text ends with a closing quote
    */
   static String string(String text, boolean terminated) {
+    assert !text.isEmpty() && "\"`'".indexOf(text.charAt(0)) >= 0 : "no opening quote: " + text;
+    assert !terminated || (text.length() >= 2 && text.endsWith(text.substring(0, 1)))
+        : "no closing quote: " + text;
     return unescape(text.substring(1, terminated ? text.length() - 1 : text.length()));
   }
 

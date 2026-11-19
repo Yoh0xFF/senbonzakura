@@ -13,6 +13,7 @@ final class ParseGroup {
    * closing parenthesis is reported, and the group then ends where its contents do.
    */
   static Expr parenthesized(TokenCursor c) {
+    assert c.at(Token.Kind.LEFT_PAREN) : c.peek();
     Token open = c.advance();
     Expr inner = Parser.expression(c);
     if (!c.at(Token.Kind.RIGHT_PAREN)) {

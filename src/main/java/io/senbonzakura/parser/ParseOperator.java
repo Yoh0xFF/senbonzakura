@@ -35,6 +35,7 @@ final class ParseOperator {
   }
 
   static Expr prefix(TokenCursor c) {
+    assert c.at(Token.Kind.MINUS) || c.at(Token.Kind.BANG) : c.peek();
     Token token = c.advance();
     UnaryOp op =
         switch (token.kind()) {

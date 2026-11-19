@@ -25,6 +25,7 @@ final class ParseStatement {
 
   /** The cursor must be on {@code let}. */
   static Stmt let(TokenCursor c) {
+    assert c.at(Token.Kind.LET) : c.peek();
     int problemsBefore = c.diagnostics().size();
     Token let = c.advance();
     boolean mutable = c.at(Token.Kind.MUT);
@@ -79,6 +80,7 @@ final class ParseStatement {
    * input.
    */
   static Stmt block(TokenCursor c) {
+    assert c.at(Token.Kind.LEFT_BRACE) : c.peek();
     Token open = c.advance();
     var statements = new ArrayList<Stmt>();
     while (!c.at(Token.Kind.RIGHT_BRACE) && !c.atEnd()) {

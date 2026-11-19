@@ -23,6 +23,7 @@ final class ScanIdentifier {
    * Scans the word at the cursor, which must be {@link Cursor#atIdentifierStart() on its start}.
    */
   static Token identifierOrKeyword(Cursor c) {
+    assert c.atIdentifierStart() : "not on an identifier start at " + c.pos();
     int start = c.pos();
     c.skipIdentifierChars();
     var kind = KEYWORDS.getOrDefault(c.text(start, c.pos()), Token.Kind.IDENTIFIER);

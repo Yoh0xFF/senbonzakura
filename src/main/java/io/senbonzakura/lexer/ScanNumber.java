@@ -13,6 +13,7 @@ final class ScanNumber {
 
   /** Scans the number at the cursor, which must be on a decimal digit. */
   static Token literal(Cursor c) {
+    assert c.peekDigit(10) >= 0 : "not on a decimal digit at " + c.pos();
     int start = c.pos();
     if (c.peek() == '0') {
       switch (c.peek(1)) {
@@ -58,6 +59,8 @@ final class ScanNumber {
   }
 
   private static Token prefixedInteger(Cursor c, int start, int radix, String name) {
+    assert c.pos() == start && c.peek() == '0' && "xXoObB".indexOf(c.peek(1)) >= 0
+        : "not on a radix prefix at " + c.pos();
     c.bump(2); // '0x', '0o' or '0b'
     int count = digits(c, radix);
 

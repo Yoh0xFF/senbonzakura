@@ -12,6 +12,7 @@ final class ScanQuoted {
 
   /** Scans a {@code "..."} string, which must end on the line it starts. */
   static Token string(Cursor c) {
+    assert c.peek() == '"' : "not on '\"' at " + c.pos();
     int start = c.pos();
     c.bump(); // opening '"'
     int flags = 0;
@@ -41,6 +42,7 @@ final class ScanQuoted {
    * two lines. There is no {@code ${...}} interpolation; it is plain text.
    */
   static Token multiline(Cursor c) {
+    assert c.peek() == '`' : "not on '`' at " + c.pos();
     int start = c.pos();
     c.bump(); // opening '`'
     int flags = 0;
@@ -68,6 +70,7 @@ final class ScanQuoted {
 
   /** Scans a {@code '...'} literal, which must hold exactly one character or escape. */
   static Token character(Cursor c) {
+    assert c.peek() == '\'' : "not on '\\'' at " + c.pos();
     int start = c.pos();
     c.bump(); // opening '\''
     int flags = 0;
@@ -105,6 +108,7 @@ final class ScanQuoted {
    * continues the line.
    */
   private static void escape(Cursor c, boolean multiline) {
+    assert c.peek() == '\\' : "not on '\\' at " + c.pos();
     int start = c.pos();
     c.bump(); // '\\'
     switch (c.peek()) {
@@ -124,6 +128,7 @@ final class ScanQuoted {
   }
 
   private static void unicodeEscape(Cursor c, int start) {
+    assert c.peek() == 'u' && c.pos() == start + 1 : "not on the 'u' of '\\u' at " + c.pos();
     c.bump(); // 'u'
     if (c.peek() != '{') {
       c.report(start, "expected '{' after '\\u'");
