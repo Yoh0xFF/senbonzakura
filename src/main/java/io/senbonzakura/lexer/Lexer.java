@@ -15,6 +15,9 @@ public class Lexer {
   private final SourceFile source;
   private final Cursor cursor;
 
+  /** The EOF token once reached, so every later call returns it with the same flags. */
+  private Token eof;
+
   public Lexer(SourceFile source) {
     this.source = Objects.requireNonNull(source, "source");
     this.cursor = new Cursor(source.text());
@@ -36,8 +39,21 @@ public class Lexer {
    * token.
    */
   public Token nextToken() {
-    skipWhitespace();
+    if (eof != null) {
+      return eof;
+    }
+    int flags = skipTrivia();
+    Token token = scan();
+    if (flags != 0) {
+      token = new Token(token.kind(), token.start(), token.end(), token.flags() | flags);
+    }
+    if (token.kind() == Token.Kind.EOF) {
+      eof = token;
+    }
+    return token;
+  }
 
+  private Token scan() {
     return switch (cursor.peek()) {
       case Cursor.EOF -> Token.eof(cursor.pos(), 0);
       case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' -> ScanNumber.literal(cursor);
@@ -62,14 +78,28 @@ public class Lexer {
     return cursor.token(Token.Kind.ERROR, start, 0);
   }
 
-  private void skipWhitespace() {
+  /**
+   * Skips whitespace and comments, and returns the {@link Token#SPACE_BEFORE} and {@link
+   * Token#NEWLINE_BEFORE} flags they earn the token after them.
+   */
+  private int skipTrivia() {
+    int start = cursor.pos();
+    boolean lineBreak = false;
     while (true) {
-      switch (cursor.peek()) {
-        case ' ', '\t', '\n', '\r' -> cursor.bump();
-        default -> {
-          return;
-        }
+      int ch = cursor.peek();
+      if (ch == ' ' || ch == '\t') {
+        cursor.bump();
+      } else if (ch == '\n' || ch == '\r') {
+        lineBreak = true;
+        cursor.bump();
+      } else if (ScanComment.atComment(cursor)) {
+        lineBreak |= ScanComment.skip(cursor);
+      } else {
+        break;
       }
     }
+
+    int flags = cursor.pos() > start ? Token.SPACE_BEFORE : 0;
+    return lineBreak ? flags | Token.NEWLINE_BEFORE : flags;
   }
 }

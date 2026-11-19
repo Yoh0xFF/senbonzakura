@@ -8,8 +8,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import io.senbonzakura.lexer.Token.Diagnostic;
 import io.senbonzakura.lexer.Token.Kind;
 import java.util.List;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 class LexerTest {
@@ -39,6 +42,62 @@ class LexerTest {
 
     var eof = lexer.nextToken();
     assertEquals(new Token(Kind.EOF, 1, 1, 0), eof);
+    assertEquals(eof, lexer.nextToken());
+    assertEquals(eof, lexer.nextToken());
+  }
+
+  static Stream<Arguments> secondTokenRecordsWhatCameBetween() {
+    return Stream.of(
+        Arguments.of("a b", false),
+        Arguments.of("a\tb", false),
+        Arguments.of("a/*x*/b", false),
+        Arguments.of("a\nb", true),
+        Arguments.of("a\r\nb", true),
+        Arguments.of("a\rb", true),
+        Arguments.of("a/*\n*/b", true),
+        Arguments.of("a // c\nb", true),
+        Arguments.of("a /* x */ \n b", true));
+  }
+
+  @ParameterizedTest
+  @MethodSource
+  void secondTokenRecordsWhatCameBetween(String input, boolean newline) {
+    var second = lex(input).tokens().get(1);
+
+    assertTrue(second.has(Token.SPACE_BEFORE), "space or comment before the second token");
+    assertEquals(newline, second.has(Token.NEWLINE_BEFORE));
+  }
+
+  @ParameterizedTest
+  @ValueSource(strings = {"ab", "a+b", "a(b", "1.5", "\"s\"x"})
+  void adjacentTokensHaveNoSpaceFlags(String input) {
+    for (var token : lex(input).tokens()) {
+      assertEquals(0, token.flags(), token::toString);
+    }
+  }
+
+  @Test
+  void firstTokenRecordsWhatCameBeforeIt() {
+    assertEquals(Token.SPACE_BEFORE, lex(" a").tokens().getFirst().flags());
+    assertEquals(Token.SPACE_BEFORE | Token.NEWLINE_BEFORE, lex("\na").tokens().getFirst().flags());
+    assertEquals(Token.SPACE_BEFORE, lex("/**/a").tokens().getFirst().flags());
+  }
+
+  @Test
+  void spaceFlagsCombineWithLiteralFlags() {
+    var token = lex("x \"unterminated").tokens().get(1);
+
+    assertTrue(token.has(Token.UNTERMINATED));
+    assertTrue(token.has(Token.SPACE_BEFORE));
+  }
+
+  @Test
+  void eofRecordsTrailingSpaceAndStaysTheSame() {
+    var lexer = new Lexer(new SourceFile("test", "1 // done\n"));
+    lexer.nextToken();
+
+    var eof = lexer.nextToken();
+    assertEquals(new Token(Kind.EOF, 10, 10, Token.SPACE_BEFORE | Token.NEWLINE_BEFORE), eof);
     assertEquals(eof, lexer.nextToken());
     assertEquals(eof, lexer.nextToken());
   }

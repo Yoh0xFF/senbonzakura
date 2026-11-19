@@ -166,7 +166,7 @@ class ScanQuotedTest {
 
       assertEquals(List.of(Kind.INT_LITERAL, Kind.STRING_LITERAL), lexed.kinds());
       assertEquals(List.of("1", "`abc\ndef"), lexed.texts());
-      assertEquals(Token.UNTERMINATED, lexed.tokens().get(1).flags());
+      assertEquals(Token.UNTERMINATED | Token.SPACE_BEFORE, lexed.tokens().get(1).flags());
       assertEquals(
           List.of(new Diagnostic(2, 3, "unterminated multi-line string literal")),
           lexed.diagnostics());

@@ -17,10 +17,13 @@ import java.util.Objects;
  */
 public record Token(Kind kind, int start, int end, int flags) {
 
-  /** A line break appears between the previous token and this one. */
+  /**
+   * A line break appears between the previous token, or the start of the input, and this one,
+   * possibly inside a block comment.
+   */
   public static final int NEWLINE_BEFORE = 1;
 
-  /** Whitespace or a comment appears between the previous token and this one. */
+  /** Whitespace or a comment appears between the previous token, or the start, and this one. */
   public static final int SPACE_BEFORE = 1 << 1;
 
   /** The literal has no closing quote; a diagnostic has already been reported. */
