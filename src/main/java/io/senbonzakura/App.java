@@ -6,6 +6,6 @@ public final class App {
   private App() {}
 
   public static void main(String[] args) {
-    System.exit(new Cli(System.out, System.err).run(args));
+    System.exit(new Cli(System.in, System.out, System.err).run(args));
   }
 }

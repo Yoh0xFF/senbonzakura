@@ -9,9 +9,13 @@ import io.senbonzakura.lexer.Lexer;
 import io.senbonzakura.lexer.SourceFile;
 import io.senbonzakura.lexer.Token.Diagnostic;
 import io.senbonzakura.parser.Parser;
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.nio.charset.MalformedInputException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.AccessDeniedException;
 import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
@@ -22,12 +26,13 @@ import java.util.List;
 import java.util.stream.Stream;
 
 /**
- * The command line: {@code senbonzakura [--tree] [--run] <file>}. Parses and {@link Checker checks}
- * the file, and prints each problem found to the error stream, with the line it is on and a caret
- * under the part it covers. The checks run only on a file that lexed and parsed cleanly, so one
- * syntax error does not show up again as a list of undefined names. With {@code --tree} it also
- * prints each top-level statement as an {@link Sexpr S-expression}, and with {@code --run} it then
- * runs a file that has no problems, its output going to the output stream.
+ * The command line: {@code senbonzakura [--tree] [--run] <file>}, or {@code senbonzakura --repl}
+ * for the interactive {@link Repl}. Parses and {@link Checker checks} the file, and prints each
+ * problem found to the error stream, with the line it is on and a caret under the part it covers.
+ * The checks run only on a file that lexed and parsed cleanly, so one syntax error does not show up
+ * again as a list of undefined names. With {@code --tree} it also prints each top-level statement
+ * as an {@link Sexpr S-expression}, and with {@code --run} it then runs a file that has no
+ * problems, its output going to the output stream.
  *
  * <p>Exits with {@link #OK} when the file has no problems and ran without failing, {@link
  * #PROBLEMS} when it has problems, {@link #USAGE} when the arguments are wrong or the file cannot
@@ -40,31 +45,50 @@ public final class Cli {
   public static final int USAGE = 2;
   public static final int RUNTIME_ERROR = 3;
 
-  private static final String USAGE_TEXT = "usage: senbonzakura [--tree] [--run] <file>";
+  private static final String USAGE_TEXT =
+      "usage: senbonzakura [--tree] [--run] <file>\n       senbonzakura --repl";
 
+  private final InputStream in;
   private final PrintStream out;
   private final PrintStream err;
 
-  public Cli(PrintStream out, PrintStream err) {
+  public Cli(InputStream in, PrintStream out, PrintStream err) {
+    this.in = in;
     this.out = out;
     this.err = err;
+  }
+
+  /** A command line with no input, for running files. */
+  public Cli(PrintStream out, PrintStream err) {
+    this(InputStream.nullInputStream(), out, err);
   }
 
   public int run(String... args) {
     boolean tree = false;
     boolean execute = false;
+    boolean repl = false;
     String path = null;
     for (String arg : args) {
       if (arg.equals("--tree")) {
         tree = true;
       } else if (arg.equals("--run")) {
         execute = true;
+      } else if (arg.equals("--repl")) {
+        repl = true;
       } else if (arg.startsWith("-") || path != null) {
         err.println(USAGE_TEXT);
         return USAGE;
       } else {
         path = arg;
       }
+    }
+    if (repl) {
+      if (path != null || tree || execute) {
+        err.println(USAGE_TEXT);
+        return USAGE;
+      }
+      var reader = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8));
+      return new Repl(reader, out, err).run();
     }
     if (path == null) {
       err.println(USAGE_TEXT);
@@ -104,7 +128,8 @@ public final class Cli {
               .toList();
     }
     for (var diagnostic : diagnostics) {
-      print(source, diagnostic.start(), diagnostic.end(), "error", diagnostic.message());
+      Problems.print(
+          err, source, diagnostic.start(), diagnostic.end(), "error", diagnostic.message());
     }
     if (!diagnostics.isEmpty()) {
       return PROBLEMS;
@@ -116,7 +141,7 @@ public final class Cli {
       } catch (RuntimeError e) {
         out.flush();
         if (e.hasLocation()) {
-          print(source, e.start(), e.end(), "runtime error", e.getMessage());
+          Problems.print(err, source, e.start(), e.end(), "runtime error", e.getMessage());
         } else {
           err.println(source.path() + ": runtime error: " + e.getMessage());
         }
@@ -124,30 +149,6 @@ public final class Cli {
       }
     }
     return OK;
-  }
-
-  /** Prints {@code path:line:column: kind: message}, then the line and a caret under it. */
-  private void print(SourceFile source, int start, int end, String kind, String message) {
-    var at = source.locate(start);
-    err.println(source.path() + ":" + at + ": " + kind + ": " + message);
-    String line = source.lineText(at.line());
-    err.println("    " + line);
-    err.println("    " + caret(line, at.column(), end - start));
-  }
-
-  /**
-   * Pads up to {@code column} and marks {@code length} characters with {@code ^}, at least one and
-   * no further than the end of the line. The padding keeps the line's tabs, so the caret lines up
-   * under tab-indented code.
-   */
-  static String caret(String line, int column, int length) {
-    int from = column - 1;
-    var caret = new StringBuilder();
-    for (int i = 0; i < from && i < line.length(); i++) {
-      caret.append(line.charAt(i) == '\t' ? '\t' : ' ');
-    }
-    int width = Math.max(1, Math.min(length, line.length() - from));
-    return caret.append("^".repeat(width)).toString();
   }
 
   private static String reason(Exception e) {

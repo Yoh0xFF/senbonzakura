@@ -28,7 +28,9 @@ import java.util.Map;
  */
 public final class Interpreter {
 
-  private final Checker.Analysis analysis;
+  /** Where the types come from; a {@link Session} sets it for each entry. */
+  private Checker.Analysis analysis;
+
   private final PrintStream out;
 
   /** The values a {@code return} gave, read by the call that is returning. */
@@ -45,13 +47,66 @@ public final class Interpreter {
    * @throws RuntimeError if the program fails, for example by dividing by zero
    */
   public void run(List<Stmt> statements) {
+    try {
+      statements(statements, new Env(builtins()));
+    } catch (StackOverflowError e) {
+      throw stackOverflow();
+    }
+  }
+
+  /**
+   * Runs a program one entry at a time, in step with a {@link Checker.Session}: each entry runs in
+   * an environment inside the earlier entries', and one that fails is forgotten.
+   */
+  public static final class Session {
+
+    private final Interpreter interpreter;
+    private Env env;
+
+    public Session(PrintStream out) {
+      interpreter = new Interpreter(null, out);
+      env = interpreter.builtins();
+    }
+
+    /**
+     * Runs an entry that checked cleanly. With {@code showLast}, the last statement must be an
+     * expression statement, and this returns how {@code print} would show its value, or {@code
+     * null} when it has none; otherwise it returns {@code null}.
+     *
+     * @throws RuntimeError if the entry fails; its variables are then forgotten
+     */
+    public String run(List<Stmt> statements, Checker.Analysis analysis, boolean showLast) {
+      interpreter.analysis = analysis;
+      var entry = new Env(env);
+      String shown = null;
+      try {
+        if (showLast) {
+          var last = (Stmt.Expression) statements.getLast();
+          interpreter.statements(statements.subList(0, statements.size() - 1), entry);
+          Object value = interpreter.evaluate(last.expr(), entry);
+          Ty type = analysis.typeOf(last.expr());
+          if (value != null && !(type instanceof Ty.Multiple)) {
+            shown = Values.format(type, value);
+          }
+        } else {
+          interpreter.statements(statements, entry);
+        }
+      } catch (StackOverflowError e) {
+        throw stackOverflow();
+      }
+      env = entry;
+      return shown;
+    }
+  }
+
+  private Env builtins() {
     var builtins = new Env(null);
     builtins.define("print", Builtin.PRINT);
-    try {
-      statements(statements, new Env(builtins));
-    } catch (StackOverflowError e) {
-      throw new RuntimeError("stack overflow: the calls nest too deeply");
-    }
+    return builtins;
+  }
+
+  private static RuntimeError stackOverflow() {
+    return new RuntimeError("stack overflow: the calls nest too deeply");
   }
 
   /** How a statement finished, so loops and calls know whether to go on. */

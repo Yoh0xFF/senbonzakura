@@ -89,6 +89,36 @@ public final class Checker {
     return new Analysis(List.copyOf(checker.diagnostics), checker.types);
   }
 
+  /**
+   * Checks a program one entry at a time, as an interactive prompt reads it. Each entry gets a
+   * scope inside the earlier entries' scopes, so it sees their names and may declare one again,
+   * which shadows the old one. An entry with problems is forgotten, as if it was never entered.
+   */
+  public static final class Session {
+
+    private final Checker checker = new Checker();
+
+    /** Checks one entry; its names stay visible to later entries if it has no problems. */
+    public Analysis check(List<Stmt> statements) {
+      checker.diagnostics.clear();
+      checker.enterScope();
+      checker.statements(statements);
+      var analysis = new Analysis(List.copyOf(checker.diagnostics), checker.types);
+      if (!analysis.diagnostics().isEmpty()) {
+        checker.exitScope();
+      }
+      return analysis;
+    }
+
+    /**
+     * Forgets the last entry that checked cleanly, for when running it failed, so the names it
+     * never got to define are not visible later.
+     */
+    public void forgetLast() {
+      checker.exitScope();
+    }
+  }
+
   /** What checking a file found: its problems, and the type of every expression it checked. */
   public static final class Analysis {
 

@@ -2,6 +2,7 @@ package io.senbonzakura;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
@@ -156,6 +157,19 @@ class CliTest {
   }
 
   @Test
+  void replOptionStartsThePromptOnTheInput() {
+    var input = new ByteArrayInputStream("1 + 2\n".getBytes(StandardCharsets.UTF_8));
+    var repl =
+        new Cli(
+            input,
+            new PrintStream(out, true, StandardCharsets.UTF_8),
+            new PrintStream(err, true, StandardCharsets.UTF_8));
+
+    assertEquals(Cli.OK, repl.run("--repl"));
+    assertEquals(Repl.BANNER + "\n> 3\n> \n", out());
+  }
+
+  @Test
   void missingFileIsAUsageError() {
     var file = dir.resolve("missing.sz").toString();
 
@@ -166,12 +180,21 @@ class CliTest {
   @ParameterizedTest
   @CsvSource(
       delimiterString = "=>",
-      value = {"''", "'--tree'", "'--run'", "'--bogus a.sz'", "'a.sz b.sz'"})
+      value = {
+        "''",
+        "'--tree'",
+        "'--run'",
+        "'--bogus a.sz'",
+        "'a.sz b.sz'",
+        "'--repl a.sz'",
+        "'--repl --run'"
+      })
   void badArgumentsPrintUsage(String args) {
     String[] argv = args.isEmpty() ? new String[0] : args.split(" ");
 
     assertEquals(Cli.USAGE, cli.run(argv));
-    assertEquals("usage: senbonzakura [--tree] [--run] <file>\n", err());
+    assertEquals(
+        "usage: senbonzakura [--tree] [--run] <file>\n       senbonzakura --repl\n", err());
   }
 
   @ParameterizedTest
@@ -185,7 +208,7 @@ class CliTest {
         "'\tx = ;'  => 6 => 1 => '\t    ^'",
       })
   void caretLinesUpUnderTheLine(String line, int column, int length, String caret) {
-    assertEquals(caret, Cli.caret(line, column, length));
+    assertEquals(caret, Problems.caret(line, column, length));
   }
 
   private String write(String name, String text) throws IOException {

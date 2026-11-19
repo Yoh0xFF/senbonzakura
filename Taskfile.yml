@@ -24,6 +24,13 @@ tasks:
     cmds:
       - '{{.MVNW}} test'
 
+  repl:
+    desc: Start the interactive prompt
+    interactive: true
+    cmds:
+      - '{{.MVNW}} -q package -DskipTests'
+      - 'java -ea -jar target/senbonzakura-1.0-SNAPSHOT.jar --repl'
+
   run:
     desc: 'Check a file and report its problems, or run it: task run -- --run hello.sz'
     cmds:
