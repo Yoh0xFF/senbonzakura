@@ -17,19 +17,14 @@ import java.util.Objects;
  */
 public record Token(Kind kind, int start, int end, int flags) {
 
-  /**
-   * A line break appears between the previous token, or the start of the input, and this one,
-   * possibly inside a block comment.
-   */
+  // A line break appears between the previous token, or the start of the input, and this one,
+  // possibly inside a block comment.
   public static final int NEWLINE_BEFORE = 1;
-
-  /** Whitespace or a comment appears between the previous token, or the start, and this one. */
+  // Whitespace or a comment appears between the previous token, or the start, and this one.
   public static final int SPACE_BEFORE = 1 << 1;
-
-  /** The literal has no closing quote; a diagnostic has already been reported. */
+  // The literal has no closing quote; a diagnostic has already been reported.
   public static final int UNTERMINATED = 1 << 2;
-
-  /** The literal contains escape sequences, so its value differs from its source text. */
+  // The literal contains escape sequences, so its value differs from its source text.
   public static final int HAS_ESCAPES = 1 << 3;
 
   public Token {
@@ -145,17 +140,18 @@ public record Token(Kind kind, int start, int end, int flags) {
     OR_OR("||", OPERATOR),
     BANG("!", OPERATOR),
 
-    /** A character that starts no token; a diagnostic has already been reported. */
+    // A character that starts no token; a diagnostic has already been reported.
     ERROR,
 
-    /** The zero-width token at the end of the input. */
+    // The zero-width token at the end of the input.
     EOF;
 
     /** How a kind with a fixed spelling is scanned. */
     enum Category {
-      /** A reserved word, scanned like an identifier. */
+      // A reserved word, scanned like an identifier.
       KEYWORD,
-      /** An operator or punctuation mark, scanned by longest match. */
+
+      // An operator or punctuation mark, scanned by longest match.
       OPERATOR,
     }
 
@@ -171,10 +167,6 @@ public record Token(Kind kind, int start, int end, int flags) {
       this.category = category;
     }
 
-    /**
-     * Returns the source text every token of this kind has, like {@code "if"}, or {@code null} when
-     * it varies, as for identifiers and literals.
-     */
     public String spelling() {
       return spelling;
     }

@@ -43,18 +43,14 @@ public final class SourceFile {
    * @throws IndexOutOfBoundsException if {@code line} is outside {@code 1} to {@link #lineCount()}
    */
   public String lineText(int line) {
-    if (line < 1 || line > lineStarts.length) {
+    if (line < 1 || line > lineStarts.length)
       throw new IndexOutOfBoundsException(
           "line " + line + " outside 1.." + lineStarts.length + " in " + path);
-    }
+
     int start = lineStarts[line - 1];
     int end = line < lineStarts.length ? lineStarts[line] : text.length();
-    if (end > start && text.charAt(end - 1) == '\n') {
-      end--;
-    }
-    if (end > start && text.charAt(end - 1) == '\r') {
-      end--;
-    }
+    if (end > start && text.charAt(end - 1) == '\n') end--;
+    if (end > start && text.charAt(end - 1) == '\r') end--;
     return text.substring(start, end);
   }
 
@@ -66,10 +62,10 @@ public final class SourceFile {
    * @throws IndexOutOfBoundsException if {@code offset} is outside that range
    */
   public LineCol locate(int offset) {
-    if (offset < 0 || offset > text.length()) {
+    if (offset < 0 || offset > text.length())
       throw new IndexOutOfBoundsException(
           "offset " + offset + " outside 0.." + text.length() + " in " + path);
-    }
+
     int index = Arrays.binarySearch(lineStarts, offset);
     // Not found: binarySearch returns -(insertionPoint) - 1; the line is the one before it.
     int line = index >= 0 ? index : -index - 2;
@@ -84,14 +80,11 @@ public final class SourceFile {
     int length = text.length();
     for (int i = 0; i < length; i++) {
       char c = text.charAt(i);
-      if (c == '\r' && i + 1 < length && text.charAt(i + 1) == '\n') {
-        i++;
-      } else if (c != '\n' && c != '\r') {
-        continue;
-      }
-      if (count == starts.length) {
-        starts = Arrays.copyOf(starts, count * 2);
-      }
+
+      if (c != '\n' && c != '\r') continue;
+      if (c == '\r' && i + 1 < length && text.charAt(i + 1) == '\n') i++;
+      if (count == starts.length) starts = Arrays.copyOf(starts, count * 2);
+
       starts[count++] = i + 1;
     }
     return Arrays.copyOf(starts, count);
@@ -106,9 +99,8 @@ public final class SourceFile {
   public record LineCol(int line, int column) {
 
     public LineCol {
-      if (line < 1 || column < 1) {
+      if (line < 1 || column < 1)
         throw new IllegalArgumentException("line and column are 1-based: " + line + ":" + column);
-      }
     }
 
     @Override
