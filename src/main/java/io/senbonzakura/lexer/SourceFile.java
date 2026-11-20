@@ -28,7 +28,6 @@ public final class SourceFile {
     return text.length();
   }
 
-  /** Returns the number of lines. Text that ends in a line break has an empty last line. */
   public int lineCount() {
     return lineStarts.length;
   }
