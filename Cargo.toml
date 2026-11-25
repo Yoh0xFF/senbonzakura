@@ -1,0 +1,14 @@
+[package]
+name = "senbonzakura"
+version = "0.1.0"
+edition = "2024"
+description = "A small statically typed language: lexer, parser, checker, tree-walking interpreter and REPL"
+publish = false
+
+[dependencies]
+# Line editing and history for the REPL. nu-ansi-term is the color type its prompts use.
+nu-ansi-term = "0.50"
+reedline = "0.53.0"
+# Unicode general categories, so identifiers take letters and digits by category, not the wider
+# Alphabetic property char::is_alphabetic uses.
+unicode-general-category = "1.1.0"

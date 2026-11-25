@@ -1,0 +1,16 @@
+#!/bin/sh
+# Format staged Rust files with rustfmt, then re-stage them.
+# Installed with `task hooks` (git config core.hooksPath .githooks).
+set -e
+
+root=$(git rev-parse --show-toplevel)
+cd "$root"
+
+files=$(git diff --cached --name-only --diff-filter=ACMR -- '*.rs')
+[ -z "$files" ] && exit 0
+
+echo "pre-commit: formatting staged Rust files with rustfmt..."
+printf '%s\n' "$files" | while IFS= read -r f; do
+  rustfmt --edition 2024 -- "$f"
+  git add -- "$f"
+done
