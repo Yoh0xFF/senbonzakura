@@ -4,19 +4,19 @@
 //!   becomes an [`ExprKind::Error`] node. Problems the lexer already reported are not reported
 //!   again.
 //! - [`Parser`] picks a parser from the token that starts each statement, operand and primary.
-//!   `TokenCursor` holds all mutable state, and the other modules are stateless.
-//! - Parsers call back into `statement`, `expression`, `operand`, `primary` and `types::ty`
-//!   for nested parts, so they never depend on one another directly. The
-//!   `operator` module alone knows operator precedence.
+//!   `TokenCursor` holds all mutable state, and the `parse_*` modules are stateless.
+//! - Parsers call back into `statement`, `expression`, `operand`, `primary` and `parse_type::ty`
+//!   for nested parts, so they never depend on one another directly. The `parse_operator` module
+//!   alone knows operator precedence.
 
 mod cursor;
 mod decode;
-mod group;
-mod literal;
-mod operator;
-mod postfix;
-mod statement;
-mod types;
+mod parse_group;
+mod parse_literal;
+mod parse_operator;
+mod parse_postfix;
+mod parse_statement;
+mod parse_type;
 
 #[cfg(test)]
 mod tests;
@@ -87,43 +87,43 @@ impl<'a> Parser<'a> {
 /// Picks a parser from the token that starts the statement.
 pub(crate) fn statement(c: &mut TokenCursor) -> Stmt {
     match c.peek().kind {
-        Kind::LeftBrace => Stmt::Block(statement::block(c)),
-        Kind::Var => statement::var_statement(c),
-        Kind::If => statement::if_statement(c),
-        Kind::Loop => statement::loop_statement(c),
-        Kind::Continue => statement::continue_statement(c),
-        Kind::Break => statement::break_statement(c),
-        Kind::Return => statement::return_statement(c),
-        Kind::Fn => statement::function(c),
-        _ => statement::expression(c),
+        Kind::LeftBrace => Stmt::Block(parse_statement::block(c)),
+        Kind::Var => parse_statement::var_statement(c),
+        Kind::If => parse_statement::if_statement(c),
+        Kind::Loop => parse_statement::loop_statement(c),
+        Kind::Continue => parse_statement::continue_statement(c),
+        Kind::Break => parse_statement::break_statement(c),
+        Kind::Return => parse_statement::return_statement(c),
+        Kind::Fn => parse_statement::function(c),
+        _ => parse_statement::expression(c),
     }
 }
 
 pub(crate) fn expression(c: &mut TokenCursor) -> Expr {
-    operator::expression(c)
+    parse_operator::expression(c)
 }
 
 /// Parses the part of an expression between infix operators: prefix operators, then a postfix.
 pub(crate) fn operand(c: &mut TokenCursor) -> Expr {
     match c.peek().kind {
-        Kind::Minus | Kind::Bang => operator::prefix(c),
-        _ => postfix::postfix(c),
+        Kind::Minus | Kind::Bang => parse_operator::prefix(c),
+        _ => parse_postfix::postfix(c),
     }
 }
 
 /// Picks a parser from the token that starts the primary: a literal, a name or a group.
 pub(crate) fn primary(c: &mut TokenCursor) -> Expr {
     match c.peek().kind {
-        Kind::IntLiteral => literal::integer(c),
-        Kind::FloatLiteral => literal::floating(c),
-        Kind::StringLiteral => literal::string(c),
-        Kind::CharLiteral => literal::character(c),
-        Kind::True | Kind::False => literal::boolean(c),
+        Kind::IntLiteral => parse_literal::integer(c),
+        Kind::FloatLiteral => parse_literal::floating(c),
+        Kind::StringLiteral => parse_literal::string(c),
+        Kind::CharLiteral => parse_literal::character(c),
+        Kind::True | Kind::False => parse_literal::boolean(c),
         Kind::Identifier => {
             let token = c.advance();
             Expr::new(ExprKind::Identifier(c.text(token).to_string()), token.start, token.end)
         }
-        Kind::LeftParen => group::parenthesized(c),
+        Kind::LeftParen => parse_group::parenthesized(c),
         Kind::Error => {
             // The lexer already reported this character.
             let token = c.advance();

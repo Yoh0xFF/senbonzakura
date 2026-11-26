@@ -1,12 +1,12 @@
-mod function;
-mod group;
-mod identifier;
-mod literal;
-mod operator;
+mod parse_function;
+mod parse_group;
+mod parse_identifier;
+mod parse_literal;
+mod parse_operator;
+mod parse_postfix;
+mod parse_statement;
+mod parse_type;
 mod parser;
-mod postfix;
-mod statement;
-mod types;
 
 use super::Parser;
 use senbonzakura_ast::{Argument, Block, Declarator, Expr, Parameter, Stmt, Type, VarStmt, sexpr};

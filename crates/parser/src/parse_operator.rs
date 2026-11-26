@@ -103,7 +103,7 @@ fn cast(c: &mut TokenCursor) -> Expr {
     let mut expr = super::operand(c);
     while c.at(Kind::As) {
         c.advance();
-        let ty = super::types::ty(c);
+        let ty = super::parse_type::ty(c);
         let (start, end) = (expr.start, expr.end.max(ty.end));
         expr = Expr::new(ExprKind::Cast { value: Box::new(expr), ty }, start, end);
     }

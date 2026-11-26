@@ -9,7 +9,7 @@
 use std::rc::Rc;
 
 use super::cursor::TokenCursor;
-use super::types;
+use super::parse_type;
 use senbonzakura_ast::{
     Block, Declarator, Expr, ExprKind, ExpressionStmt, Function, IfStmt, JumpStmt, LoopInStmt,
     LoopStepStmt, LoopStmt, Parameter, ReturnStmt, Stmt, Type, TypeKind, VarStmt,
@@ -62,7 +62,7 @@ fn binding(c: &mut TokenCursor, in_loop: bool) -> Binding {
     let mut ty = None;
     if c.at(Kind::Colon) {
         c.advance();
-        let t = super::types::ty(c);
+        let t = super::parse_type::ty(c);
         end = t.end;
         ty = Some(t);
     }
@@ -270,16 +270,16 @@ pub(crate) fn function(c: &mut TokenCursor) -> Stmt {
     }
 
     let mut return_types = Vec::new();
-    if c.at(Kind::Colon) || types::at_type(c) {
+    if c.at(Kind::Colon) || parse_type::at_type(c) {
         if c.at(Kind::Colon) {
             c.advance();
         } else if c.problem_count() == problems_before {
             c.report_found("expected ':' before return type");
         }
-        return_types.push(types::ty(c));
+        return_types.push(parse_type::ty(c));
         while c.at(Kind::Comma) {
             c.advance();
-            return_types.push(types::ty(c));
+            return_types.push(parse_type::ty(c));
         }
         end = return_types.last().expect("at least one return type").end;
     }
@@ -354,12 +354,16 @@ fn parameter(c: &mut TokenCursor) -> Parameter {
 
     let ty = if c.at(Kind::Colon) {
         c.advance();
-        types::ty(c)
+        parse_type::ty(c)
     } else {
         if c.problem_count() == problems_before {
             c.report_found("expected ':' after parameter name");
         }
-        if types::at_type(c) { types::ty(c) } else { Type::new(TypeKind::Error, end, end) }
+        if parse_type::at_type(c) {
+            parse_type::ty(c)
+        } else {
+            Type::new(TypeKind::Error, end, end)
+        }
     };
     let end = ty.end;
     Parameter { name, ty, start, end }
