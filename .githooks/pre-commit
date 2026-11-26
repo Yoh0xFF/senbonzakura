@@ -1,6 +1,6 @@
 #!/bin/sh
 # Format staged Rust files with rustfmt, then re-stage them.
-# Installed with `task hooks` (git config core.hooksPath .githooks).
+# Installed with `just hooks` (git config core.hooksPath .githooks).
 set -e
 
 root=$(git rev-parse --show-toplevel)

@@ -45,5 +45,18 @@ lexer ──► parser ──► check ──► interpret ──► cli
 
 ## Tasks
 
-`task test`, `task lint`, `task fmt`, `task repl`, `task run -- --run hello.sz`. Run `task hooks`
-once to format staged Rust files on commit.
+Tasks are recipes in the `justfile`, run with [just](https://github.com/casey/just)
+(`cargo install just` or `brew install just`). `just` alone lists them.
+
+| Command                 | What it does                                                    |
+|-------------------------|-----------------------------------------------------------------|
+| `just build`            | Build the release binary                                        |
+| `just test`             | Run the tests of every crate                                    |
+| `just fmt`              | Format all Rust files                                           |
+| `just lint`             | Clippy on every crate and its tests, failing on any warning     |
+| `just doc`              | Build the docs, failing on any warning                          |
+| `just ci`               | Check formatting, lint, test and build the docs, as CI would    |
+| `just repl`             | Start the interactive prompt                                    |
+| `just run --run x.sz`   | Run the binary on its arguments: check a file, then run it      |
+| `just hooks`            | Install the pre-commit hook that formats staged Rust files      |
+| `just clean`            | Clean all build artifacts                                       |
