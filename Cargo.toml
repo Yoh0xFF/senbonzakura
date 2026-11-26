@@ -1,14 +1,19 @@
-[package]
-name = "senbonzakura"
+[workspace]
+resolver = "3"
+members = ["crates/*"]
+
+[workspace.package]
 version = "0.1.0"
 edition = "2024"
-description = "A small statically typed language: lexer, parser, checker, tree-walking interpreter and REPL"
 publish = false
 
-[dependencies]
-# Line editing and history for the REPL. nu-ansi-term is the color type its prompts use.
+[workspace.dependencies]
+senbonzakura-ast = { path = "crates/ast" }
+senbonzakura-check = { path = "crates/check" }
+senbonzakura-interpret = { path = "crates/interpret" }
+senbonzakura-lexer = { path = "crates/lexer" }
+senbonzakura-parser = { path = "crates/parser" }
+
 nu-ansi-term = "0.50"
 reedline = "0.53.0"
-# Unicode general categories, so identifiers take letters and digits by category, not the wider
-# Alphabetic property char::is_alphabetic uses.
 unicode-general-category = "1.1.0"

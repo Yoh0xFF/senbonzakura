@@ -17,19 +17,19 @@ tasks:
       - cargo clean
 
   test:
-    desc: Run all tests
+    desc: Run the tests of every crate
     cmds:
-      - cargo test
+      - cargo test --workspace
 
   fmt:
     desc: Format all Rust files
     cmds:
-      - cargo fmt
+      - cargo fmt --all
 
   lint:
-    desc: Run clippy on the library, binary and tests
+    desc: Run clippy on every crate, its binary and tests
     cmds:
-      - cargo clippy --all-targets -- -D warnings
+      - cargo clippy --workspace --all-targets -- -D warnings
 
   check:
     desc: Lint and test

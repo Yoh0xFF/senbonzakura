@@ -1,0 +1,21 @@
+[package]
+name = "senbonzakura-cli"
+description = "The senbonzakura command line and interactive prompt"
+version.workspace = true
+edition.workspace = true
+publish.workspace = true
+
+[[bin]]
+name = "senbonzakura"
+path = "src/main.rs"
+
+[dependencies]
+senbonzakura-ast.workspace = true
+senbonzakura-check.workspace = true
+senbonzakura-interpret.workspace = true
+senbonzakura-lexer.workspace = true
+senbonzakura-parser.workspace = true
+
+# Line editing and history for the REPL. nu-ansi-term is the color type its prompts use.
+nu-ansi-term.workspace = true
+reedline.workspace = true

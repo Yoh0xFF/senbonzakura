@@ -1,0 +1,13 @@
+[package]
+name = "senbonzakura-check"
+description = "Checks names, control flow and types of a Senbonzakura syntax tree"
+version.workspace = true
+edition.workspace = true
+publish.workspace = true
+
+[dependencies]
+senbonzakura-ast.workspace = true
+senbonzakura-lexer.workspace = true
+
+[dev-dependencies]
+senbonzakura-parser.workspace = true

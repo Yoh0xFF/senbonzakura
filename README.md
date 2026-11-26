@@ -18,14 +18,21 @@ failed while running.
 
 ## Layout
 
-| Module          | What it does                                                          |
-|-----------------|-----------------------------------------------------------------------|
-| `lexer`         | Source text to tokens; problems are collected, never thrown           |
-| `ast`           | The syntax tree, and `ast::sexpr` to print it                         |
-| `parser`        | Tokens to a tree, with error nodes where parsing failed               |
-| `check`         | Names, scopes, control flow and types; records each expression's type |
-| `interpret`     | Runs a checked tree; `interpret::Session` runs REPL entries           |
-| `cli`, `repl`   | The command line and the interactive prompt                           |
+A Cargo workspace, one crate per stage. Each depends only on the stages before it:
+
+| Crate                    | Directory          | What it does                                                         |
+|--------------------------|--------------------|----------------------------------------------------------------------|
+| `senbonzakura-lexer`     | `crates/lexer`     | Source text to tokens; problems are collected, never thrown          |
+| `senbonzakura-ast`       | `crates/ast`       | The syntax tree, and `sexpr` and `float_text` to print it            |
+| `senbonzakura-parser`    | `crates/parser`    | Tokens to a tree, with error nodes where parsing failed              |
+| `senbonzakura-check`     | `crates/check`     | Names, scopes, control flow and types; records each expression's type |
+| `senbonzakura-interpret` | `crates/interpret` | Runs a checked tree; `Session` runs REPL entries                     |
+| `senbonzakura-cli`       | `crates/cli`       | The `senbonzakura` binary: command line and interactive prompt       |
+
+```
+lexer ──► parser ──► check ──► interpret ──► cli
+  ast ──────┴──────────┴──────────┘
+```
 
 ## Differences from the Java version
 

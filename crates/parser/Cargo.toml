@@ -1,0 +1,10 @@
+[package]
+name = "senbonzakura-parser"
+description = "Turns Senbonzakura tokens into a syntax tree"
+version.workspace = true
+edition.workspace = true
+publish.workspace = true
+
+[dependencies]
+senbonzakura-ast.workspace = true
+senbonzakura-lexer.workspace = true

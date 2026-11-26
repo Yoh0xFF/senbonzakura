@@ -1,0 +1,11 @@
+[package]
+name = "senbonzakura-lexer"
+description = "Turns Senbonzakura source text into tokens"
+version.workspace = true
+edition.workspace = true
+publish.workspace = true
+
+[dependencies]
+# Unicode general categories, so identifiers take letters and digits by category, not the wider
+# Alphabetic property char::is_alphabetic uses.
+unicode-general-category.workspace = true

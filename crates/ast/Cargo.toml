@@ -1,0 +1,6 @@
+[package]
+name = "senbonzakura-ast"
+description = "The Senbonzakura syntax tree, and how to print it"
+version.workspace = true
+edition.workspace = true
+publish.workspace = true
