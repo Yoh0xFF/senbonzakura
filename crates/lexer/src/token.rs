@@ -4,73 +4,73 @@
 /// [`SourceFile::locate`](super::SourceFile::locate) turn them into text and positions.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Token {
-    pub kind: Kind,
-    /// Offset of the first byte.
-    pub start: usize,
-    /// Offset just past the last byte; equal to `start` for [`Kind::Eof`].
-    pub end: usize,
-    /// The flag constants below, combined with `|`.
-    pub flags: u8,
+  pub kind: Kind,
+  /// Offset of the first byte.
+  pub start: usize,
+  /// Offset just past the last byte; equal to `start` for [`Kind::Eof`].
+  pub end: usize,
+  /// The flag constants below, combined with `|`.
+  pub flags: u8,
 }
 
 impl Token {
-    /// A line break appears between the previous token, or the start of the input, and this one,
-    /// possibly inside a block comment.
-    pub const NEWLINE_BEFORE: u8 = 1;
-    /// Whitespace or a comment appears between the previous token, or the start, and this one.
-    pub const SPACE_BEFORE: u8 = 1 << 1;
-    /// The literal has no closing quote; a diagnostic has already been reported.
-    pub const UNTERMINATED: u8 = 1 << 2;
-    /// The literal contains escape sequences, so its value differs from its source text.
-    pub const HAS_ESCAPES: u8 = 1 << 3;
+  /// A line break appears between the previous token, or the start of the input, and this one,
+  /// possibly inside a block comment.
+  pub const NEWLINE_BEFORE: u8 = 1;
+  /// Whitespace or a comment appears between the previous token, or the start, and this one.
+  pub const SPACE_BEFORE: u8 = 1 << 1;
+  /// The literal has no closing quote; a diagnostic has already been reported.
+  pub const UNTERMINATED: u8 = 1 << 2;
+  /// The literal contains escape sequences, so its value differs from its source text.
+  pub const HAS_ESCAPES: u8 = 1 << 3;
 
-    /// # Panics
-    ///
-    /// If `end` is before `start`.
-    pub fn new(kind: Kind, start: usize, end: usize, flags: u8) -> Token {
-        assert!(start <= end, "invalid token range {start}..{end}");
-        Token { kind, start, end, flags }
-    }
+  /// # Panics
+  ///
+  /// If `end` is before `start`.
+  pub fn new(kind: Kind, start: usize, end: usize, flags: u8) -> Token {
+    assert!(start <= end, "invalid token range {start}..{end}");
+    Token { kind, start, end, flags }
+  }
 
-    pub fn eof(offset: usize, flags: u8) -> Token {
-        Token::new(Kind::Eof, offset, offset, flags)
-    }
+  pub fn eof(offset: usize, flags: u8) -> Token {
+    Token::new(Kind::Eof, offset, offset, flags)
+  }
 
-    pub fn len(&self) -> usize {
-        self.end - self.start
-    }
+  pub fn len(&self) -> usize {
+    self.end - self.start
+  }
 
-    pub fn is_empty(&self) -> bool {
-        self.start == self.end
-    }
+  pub fn is_empty(&self) -> bool {
+    self.start == self.end
+  }
 
-    pub fn has(&self, flag: u8) -> bool {
-        self.flags & flag != 0
-    }
+  pub fn has(&self, flag: u8) -> bool {
+    self.flags & flag != 0
+  }
 }
 
 /// A problem found while lexing, parsing or checking, covering offsets `start` up to (not
 /// including) `end`.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Diagnostic {
-    pub start: usize,
-    pub end: usize,
-    pub message: String,
+  pub start: usize,
+  pub end: usize,
+  pub message: String,
 }
 
 impl Diagnostic {
-    pub fn new(start: usize, end: usize, message: impl Into<String>) -> Diagnostic {
-        Diagnostic { start, end, message: message.into() }
-    }
+  pub fn new(start: usize, end: usize, message: impl Into<String>) -> Diagnostic {
+    Diagnostic { start, end, message: message.into() }
+  }
 }
 
 /// How a kind with a fixed spelling is scanned.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub(crate) enum Category {
-    /// A reserved word, scanned like an identifier.
-    Keyword,
-    /// An operator or punctuation mark, scanned by longest match.
-    Operator,
+  /// A reserved word, scanned like an identifier.
+  Keyword,
+  /// An operator or punctuation mark, scanned by longest match.
+  Operator,
 }
 
 macro_rules! kinds {
@@ -198,11 +198,11 @@ kinds! {
 }
 
 impl Kind {
-    pub(crate) fn is_keyword(self) -> bool {
-        self.category() == Some(Category::Keyword)
-    }
+  pub(crate) fn is_keyword(self) -> bool {
+    self.category() == Some(Category::Keyword)
+  }
 
-    pub(crate) fn is_operator(self) -> bool {
-        self.category() == Some(Category::Operator)
-    }
+  pub(crate) fn is_operator(self) -> bool {
+    self.category() == Some(Category::Operator)
+  }
 }

@@ -31,148 +31,138 @@ pub const RUNTIME_ERROR: i32 = 3;
 const USAGE_TEXT: &str = "usage: senbonzakura [--tree] [--run] <file>\n       senbonzakura --repl";
 
 pub struct Cli<'a> {
+  input: &'a mut dyn BufRead,
+  out: &'a mut dyn Write,
+  err: &'a mut dyn Write,
+  terminal: bool,
+}
+
+impl<'a> Cli<'a> {
+  /// `terminal` says whether the program runs in a terminal, so the REPL reads with line editing
+  /// from it instead of plain lines from `input`.
+  pub fn new(
     input: &'a mut dyn BufRead,
     out: &'a mut dyn Write,
     err: &'a mut dyn Write,
     terminal: bool,
-}
+  ) -> Cli<'a> {
+    Cli { input, out, err, terminal }
+  }
 
-impl<'a> Cli<'a> {
-    /// `terminal` says whether the program runs in a terminal, so the REPL reads with line editing
-    /// from it instead of plain lines from `input`.
-    pub fn new(
-        input: &'a mut dyn BufRead,
-        out: &'a mut dyn Write,
-        err: &'a mut dyn Write,
-        terminal: bool,
-    ) -> Cli<'a> {
-        Cli { input, out, err, terminal }
+  pub fn run<S: AsRef<str>>(&mut self, args: &[S]) -> i32 {
+    let code = self.dispatch(args);
+    let _ = self.out.flush();
+    let _ = self.err.flush();
+    code
+  }
+
+  fn dispatch<S: AsRef<str>>(&mut self, args: &[S]) -> i32 {
+    let mut tree = false;
+    let mut execute = false;
+    let mut repl = false;
+    let mut path: Option<&str> = None;
+    for arg in args.iter().map(AsRef::as_ref) {
+      match arg {
+        "--tree" => tree = true,
+        "--run" => execute = true,
+        "--repl" => repl = true,
+        _ if arg.starts_with('-') || path.is_some() => return self.usage(),
+        _ => path = Some(arg),
+      }
+    }
+    if repl {
+      if path.is_some() || tree || execute {
+        return self.usage();
+      }
+      return self.repl();
+    }
+    let Some(path) = path else {
+      return self.usage();
+    };
+
+    let text = match read(path) {
+      Ok(text) => text,
+      Err(reason) => {
+        let _ = writeln!(self.err, "senbonzakura: cannot read {path}: {reason}");
+        return USAGE;
+      }
+    };
+    self.file(&SourceFile::new(path, text), tree, execute)
+  }
+
+  fn file(&mut self, source: &SourceFile, tree: bool, execute: bool) -> i32 {
+    let mut parser = Parser::new(Lexer::new(source));
+    let statements = parser.parse_file();
+
+    if tree {
+      for stmt in &statements {
+        let _ = writeln!(self.out, "{}", sexpr::stmt(stmt));
+      }
     }
 
-    pub fn run<S: AsRef<str>>(&mut self, args: &[S]) -> i32 {
-        let code = self.dispatch(args);
+    // The lexer's problems come in as the parser pulls tokens, so the two lists interleave.
+    let mut diagnostics: Vec<Diagnostic> =
+      parser.lexer().diagnostics().iter().chain(parser.diagnostics()).cloned().collect();
+    let mut analysis = None;
+    if diagnostics.is_empty() {
+      let checked = check::analyze(&statements);
+      diagnostics = checked.diagnostics().to_vec();
+      analysis = Some(checked);
+    }
+    diagnostics.sort_by_key(|d| d.start);
+    for d in &diagnostics {
+      problems::print(self.err, source, d.start, d.end, "error", &d.message);
+    }
+    if !diagnostics.is_empty() {
+      return PROBLEMS;
+    }
+
+    if execute {
+      let analysis = analysis.expect("checked");
+      if let Err(error) = Interpreter::new(&analysis, self.out).run(&statements) {
         let _ = self.out.flush();
-        let _ = self.err.flush();
-        code
+        match error.location {
+          Some((start, end)) => {
+            problems::print(self.err, source, start, end, "runtime error", &error.message)
+          }
+          None => {
+            let _ = writeln!(self.err, "{}: runtime error: {}", source.path(), error.message);
+          }
+        }
+        return RUNTIME_ERROR;
+      }
     }
+    OK
+  }
 
-    fn dispatch<S: AsRef<str>>(&mut self, args: &[S]) -> i32 {
-        let mut tree = false;
-        let mut execute = false;
-        let mut repl = false;
-        let mut path: Option<&str> = None;
-        for arg in args.iter().map(AsRef::as_ref) {
-            match arg {
-                "--tree" => tree = true,
-                "--run" => execute = true,
-                "--repl" => repl = true,
-                _ if arg.starts_with('-') || path.is_some() => return self.usage(),
-                _ => path = Some(arg),
-            }
-        }
-        if repl {
-            if path.is_some() || tree || execute {
-                return self.usage();
-            }
-            return self.repl();
-        }
-        let Some(path) = path else {
-            return self.usage();
-        };
-
-        let text = match read(path) {
-            Ok(text) => text,
-            Err(reason) => {
-                let _ = writeln!(self.err, "senbonzakura: cannot read {path}: {reason}");
-                return USAGE;
-            }
-        };
-        self.file(&SourceFile::new(path, text), tree, execute)
+  fn repl(&mut self) -> i32 {
+    if !self.terminal {
+      let input = Box::new(Plain::new(&mut *self.input));
+      return Repl::new(input, self.out, self.err).run();
     }
-
-    fn file(&mut self, source: &SourceFile, tree: bool, execute: bool) -> i32 {
-        let mut parser = Parser::new(Lexer::new(source));
-        let statements = parser.parse_file();
-
-        if tree {
-            for stmt in &statements {
-                let _ = writeln!(self.out, "{}", sexpr::stmt(stmt));
-            }
-        }
-
-        // The lexer's problems come in as the parser pulls tokens, so the two lists interleave.
-        let mut diagnostics: Vec<Diagnostic> =
-            parser.lexer().diagnostics().iter().chain(parser.diagnostics()).cloned().collect();
-        let mut analysis = None;
-        if diagnostics.is_empty() {
-            let checked = check::analyze(&statements);
-            diagnostics = checked.diagnostics().to_vec();
-            analysis = Some(checked);
-        }
-        diagnostics.sort_by_key(|d| d.start);
-        for d in &diagnostics {
-            problems::print(self.err, source, d.start, d.end, "error", &d.message);
-        }
-        if !diagnostics.is_empty() {
-            return PROBLEMS;
-        }
-
-        if execute {
-            let analysis = analysis.expect("checked");
-            if let Err(error) = Interpreter::new(&analysis, self.out).run(&statements) {
-                let _ = self.out.flush();
-                match error.location {
-                    Some((start, end)) => problems::print(
-                        self.err,
-                        source,
-                        start,
-                        end,
-                        "runtime error",
-                        &error.message,
-                    ),
-                    None => {
-                        let _ = writeln!(
-                            self.err,
-                            "{}: runtime error: {}",
-                            source.path(),
-                            error.message
-                        );
-                    }
-                }
-                return RUNTIME_ERROR;
-            }
-        }
-        OK
-    }
-
-    fn repl(&mut self) -> i32 {
-        if !self.terminal {
-            let input = Box::new(Plain::new(&mut *self.input));
-            return Repl::new(input, self.out, self.err).run();
-        }
-        match Terminal::new(history_file()) {
-            Ok(terminal) => Repl::new(Box::new(terminal), self.out, self.err).run(),
-            Err(e) => {
-                let _ = writeln!(self.err, "senbonzakura: cannot use the terminal: {e}");
-                USAGE
-            }
-        }
-    }
-
-    fn usage(&mut self) -> i32 {
-        let _ = writeln!(self.err, "{USAGE_TEXT}");
+    match Terminal::new(history_file()) {
+      Ok(terminal) => Repl::new(Box::new(terminal), self.out, self.err).run(),
+      Err(e) => {
+        let _ = writeln!(self.err, "senbonzakura: cannot use the terminal: {e}");
         USAGE
+      }
     }
+  }
+
+  fn usage(&mut self) -> i32 {
+    let _ = writeln!(self.err, "{USAGE_TEXT}");
+    USAGE
+  }
 }
 
 /// Reads a source file, or says why it cannot be read.
 fn read(path: &str) -> Result<String, String> {
-    let bytes = std::fs::read(path).map_err(|e| match e.kind() {
-        io::ErrorKind::NotFound => "no such file".to_string(),
-        io::ErrorKind::PermissionDenied => "permission denied".to_string(),
-        _ => e.to_string(),
-    })?;
-    String::from_utf8(bytes).map_err(|_| "not valid UTF-8".to_string())
+  let bytes = std::fs::read(path).map_err(|e| match e.kind() {
+    io::ErrorKind::NotFound => "no such file".to_string(),
+    io::ErrorKind::PermissionDenied => "permission denied".to_string(),
+    _ => e.to_string(),
+  })?;
+  String::from_utf8(bytes).map_err(|_| "not valid UTF-8".to_string())
 }
 
 #[cfg(test)]

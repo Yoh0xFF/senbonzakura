@@ -33,136 +33,136 @@ use senbonzakura_lexer::{Diagnostic, Kind, Lexer};
 /// [`diagnostics`](Self::diagnostics) and the part that failed becomes an [`ExprKind::Error`]
 /// node. Problems the lexer found stay in the lexer's own diagnostics and are not reported again.
 pub struct Parser<'a> {
-    cursor: TokenCursor<'a>,
+  cursor: TokenCursor<'a>,
 }
 
 impl<'a> Parser<'a> {
-    pub fn new(lexer: Lexer<'a>) -> Parser<'a> {
-        Parser { cursor: TokenCursor::new(lexer) }
-    }
+  pub fn new(lexer: Lexer<'a>) -> Parser<'a> {
+    Parser { cursor: TokenCursor::new(lexer) }
+  }
 
-    /// Returns the problems found so far, in the order found.
-    pub fn diagnostics(&self) -> &[Diagnostic] {
-        self.cursor.diagnostics()
-    }
+  /// Returns the problems found so far, in the order found.
+  pub fn diagnostics(&self) -> &[Diagnostic] {
+    self.cursor.diagnostics()
+  }
 
-    /// The lexer the tokens come from, which holds the lexical problems.
-    pub fn lexer(&self) -> &Lexer<'a> {
-        self.cursor.lexer()
-    }
+  /// The lexer the tokens come from, which holds the lexical problems.
+  pub fn lexer(&self) -> &Lexer<'a> {
+    self.cursor.lexer()
+  }
 
-    pub fn at_end(&self) -> bool {
-        self.cursor.at_end()
-    }
+  pub fn at_end(&self) -> bool {
+    self.cursor.at_end()
+  }
 
-    /// Parses one statement. Always consumes at least one token, unless the input is used up, so a
-    /// loop calling it until [`at_end`](Self::at_end) always finishes.
-    pub fn parse_statement(&mut self) -> Stmt {
-        let first = self.cursor.peek();
-        let stmt = statement(&mut self.cursor);
-        self.cursor.skip_if_stuck(first);
-        stmt
-    }
+  /// Parses one statement. Always consumes at least one token, unless the input is used up, so a
+  /// loop calling it until [`at_end`](Self::at_end) always finishes.
+  pub fn parse_statement(&mut self) -> Stmt {
+    let first = self.cursor.peek();
+    let stmt = statement(&mut self.cursor);
+    self.cursor.skip_if_stuck(first);
+    stmt
+  }
 
-    /// Parses statements until the input is used up, and returns them in source order. A
-    /// statement with problems is still returned, as a tree with error nodes in it.
-    pub fn parse_file(&mut self) -> Vec<Stmt> {
-        let mut statements = Vec::new();
-        while !self.at_end() {
-            statements.push(self.parse_statement());
-        }
-        statements
+  /// Parses statements until the input is used up, and returns them in source order. A
+  /// statement with problems is still returned, as a tree with error nodes in it.
+  pub fn parse_file(&mut self) -> Vec<Stmt> {
+    let mut statements = Vec::new();
+    while !self.at_end() {
+      statements.push(self.parse_statement());
     }
+    statements
+  }
 
-    /// Like [`parse_statement`](Self::parse_statement), always consumes at least one token unless
-    /// at the end.
-    pub fn parse_expression(&mut self) -> Expr {
-        let first = self.cursor.peek();
-        let expr = expression(&mut self.cursor);
-        self.cursor.skip_if_stuck(first);
-        expr
-    }
+  /// Like [`parse_statement`](Self::parse_statement), always consumes at least one token unless
+  /// at the end.
+  pub fn parse_expression(&mut self) -> Expr {
+    let first = self.cursor.peek();
+    let expr = expression(&mut self.cursor);
+    self.cursor.skip_if_stuck(first);
+    expr
+  }
 }
 
 /// Picks a parser from the token that starts the statement.
 pub(crate) fn statement(c: &mut TokenCursor) -> Stmt {
-    match c.peek().kind {
-        Kind::LeftBrace => Stmt::Block(parse_statement::block(c)),
-        Kind::Var => parse_statement::var_statement(c),
-        Kind::If => parse_statement::if_statement(c),
-        Kind::Loop => parse_statement::loop_statement(c),
-        Kind::Continue => parse_statement::continue_statement(c),
-        Kind::Break => parse_statement::break_statement(c),
-        Kind::Return => parse_statement::return_statement(c),
-        Kind::Fn => parse_statement::function(c),
-        _ => parse_statement::expression(c),
-    }
+  match c.peek().kind {
+    Kind::LeftBrace => Stmt::Block(parse_statement::block(c)),
+    Kind::Var => parse_statement::var_statement(c),
+    Kind::If => parse_statement::if_statement(c),
+    Kind::Loop => parse_statement::loop_statement(c),
+    Kind::Continue => parse_statement::continue_statement(c),
+    Kind::Break => parse_statement::break_statement(c),
+    Kind::Return => parse_statement::return_statement(c),
+    Kind::Fn => parse_statement::function(c),
+    _ => parse_statement::expression(c),
+  }
 }
 
 pub(crate) fn expression(c: &mut TokenCursor) -> Expr {
-    parse_operator::expression(c)
+  parse_operator::expression(c)
 }
 
 /// Parses the part of an expression between infix operators: prefix operators, then a postfix.
 pub(crate) fn operand(c: &mut TokenCursor) -> Expr {
-    match c.peek().kind {
-        Kind::Minus | Kind::Bang => parse_operator::prefix(c),
-        _ => parse_postfix::postfix(c),
-    }
+  match c.peek().kind {
+    Kind::Minus | Kind::Bang => parse_operator::prefix(c),
+    _ => parse_postfix::postfix(c),
+  }
 }
 
 /// Picks a parser from the token that starts the primary: a literal, a name or a group.
 pub(crate) fn primary(c: &mut TokenCursor) -> Expr {
-    match c.peek().kind {
-        Kind::IntLiteral => parse_literal::integer(c),
-        Kind::FloatLiteral => parse_literal::floating(c),
-        Kind::StringLiteral => parse_literal::string(c),
-        Kind::CharLiteral => parse_literal::character(c),
-        Kind::True | Kind::False => parse_literal::boolean(c),
-        Kind::Identifier => {
-            let token = c.advance();
-            Expr::new(ExprKind::Identifier(c.text(token).to_string()), token.start, token.end)
-        }
-        Kind::LeftParen => parse_group::parenthesized(c),
-        Kind::Error => {
-            // The lexer already reported this character.
-            let token = c.advance();
-            Expr::new(ExprKind::Error, token.start, token.end)
-        }
-        Kind::RightParen
-        | Kind::RightBracket
-        | Kind::LeftBrace
-        | Kind::RightBrace
-        | Kind::Comma
-        | Kind::Semicolon
-        | Kind::If
-        | Kind::Eof => missing_operand(c),
-        _ => unexpected_token(c),
+  match c.peek().kind {
+    Kind::IntLiteral => parse_literal::integer(c),
+    Kind::FloatLiteral => parse_literal::floating(c),
+    Kind::StringLiteral => parse_literal::string(c),
+    Kind::CharLiteral => parse_literal::character(c),
+    Kind::True | Kind::False => parse_literal::boolean(c),
+    Kind::Identifier => {
+      let token = c.advance();
+      Expr::new(ExprKind::Identifier(c.text(token).to_string()), token.start, token.end)
     }
+    Kind::LeftParen => parse_group::parenthesized(c),
+    Kind::Error => {
+      // The lexer already reported this character.
+      let token = c.advance();
+      Expr::new(ExprKind::Error, token.start, token.end)
+    }
+    Kind::RightParen
+    | Kind::RightBracket
+    | Kind::LeftBrace
+    | Kind::RightBrace
+    | Kind::Comma
+    | Kind::Semicolon
+    | Kind::If
+    | Kind::Eof => missing_operand(c),
+    _ => unexpected_token(c),
+  }
 }
 
 /// Whether `=`, `+=`, `++` and the like can write to `target`: a name, a field or an index. An
 /// error node counts, since it was already reported.
 pub(crate) fn is_assignable(target: &Expr) -> bool {
-    matches!(
-        target.kind,
-        ExprKind::Identifier(_) | ExprKind::Field { .. } | ExprKind::Index { .. } | ExprKind::Error
-    )
+  matches!(
+    target.kind,
+    ExprKind::Identifier(_) | ExprKind::Field { .. } | ExprKind::Index { .. } | ExprKind::Error
+  )
 }
 
 /// Leaves the token in place, so an enclosing group, argument list or statement can match it. A
 /// `{` is left for the statement it belongs to, like the body after an if condition, and an `if`
 /// for the condition that ends a return, break or continue.
 fn missing_operand(c: &mut TokenCursor) -> Expr {
-    let token = c.peek();
-    c.report_found("expected expression");
-    Expr::new(ExprKind::Error, token.start, token.start)
+  let token = c.peek();
+  c.report_found("expected expression");
+  Expr::new(ExprKind::Error, token.start, token.start)
 }
 
 /// Consumes a token nothing else recognized, so parsing always makes progress.
 fn unexpected_token(c: &mut TokenCursor) -> Expr {
-    debug_assert!(!c.at_end());
-    c.report_found("expected expression");
-    let token = c.advance();
-    Expr::new(ExprKind::Error, token.start, token.end)
+  debug_assert!(!c.at_end());
+  c.report_found("expected expression");
+  let token = c.advance();
+  Expr::new(ExprKind::Error, token.start, token.end)
 }
